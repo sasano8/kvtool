@@ -11,8 +11,8 @@ variables:
 build:
   stage: build
   image: golang:${GO_VERSION}
-  rules:
-    - if: $CI_COMMIT_TAG   # タグのときだけ
+  # rules:
+  #   - if: $CI_COMMIT_TAG
   script:
     - go version
     - make test

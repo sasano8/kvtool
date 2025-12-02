@@ -19,18 +19,20 @@ func TestJSONToEnv(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "FOO=bar\n") {
-		t.Errorf("expected FOO=bar, got:\n%s", out)
+
+	// map の順序は未定なので Contains で判定するのは OK
+	if !strings.Contains(out, "FOO=\"bar\"\n") {
+		t.Errorf("expected line FOO=\"bar\", got:\n%s", out)
 	}
-	if !strings.Contains(out, `BAZ="hello world"`) {
-		t.Errorf("expected BAZ=\"hello world\", got:\n%s", out)
+	if !strings.Contains(out, "BAZ=\"hello world\"\n") {
+		t.Errorf("expected line BAZ=\"hello world\", got:\n%s", out)
 	}
-	if !strings.Contains(out, "NUM=123\n") {
-		t.Errorf("expected NUM=123, got:\n%s", out)
+	if !strings.Contains(out, "NUM=\"123\"\n") {
+		t.Errorf("expected line NUM=\"123\", got:\n%s", out)
 	}
 }
 
-func TestEnvToJSON(t *testing.T) {
+func TestDotenvToJSON(t *testing.T) {
 	input := `
 FOO=bar
 BAZ="hello world"
@@ -39,7 +41,7 @@ NUM=123
 `
 
 	var buf bytes.Buffer
-	if err := EnvToJSON(strings.NewReader(input), &buf); err != nil {
+	if err := DotenvToJSON(strings.NewReader(input), &buf); err != nil {
 		t.Fatalf("EnvToJSON error: %v", err)
 	}
 

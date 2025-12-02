@@ -20,6 +20,8 @@ func main() {
 	switch cmd {
 	case "json2env":
 		json2envCmd(os.Args[2:])
+	case "dotenv2json":
+		dotenv2jsonCmd(os.Args[2:])
 	case "env2json":
 		env2jsonCmd(os.Args[2:])
 	default:
@@ -106,8 +108,8 @@ func json2envCmd(args []string) {
 	}
 }
 
-func env2jsonCmd(args []string) {
-	ioOpts, _ := parseIOFlags(args, "env2json")
+func dotenv2jsonCmd(args []string) {
+	ioOpts, _ := parseIOFlags(args, "dotenv2json")
 
 	in, err := openInput(ioOpts.inPath)
 	if err != nil {
@@ -121,7 +123,27 @@ func env2jsonCmd(args []string) {
 	}
 	defer out.Close()
 
-	if err := convert.EnvToJSON(in, out); err != nil {
+	if err := convert.DotenvToJSON(in, out); err != nil {
+		exitErr(err)
+	}
+}
+
+func env2jsonCmd(args []string) {
+	ioOpts, _ := parseIOFlags(args, "env2json")
+
+	// in, err := openInput(ioOpts.inPath)
+	// if err != nil {
+	// 	exitErr(err)
+	// }
+	// defer in.Close()
+
+	out, err := openOutput(ioOpts.outPath)
+	if err != nil {
+		exitErr(err)
+	}
+	defer out.Close()
+
+	if err := convert.EnvToJSON(out); err != nil {
 		exitErr(err)
 	}
 }

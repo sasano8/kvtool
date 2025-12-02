@@ -3,9 +3,8 @@ stages:
   - release
 
 variables:
-#   GO_VERSION: "1.22.2"       # 使っている Go のバージョン
+  GO_VERSION: "1.22.2"       # 使っている Go のバージョン
   BINARY_NAME: "kvtool"    # 実際のコマンド名に合わせて変更
-#   MAIN_GO_PKG: "./cmd/kvtool"
 
 # タグが push されたときだけビルド
 build:

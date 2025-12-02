@@ -33,20 +33,23 @@ release:
     - echo "Creating GitLab Release for $CI_COMMIT_TAG"
     - |
       # dist/ 以下のファイルを列挙して --assets-link を組み立てる
-      links_args=""
+      assets_links=""
       for f in dist/*; do
         fname=$(basename "$f")
 
         # artifacts への URL を組み立て
         url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$fname?job=build"
 
-        # release-cli の引数形式: --assets-link-name=... --assets-link-url=...
-        links_args="$links_args --assets-link-name=$fname --assets-link-url=$url"
+        # link_type は省略可だが、とりあえず "other" にしておく
+        json=$(printf '{"name":"%s","url":"%s","link_type":"other"}' "$fname" "$url")
+
+        # --assets-link=<json> をどんどん追加
+        assets_links="$assets_links --assets-link=$json"
       done
 
       set -x
       release-cli create \
-        --name "${BINARY_NAME} ${CI_COMMIT_TAG}" \
+        --name "kvtool $CI_COMMIT_TAG" \
         --tag-name "$CI_COMMIT_TAG" \
         --description "Automated release for $CI_COMMIT_TAG" \
-        $links_args
+        $assets_links

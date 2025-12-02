@@ -1,0 +1,66 @@
+stages:
+  - build
+  - release
+
+variables:
+#   GO_VERSION: "1.22.2"       # 使っている Go のバージョン
+  BINARY_NAME: "kvtool"    # 実際のコマンド名に合わせて変更
+#   MAIN_GO_PKG: "./cmd/kvtool"
+
+# タグが push されたときだけビルド
+build:
+  stage: build
+  image: golang:${GO_VERSION}
+  rules:
+    - if: $CI_COMMIT_TAG   # タグのときだけ
+  script:
+    - go version
+    - make test
+    - make build-full
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: build
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG   # タグのときだけ
+  script:
+    - echo "Creating GitLab Release for $CI_COMMIT_TAG"
+    - |
+      # dist/ 以下のファイルを列挙して --assets-link を組み立てる
+      links_args=()
+      for f in dist/*; do
+        fname=$(basename "$f")
+
+        # artifacts への URL を組み立て
+        url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$fname?job=build"
+
+        # release-cli の引数形式: --assets-link-name=... --assets-link-url=...
+        links_args+=("--assets-link-name=$fname" "--assets-link-url=$url")
+      done
+
+      # 動的に組み立てた引数で release-cli を実行
+      release-cli create \
+        --name "${BINARY_NAME} ${CI_COMMIT_TAG}" \
+        --tag-name "$CI_COMMIT_TAG" \
+        --description "Automated release for $CI_COMMIT_TAG" \
+        "${links_args[@]}"
+
+  # release:
+  #   name: "${BINARY_NAME} ${CI_COMMIT_TAG}"
+  #   tag_name: "$CI_COMMIT_TAG"
+  #   description: "Automated release for $CI_COMMIT_TAG"
+  #   assets:
+  #     links:
+  #       - name: "${BINARY_NAME}-linux-amd64"
+  #         url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/${BINARY_NAME}-linux-amd64?job=build"
+  #       - name: "${BINARY_NAME}-windows-amd64.exe"
+  #         url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/${BINARY_NAME}-windows-amd64.exe?job=build"
+  #       - name: "${BINARY_NAME}-darwin-arm64"
+  #         url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/${BINARY_NAME}-darwin-arm64?job=build"

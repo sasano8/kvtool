@@ -8,7 +8,7 @@ build:
 	@go build -o $(BIN_DIR)/$(BINARY_NAME) ${MAIN_GO_PKG}
 	@chmod +x $(BIN_DIR)/$(BINARY_NAME)
 
-build-release:
+build-full:
 	@mkdir -p dist
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/${BINARY_NAME}-linux-amd64 ${MAIN_GO_PKG}
 	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o dist/${BINARY_NAME}-darwin-arm64 ${MAIN_GO_PKG}

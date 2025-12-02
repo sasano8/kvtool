@@ -8,8 +8,8 @@ build:
 	@chmod +x $(BIN_DIR)/$(BINARY_NAME)
 
 .PHONY: install
-install:
-	@mv $(BIN_DIR)/$(BINARY_NAME) /usr/local/bin/	
+install: build
+	@mv $(BIN_DIR)/$(BINARY_NAME) /usr/local/bin/
 
 .PHONY: test
 test:

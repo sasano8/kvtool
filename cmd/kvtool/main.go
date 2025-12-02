@@ -38,8 +38,9 @@ Usage:
   kvtool <command> [options]
 
 Commands:
-  json2env   JSON -> .env
-  env2json   .env -> JSON
+  env2json      env -> JSON
+  dotenv2json   .env -> JSON
+  json2env      JSON -> .env
 
 Run "kvtool <command> -h" for command options.
 `)

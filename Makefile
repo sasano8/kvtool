@@ -14,3 +14,7 @@ install:
 .PHONY: test
 test:
 	@go test ./...
+
+.PHONY: format
+format:
+	@go fmt ./...

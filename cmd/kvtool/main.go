@@ -130,13 +130,6 @@ func dotenv2jsonCmd(args []string) {
 
 func env2jsonCmd(args []string) {
 	ioOpts, _ := parseIOFlags(args, "env2json")
-
-	// in, err := openInput(ioOpts.inPath)
-	// if err != nil {
-	// 	exitErr(err)
-	// }
-	// defer in.Close()
-
 	out, err := openOutput(ioOpts.outPath)
 	if err != nil {
 		exitErr(err)

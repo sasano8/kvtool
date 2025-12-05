@@ -1,3 +1,3 @@
-module gitlab.com/ys-method-dev/tool-kv
+module github.com/sasano8/kvtool
 
 go 1.22.2

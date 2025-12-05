@@ -1,0 +1,67 @@
+name: Build and Release Go mod
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'
+
+# env:
+#   MY_VAR: "test"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Show Go version
+        run: go version
+
+      - name: Run tests
+        run: make test
+
+      - name: Build
+        run: make build-full
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    # タグのときだけ
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # デフォルトで用意されているトークン
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -eux
+
+          # GitLab の release-cli 相当を gh で実現
+          # dist/ 以下のファイルを全部アセットとしてつける
+          gh release create "$TAG_NAME" dist/* \
+            --title "kvtool $TAG_NAME" \
+            --notes "Automated release for $TAG_NAME"

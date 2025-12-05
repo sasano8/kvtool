@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"gitlab.com/ys-method-dev/tool-kv/internal/convert"
+	"github.com/sasano8/kvtool/internal/convert"
 )
 
 func main() {

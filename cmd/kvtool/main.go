@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/sasano8/kvtool/internal/convert"
 )
@@ -24,6 +26,8 @@ func main() {
 		dotenv2jsonCmd(os.Args[2:])
 	case "env2json":
 		env2jsonCmd(os.Args[2:])
+	case "init":
+		initCmd(os.Args[2:])
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n", cmd)
 		usage()
@@ -77,6 +81,11 @@ func openInput(path string) (io.ReadCloser, error) {
 type nopWriteCloser struct{ io.Writer }
 
 func (nwc nopWriteCloser) Close() error { return nil }
+
+func exitErr(err error) {
+	fmt.Fprintln(os.Stderr, "error:", err)
+	os.Exit(1)
+}
 
 func openOutput(path string) (io.WriteCloser, error) {
 	if path == "" {
@@ -142,7 +151,100 @@ func env2jsonCmd(args []string) {
 	}
 }
 
-func exitErr(err error) {
-	fmt.Fprintln(os.Stderr, "error:", err)
-	os.Exit(1)
+type StoreConfig struct {
+	Version float64          `json:"version"`
+	Stores  map[string]Store `json:"stores"`
+}
+type Store struct {
+	Type string         `json:"type"`
+	Args map[string]any `json:"args"`
+}
+
+func initCmd(args []string) {
+	fs := flag.NewFlagSet("init", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+
+	outPath := fs.String("out", ".kvtool.json", "output file path (e.g. ./config.json)")
+	pretty := fs.Bool("pretty", true, "pretty print JSON")
+	force := fs.Bool("force", false, "overwrite if file already exists")
+
+	// エラーメッセージを自前にするなら fs.Usage を上書き
+	fs.Usage = func() {
+		fmt.Fprintln(os.Stderr, "Usage: mytool init -out <path> [-pretty]")
+		fs.PrintDefaults()
+	}
+
+	if err := fs.Parse(args); err != nil {
+		os.Exit(2)
+	}
+
+	if *outPath == "" {
+		fs.Usage()
+		os.Exit(2)
+	}
+
+	if !*force {
+		if _, err := os.Stat(*outPath); err == nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %s already exists (use -force to overwrite)\n", *outPath)
+			os.Exit(1)
+		} else if !os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "ERROR: stat %s: %v\n", *outPath, err)
+			os.Exit(1)
+		}
+	}
+
+	payload := StoreConfig{
+		Version: 0.1,
+		Stores: map[string]Store{
+			"default": {
+				Type: ".env",
+				Args: map[string]any{
+					"path": ".env",
+				},
+			},
+		},
+	}
+
+	if err := writeJSONFileAtomic(*outPath, payload, *pretty); err != nil {
+		fmt.Fprintln(os.Stderr, "ERROR:", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("wrote:", *outPath)
+}
+
+func writeJSONFileAtomic(path string, v any, pretty bool) error {
+	// 親ディレクトリ作成
+	dir := filepath.Dir(path)
+	if dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", dir, err)
+		}
+	}
+
+	// JSON生成
+	var (
+		b   []byte
+		err error
+	)
+	if pretty {
+		b, err = json.MarshalIndent(v, "", "  ")
+	} else {
+		b, err = json.Marshal(v)
+	}
+	if err != nil {
+		return fmt.Errorf("marshal json: %w", err)
+	}
+	b = append(b, '\n')
+
+	// atomic write（同一FS上なら rename は原子的）
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o644); err != nil {
+		return fmt.Errorf("write tmp %s: %w", tmp, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("rename to %s: %w", path, err)
+	}
+	return nil
 }

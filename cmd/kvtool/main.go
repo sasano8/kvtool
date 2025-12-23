@@ -45,6 +45,8 @@ Commands:
   env2json      env -> JSON
   dotenv2json   .env -> JSON
   json2env      JSON -> .env
+  init
+  store
 
 Run "kvtool <command> -h" for command options.
 `)
@@ -152,8 +154,8 @@ func env2jsonCmd(args []string) {
 }
 
 type StoreConfig struct {
-	Version float64          `json:"version"`
-	Stores  map[string]Store `json:"stores"`
+	Version    float64                     `json:"version"`
+	Namespaces map[string]map[string]Store `json:"namespaces"`
 }
 type Store struct {
 	Type string         `json:"type"`
@@ -195,11 +197,13 @@ func initCmd(args []string) {
 
 	payload := StoreConfig{
 		Version: 0.1,
-		Stores: map[string]Store{
+		Namespaces: map[string]map[string]Store{
 			"default": {
-				Type: ".env",
-				Args: map[string]any{
-					"path": ".env",
+				".env": {
+					Type: ".env",
+					Args: map[string]any{
+						"path": ".env",
+					},
 				},
 			},
 		},

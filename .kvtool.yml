@@ -1,0 +1,14 @@
+version: 0.1
+namespaces:
+  default:
+    ".env":
+      type: ".env"
+      args:
+        input: ".env"
+    vault:
+      type: vault
+      args:
+        addr: "http://localhost:8200"
+        token: root
+        mount: secret
+        path: app/prod

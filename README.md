@@ -24,6 +24,12 @@ kvtool json2env -i test_data/json/simple.json
 kvtool dotenv2json -i test_data/dot_env/simple.env
 ```
 
+## vault
+
+```
+./bin/kvtool vault -addr http://localhost:8200 -token root -mount secret -path app/prod
+```
+
 
 ## use store
 

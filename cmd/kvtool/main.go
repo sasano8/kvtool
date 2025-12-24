@@ -10,8 +10,24 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/sasano8/kvtool/internal/commands"
 	"github.com/sasano8/kvtool/internal/convert"
 )
+
+type cliCommand struct {
+	run  func([]string)
+	help string
+}
+
+var _commands = map[string]cliCommand{
+	"json":        {run: jsonCmd, help: "JSON -> JSON"},
+	"env2json":    {run: env2jsonCmd, help: "env -> JSON"},
+	"dotenv2json": {run: dotenv2jsonCmd, help: ".env -> JSON"},
+	"json2env":    {run: json2envCmd, help: "JSON -> .env"},
+	"init":        {run: initCmd, help: "init config"},
+	"store":       {run: storeCmd, help: "load config and dispatch store"},
+	"vault":       {run: commands.VaultCmd, help: "Vault KV -> JSON (data only)"},
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -24,6 +40,8 @@ func main() {
 	switch cmd {
 	case "json":
 		jsonCmd(os.Args[2:])
+	case "vault":
+		_commands["vault"].run(os.Args[2:])
 	case "json2env":
 		json2envCmd(os.Args[2:])
 	case "dotenv2json":
@@ -333,6 +351,9 @@ func dispatchStore(storeKey string, st Store) {
 		env2jsonCmd(mapToFlagArgs(st.Args))
 	case ".env":
 		dotenv2jsonCmd(mapToFlagArgs(st.Args))
+	case "vault":
+		// _commands["vault"].run(mapToFlagArgs(st.Args))  // 循環参照になってしまう
+		commands.VaultCmd(mapToFlagArgs(st.Args))
 	// case "json":
 	default:
 		fmt.Fprintf(os.Stderr, "unknown store type: %q (key=%q)\n", st.Type, storeKey)

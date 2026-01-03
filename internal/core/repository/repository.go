@@ -1,18 +1,18 @@
-package registry
+package repository
 
-type Registry[T any] map[string]T
+type Repository[T any] map[string]T
 
-func New[T any]() Registry[T] {
-	reg := make(Registry[T])
+func New[T any]() Repository[T] {
+	reg := make(Repository[T])
 	return reg
 }
 
-func (reg Registry[T]) Get(key string) (T, bool) {
+func (reg Repository[T]) Get(key string) (T, bool) {
 	v, ok := reg[key]
 	return v, ok
 }
 
-func (reg Registry[T]) Create(key string, value T) (T, bool) {
+func (reg Repository[T]) Create(key string, value T) (T, bool) {
 	if _, ok := reg[key]; ok {
 		return reg[key], false
 	} else {
@@ -21,12 +21,12 @@ func (reg Registry[T]) Create(key string, value T) (T, bool) {
 	}
 }
 
-func (reg Registry[T]) Put(key string, value T) T {
+func (reg Repository[T]) Put(key string, value T) T {
 	reg[key] = value
 	return value
 }
 
-func (reg Registry[T]) Delete(key string) bool {
+func (reg Repository[T]) Delete(key string) bool {
 	if _, ok := reg[key]; ok {
 		delete(reg, key)
 		return true

@@ -7,7 +7,9 @@ import (
 )
 
 func TestRepository(t *testing.T) {
-	var v, ok any
+	var v any
+	var err error
+
 	t2 := testutil.New(t)
 
 	reg := New[int]()
@@ -15,37 +17,37 @@ func TestRepository(t *testing.T) {
 	// 要素数が0であること
 	t2.AssertEqual(0, len(reg))
 
-	v, ok = reg.Create("key1", 1)
+	v, err = reg.Create("key1", 1)
 	t2.AssertEqual(1, len(reg))
-	t2.AssertEqual(true, ok)
+	t2.IsNil(err)
 	t2.AssertEqual(1, v)
 
-	v, ok = reg.Get("key1")
+	v, err = reg.Get("key1")
 	t2.AssertEqual(1, v)
 
-	v, ok = reg.Create("key1", 2)
+	v, err = reg.Create("key1", 2)
 	t2.AssertEqual(1, len(reg))
-	t2.AssertEqual(false, ok)
+	t2.IsError(err)
 
 	// 値が変わっていないこと
-	v, ok = reg.Get("key1")
+	v, err = reg.Get("key1")
 	t2.AssertEqual(1, v)
 
-	ok = reg.Delete("key1")
+	err = reg.Delete("key1")
 	t2.AssertEqual(0, len(reg))
-	t2.AssertEqual(true, ok)
-	v, ok = reg.Get("key1")
-	t2.AssertEqual(false, ok)
+	t2.IsNil(err)
+	v, err = reg.Get("key1")
+	t2.IsError(err)
 
-	ok = reg.Delete("key1")
+	err = reg.Delete("key1")
 	t2.AssertEqual(0, len(reg))
-	t2.AssertEqual(false, ok)
+	t2.IsError(err)
 
-	v = reg.Put("key1", 1)
-	v, ok = reg.Get("key1")
+	v, err = reg.Put("key1", 1)
+	v, err = reg.Get("key1")
 	t2.AssertEqual(1, v)
 
-	v = reg.Put("key1", 2)
-	v, ok = reg.Get("key1")
+	v, err = reg.Put("key1", 2)
+	v, err = reg.Get("key1")
 	t2.AssertEqual(2, v)
 }

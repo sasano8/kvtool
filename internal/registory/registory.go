@@ -1,15 +1,31 @@
 package registory
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/sasano8/kvtool/internal/core/repository"
 )
 
-var Commands = make(repository.Repository[Command])
+var Commands = repository.New[Command]()
 
 type Command func([]string) error
+
+func ParseCli() (Command, []string, error) {
+	if len(os.Args) < 2 {
+		//usage()
+		os.Exit(1)
+	}
+	cmd := os.Args[1]
+	c, err := Commands.Get(cmd)
+	if err == nil {
+		return c, os.Args[2:], nil
+	} else {
+		msg := fmt.Sprintf("Not found command: %s\n", cmd)
+		return nil, os.Args[2:], errors.New(msg)
+	}
+}
 
 func (f Command) Run(args []string) error {
 	return f(args)

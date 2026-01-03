@@ -2,7 +2,7 @@ package registry
 
 type Registry[T any] map[string]T
 
-func CreateRegistry[T any]() Registry[T] {
+func New[T any]() Registry[T] {
 	reg := make(Registry[T])
 	return reg
 }

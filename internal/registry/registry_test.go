@@ -10,7 +10,7 @@ func TestRegistry(t *testing.T) {
 	var v, ok any
 	t2 := testutil.New(t)
 
-	reg := CreateRegistry[int]()
+	reg := New[int]()
 
 	// 要素数が0であること
 	t2.AssertEqual(0, len(reg))

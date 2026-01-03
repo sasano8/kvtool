@@ -3,7 +3,7 @@ package registry
 import (
 	"testing"
 
-	"github.com/sasano8/kvtool/internal/testutil"
+	"github.com/sasano8/kvtool/internal/core/testutil"
 )
 
 func TestRegistry(t *testing.T) {

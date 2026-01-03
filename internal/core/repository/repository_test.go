@@ -10,8 +10,8 @@ func TestRepository(t *testing.T) {
 	var v any
 	var err error
 
-	// r と assert がある。
-	// r は即時中断、assert は bool を返す。
+	// require と assert がある（使い方は同じ）。
+	// require は即時中断、assert は bool を返す。
 	r := require.New(t)
 
 	reg := New[int]()

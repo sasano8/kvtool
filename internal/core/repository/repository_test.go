@@ -6,7 +6,7 @@ import (
 	"github.com/sasano8/kvtool/internal/core/testutil"
 )
 
-func TestRegistry(t *testing.T) {
+func TestRepository(t *testing.T) {
 	var v, ok any
 	t2 := testutil.New(t)
 

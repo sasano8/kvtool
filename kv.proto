@@ -1,0 +1,49 @@
+syntax = "proto3"
+package kv.v1;
+
+import "google/api/annotations.proto"
+
+message FileRequest {
+    string path = 1;
+    string jsonpath = 2;  // query に指定された時自動で入る
+}
+
+message FileMeta {
+    string content_type = 1;
+    int64 content_length = 2; // 未指定は-1
+    string etag = 3;    // バージョン情報のようなもの
+    int64 last_modified = 4;
+    map<string, string> headers = 10;
+}
+
+//実際に送信した確定情報
+message FileMetaFinal {
+    int64 content_length = 1;
+    string hash = 2;
+}
+
+message FileResponse {
+    // いずれかを返す。chunk は複数回だが、それ以外は一回（その検証はアプリケーションで行う）
+    oneof part {
+        FileMeta meta = 1;    // 最初に一回
+        bytes chunk = 2;        // 以降は複数回
+        FileMetaFinal final = 3;  // 最後に一回　整合性情報など
+    }
+}
+
+service KV {
+    rpc Head(FileRequest) returns (FileMeta) {
+        option (google.api.http) = {
+            custom: {
+                kind: "HEAD"
+                path: "/v1/kv/{path}"
+            }
+        };
+    }
+    rpc Read(FileRequest) returns (stream FileResponse) {
+        option (google.api.http) = {
+            get: "/v1/kv/{path}"
+            // body: "extra"
+        };
+    }
+}

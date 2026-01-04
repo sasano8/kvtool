@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sasano8/kvtool/internal/core/repository"
+	repository "github.com/sasano8/kvtool/internal/core/repositories"
 )
 
 var Commands = repository.New[Command]()

@@ -14,6 +14,9 @@ func New[T any]() Repository[T] {
 }
 
 var (
+	// トラバース系の処理で、終端まで到達したことを示す特殊なエラー（正常終了を意味する）
+	ErrSuccess = errors.New("success")
+
 	ErrNotFound  = errors.New("key is not found")
 	ErrKeyExists = errors.New("key is already exists")
 	ErrEmptyPath = errors.New("key is empty")

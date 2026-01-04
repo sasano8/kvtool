@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -24,6 +25,10 @@ var (
 	// ErrNullByte    = errors.New("key contains NUL byte")
 	// ErrControlChar = errors.New("key contains control character")
 )
+
+func (reg Repository[T]) Resolve(ctx context.Context, key string) (fs Repository[T], rest string, err error) {
+	return reg, key, ErrSuccess
+}
 
 func ValidatePath(p string) error {
 	const invalid = "<>\"|?*/"

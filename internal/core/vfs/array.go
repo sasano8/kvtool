@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	repository "github.com/sasano8/kvtool/internal/core/repositories"
 )
 
-type FS[T any] map[string]T
-
-func ResolveFs[T any](fs FS[T], path string) (FS[T], string, error) {
+func ResolveFs(fs repository.Repository[any], path string) (repository.Repository[any], string, error) {
 	parentContext := context.Background()
 	timeoutContext, cancel := context.WithTimeout(parentContext, 5*time.Second)
 	defer cancel()
@@ -18,7 +18,7 @@ func ResolveFs[T any](fs FS[T], path string) (FS[T], string, error) {
 	var err error
 
 	for {
-		if err == ErrSuccess {
+		if err == repository.ErrSuccess {
 			break
 		}
 
@@ -26,11 +26,11 @@ func ResolveFs[T any](fs FS[T], path string) (FS[T], string, error) {
 		case <-timeoutContext.Done():
 			return nil, "", fmt.Errorf("Operation timed out")
 		default:
-			resolved_fs, remain_path, err = resolvedFs(parentContext, resolved_fs, remain_path)
+			resolved_fs, remain_path, err = fs.Resolve(parentContext, remain_path)
 		}
 	}
 
-	if err == ErrSuccess {
+	if err == repository.ErrSuccess {
 		return resolved_fs, remain_path, nil
 	} else {
 		if err == nil {
@@ -38,9 +38,4 @@ func ResolveFs[T any](fs FS[T], path string) (FS[T], string, error) {
 		}
 		return nil, remain_path, err
 	}
-}
-
-func resolvedFs[T any](ctx context.Context, fs FS[T], path string) (FS[T], string, error) {
-	resolved_fs := fs
-	return resolved_fs, "remain_path", fmt.Errorf("")
 }

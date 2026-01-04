@@ -82,6 +82,7 @@ func (reg Repository[T]) Delete(key string) error {
 		delete(reg, key)
 		return nil
 	} else {
+		// %w は エラーをラップしてくれる。そうすると、errors.Is(err, ErrNotFound) で判定できる。
 		return fmt.Errorf("%w: %s", ErrNotFound, key)
 	}
 }

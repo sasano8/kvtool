@@ -25,3 +25,8 @@ test:
 .PHONY: format
 format:
 	@go fmt ./...
+
+.PHONY: doc-serve
+doc-serve:
+	# go install golang.org/x/pkgsite/cmd/pkgsite@latest
+	@~/go/bin/pkgsite

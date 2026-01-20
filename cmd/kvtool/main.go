@@ -1,4 +1,4 @@
-package main
+package mainold
 
 import (
 	"encoding/json"
@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"sort"
 
 	"github.com/sasano8/kvtool/internal/commands"
-	"github.com/sasano8/kvtool/internal/convert"
+	// "github.com/sasano8/kvtool/internal/convert"
 )
 
 type cliCommand struct {
@@ -24,9 +23,9 @@ var _commands = map[string]cliCommand{
 	"env2json":    {run: env2jsonCmd, help: "env -> JSON"},
 	"dotenv2json": {run: dotenv2jsonCmd, help: ".env -> JSON"},
 	"json2env":    {run: json2envCmd, help: "JSON -> .env"},
-	"init":        {run: initCmd, help: "init config"},
-	"store":       {run: storeCmd, help: "load config and dispatch store"},
-	"vault":       {run: commands.VaultCmd, help: "Vault KV -> JSON (data only)"},
+	// "init":        {run: initCmd, help: "init config"},
+	"store": {run: storeCmd, help: "load config and dispatch store"},
+	"vault": {run: commands.VaultCmd, help: "Vault KV -> JSON (data only)"},
 }
 
 func main() {
@@ -48,8 +47,8 @@ func main() {
 		dotenv2jsonCmd(os.Args[2:])
 	case "env2json":
 		env2jsonCmd(os.Args[2:])
-	case "init":
-		initCmd(os.Args[2:])
+	// case "init":
+	// 	initCmd(os.Args[2:])
 	case "store":
 		storeCmd(os.Args[2:])
 	default:
@@ -166,9 +165,9 @@ func json2envCmd(args []string) {
 	}
 	defer out.Close()
 
-	if err := convert.JSONToEnv(in, out); err != nil {
-		exitErr(err)
-	}
+	// if err := convert.JSONToEnv(in, out); err != nil {
+	// 	exitErr(err)
+	// }
 }
 
 func dotenv2jsonCmd(args []string) {
@@ -186,9 +185,9 @@ func dotenv2jsonCmd(args []string) {
 	}
 	defer out.Close()
 
-	if err := convert.DotenvToJSON(in, out); err != nil {
-		exitErr(err)
-	}
+	// if err := convert.DotenvToJSON(in, out); err != nil {
+	// 	exitErr(err)
+	// }
 }
 
 func env2jsonCmd(args []string) {
@@ -199,9 +198,9 @@ func env2jsonCmd(args []string) {
 	}
 	defer out.Close()
 
-	if err := convert.EnvToJSON(out); err != nil {
-		exitErr(err)
-	}
+	// if err := convert.EnvToJSON(out); err != nil {
+	// 	exitErr(err)
+	// }
 }
 
 type StoreConfig struct {
@@ -213,96 +212,96 @@ type Store struct {
 	Args map[string]any `json:"args"`
 }
 
-func initCmd(args []string) {
-	fs := flag.NewFlagSet("init", flag.ContinueOnError)
-	fs.SetOutput(os.Stderr)
+// func initCmd(args []string) {
+// 	fs := flag.NewFlagSet("init", flag.ContinueOnError)
+// 	fs.SetOutput(os.Stderr)
 
-	outPath := fs.String("out", ".kvtool.json", "output file path (e.g. ./config.json)")
-	pretty := fs.Bool("pretty", true, "pretty print JSON")
-	force := fs.Bool("force", false, "overwrite if file already exists")
+// 	outPath := fs.String("out", ".kvtool.json", "output file path (e.g. ./config.json)")
+// 	pretty := fs.Bool("pretty", true, "pretty print JSON")
+// 	force := fs.Bool("force", false, "overwrite if file already exists")
 
-	// エラーメッセージを自前にするなら fs.Usage を上書き
-	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: mytool init -out <path> [-pretty]")
-		fs.PrintDefaults()
-	}
+// 	// エラーメッセージを自前にするなら fs.Usage を上書き
+// 	fs.Usage = func() {
+// 		fmt.Fprintln(os.Stderr, "Usage: mytool init -out <path> [-pretty]")
+// 		fs.PrintDefaults()
+// 	}
 
-	if err := fs.Parse(args); err != nil {
-		os.Exit(2)
-	}
+// 	if err := fs.Parse(args); err != nil {
+// 		os.Exit(2)
+// 	}
 
-	if *outPath == "" {
-		fs.Usage()
-		os.Exit(2)
-	}
+// 	if *outPath == "" {
+// 		fs.Usage()
+// 		os.Exit(2)
+// 	}
 
-	if !*force {
-		if _, err := os.Stat(*outPath); err == nil {
-			fmt.Fprintf(os.Stderr, "ERROR: %s already exists (use -force to overwrite)\n", *outPath)
-			os.Exit(1)
-		} else if !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "ERROR: stat %s: %v\n", *outPath, err)
-			os.Exit(1)
-		}
-	}
+// 	if !*force {
+// 		if _, err := os.Stat(*outPath); err == nil {
+// 			fmt.Fprintf(os.Stderr, "ERROR: %s already exists (use -force to overwrite)\n", *outPath)
+// 			os.Exit(1)
+// 		} else if !os.IsNotExist(err) {
+// 			fmt.Fprintf(os.Stderr, "ERROR: stat %s: %v\n", *outPath, err)
+// 			os.Exit(1)
+// 		}
+// 	}
 
-	payload := StoreConfig{
-		Version: 0.1,
-		Namespaces: map[string]map[string]Store{
-			"default": {
-				".env": {
-					Type: ".env",
-					Args: map[string]any{
-						"input": ".env",
-					},
-				},
-			},
-		},
-	}
+// 	payload := StoreConfig{
+// 		Version: 0.1,
+// 		Namespaces: map[string]map[string]Store{
+// 			"default": {
+// 				".env": {
+// 					Type: ".env",
+// 					Args: map[string]any{
+// 						"input": ".env",
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
 
-	if err := writeJSONFileAtomic(*outPath, payload, *pretty); err != nil {
-		fmt.Fprintln(os.Stderr, "ERROR:", err)
-		os.Exit(1)
-	}
+// 	if err := writeJSONFileAtomic(*outPath, payload, *pretty); err != nil {
+// 		fmt.Fprintln(os.Stderr, "ERROR:", err)
+// 		os.Exit(1)
+// 	}
 
-	fmt.Println("wrote:", *outPath)
-}
+// 	fmt.Println("wrote:", *outPath)
+// }
 
-func writeJSONFileAtomic(path string, v any, pretty bool) error {
-	// 親ディレクトリ作成
-	dir := filepath.Dir(path)
-	if dir != "." {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return fmt.Errorf("mkdir %s: %w", dir, err)
-		}
-	}
+// func writeJSONFileAtomic(path string, v any, pretty bool) error {
+// 	// 親ディレクトリ作成
+// 	dir := filepath.Dir(path)
+// 	if dir != "." {
+// 		if err := os.MkdirAll(dir, 0o755); err != nil {
+// 			return fmt.Errorf("mkdir %s: %w", dir, err)
+// 		}
+// 	}
 
-	// JSON生成
-	var (
-		b   []byte
-		err error
-	)
-	if pretty {
-		b, err = json.MarshalIndent(v, "", "  ")
-	} else {
-		b, err = json.Marshal(v)
-	}
-	if err != nil {
-		return fmt.Errorf("marshal json: %w", err)
-	}
-	b = append(b, '\n')
+// 	// JSON生成
+// 	var (
+// 		b   []byte
+// 		err error
+// 	)
+// 	if pretty {
+// 		b, err = json.MarshalIndent(v, "", "  ")
+// 	} else {
+// 		b, err = json.Marshal(v)
+// 	}
+// 	if err != nil {
+// 		return fmt.Errorf("marshal json: %w", err)
+// 	}
+// 	b = append(b, '\n')
 
-	// atomic write（同一FS上なら rename は原子的）
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return fmt.Errorf("write tmp %s: %w", tmp, err)
-	}
-	if err := os.Rename(tmp, path); err != nil {
-		_ = os.Remove(tmp)
-		return fmt.Errorf("rename to %s: %w", path, err)
-	}
-	return nil
-}
+// 	// atomic write（同一FS上なら rename は原子的）
+// 	tmp := path + ".tmp"
+// 	if err := os.WriteFile(tmp, b, 0o644); err != nil {
+// 		return fmt.Errorf("write tmp %s: %w", tmp, err)
+// 	}
+// 	if err := os.Rename(tmp, path); err != nil {
+// 		_ = os.Remove(tmp)
+// 		return fmt.Errorf("rename to %s: %w", path, err)
+// 	}
+// 	return nil
+// }
 
 func storeCmd(args []string) {
 	fs := flag.NewFlagSet("read", flag.ContinueOnError)
@@ -347,10 +346,10 @@ func storeCmd(args []string) {
 
 func dispatchStore(storeKey string, st Store) {
 	switch st.Type {
-	case "env":
-		env2jsonCmd(mapToFlagArgs(st.Args))
-	case ".env":
-		dotenv2jsonCmd(mapToFlagArgs(st.Args))
+	// case "env":
+	// 	env2jsonCmd(mapToFlagArgs(st.Args))
+	// case ".env":
+	// 	dotenv2jsonCmd(mapToFlagArgs(st.Args))
 	case "vault":
 		// _commands["vault"].run(mapToFlagArgs(st.Args))  // 循環参照になってしまう
 		commands.VaultCmd(mapToFlagArgs(st.Args))

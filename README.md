@@ -72,3 +72,17 @@ A=test
 ```
 kvtool store -ns default .env
 ```
+
+
+## Usage 2
+
+```
+kvtool load env
+cat test_data/dot_env/simple.env | kvtool load dotenv
+kvtool load vault -addr http://localhost:8200 -token root -mount secret app/prod
+cat test_data/json/simple.json | kvtool convert dotenv
+cat test_data/json/simple.json | kvtool convert toml
+cat test_data/json/simple.json | kvtool convert yaml
+kvtool load store --config kvtool.json env
+```
+

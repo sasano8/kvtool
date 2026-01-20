@@ -1,0 +1,25 @@
+syntax = "proto3";
+package foo.v1;
+option go_package = "example.com/yourrepo/gen/foo/v1;foopb";
+
+service KeyValueService {
+  rpc GetValue(GetValueRequest) returns (GetValueResponse);
+}
+
+message GetValueRequest {
+  string path = 1;
+}
+
+message GetValueResponse {
+  string content_type = 1;
+  bytes content = 2;
+}
+
+message GetFileRequest {
+  string path = 1;
+}
+
+message GetFileResponse {
+  string content_type = 1;
+  bytes content = 2;
+}

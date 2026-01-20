@@ -23,10 +23,18 @@ func ResolveFs(fs repository.Repository[any], path string) (repository.Repositor
 		}
 
 		select {
+		case <-parentContext.Done():
+			return nil, "", fmt.Errorf("Operation timed out")
 		case <-timeoutContext.Done():
 			return nil, "", fmt.Errorf("Operation timed out")
 		default:
-			resolved_fs, remain_path, err = fs.Resolve(parentContext, remain_path)
+			if true {
+				resolved_fs, remain_path, err = fs.Resolve(parentContext, remain_path)
+			} else {
+				// Resolve が実装されていない場合
+				resolved_fs = nil
+				err = repository.ErrSuccess
+			}
 		}
 	}
 

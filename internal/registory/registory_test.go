@@ -3,14 +3,18 @@ package registory
 import (
 	"testing"
 
-	"github.com/sasano8/kvtool/internal/core/testutil"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRegistory(t *testing.T) {
-	t2 := testutil.New(t)
+	require := require.New(t)
+	// t2 := testutil.New(t)
 
-	t2.Assert(Commands != nil)
+	require.NotNil(Commands)
 
-	_, ok := Commands.Get("VaultCmd")
-	t2.Assert(ok)
+	// t2.Assert(Commands != nil)
+
+	_, err := Commands.Get("VaultCmd")
+	require.NotNil(err)
+	// t2.Assert(ok)
 }

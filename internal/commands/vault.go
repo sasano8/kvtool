@@ -54,8 +54,7 @@ Examples:
   kvtool vault -mount secret -path app/prod -field password
 
 Env:
-  VAULT_ADDR, VAULT_TOKEN, VAULT_NAMESPACE, VAULT_* TLS vars are supported by vault/api config.
-`)
+  VAULT_ADDR, VAULT_TOKEN, VAULT_NAMESPACE, VAULT_* TLS vars are supported by vault/api config.`)
 		fs.PrintDefaults()
 	}
 

@@ -21,6 +21,29 @@
 - [x] Vault ファイルシステムのテスト ([filesystems/vault_test.go](filesystems/vault_test.go))
 - [x] Vault からの読み込みの統合テスト ([Makefile:40-58](Makefile#L40-L58))
 
+### HCL (HashiCorp Configuration Language)
+- [ ] HCL ファイルを読んで JSON にする
+  - [ ] HCL パーサーの実装（github.com/hashicorp/hcl/v2 使用）
+  - [ ] HCL から JSON への変換
+  - [ ] ネストされた構造のサポート
+  - [ ] 変数展開のサポート
+  - [ ] Transform 設定での利用
+    ```yaml
+    namespaces:
+      default:
+        terraform:
+          driver: local
+          args:
+            root: "./terraform"
+            transform:
+              read: hcl
+    ```
+  - [ ] テストの実装
+  - ユースケース:
+    - Terraform 設定ファイルの読み込み
+    - Nomad/Consul 設定との統合
+    - HCL 形式の設定ファイルの JSON 化
+
 ## インターフェースの統一
 
 - [x] 統一インターフェースの定義 ([filesystems/core.go:7-19](filesystems/core.go#L7-L19))
@@ -193,10 +216,24 @@
   - [x] テスト ([filesystems/factory_test.go](filesystems/factory_test.go))
 
 #### 統合インターフェーステスト
-- [ ] 全ファイルシステムで共通の動作を確認するテスト
-  - 提案: テーブル駆動テストで LocalFs, VaultFs, FsEnvFilesystem を同じテストケースで検証
-  - 理由: 統一インターフェースの一貫性を保証
-  - これはどこにおく？共通レベルのディレクトリが欲しい
+- [x] 全ファイルシステムで共通の動作を確認するテスト ([filesystems/integration_test.go](filesystems/integration_test.go))
+  - [x] GetFile インターフェースの一貫性テスト
+  - [x] LoadAsJson インターフェースの一貫性テスト
+  - [x] OpenReader インターフェースの一貫性テスト
+  - [x] LoadAsJson と OpenReader の一貫性テスト
+  - [x] エラーハンドリングの一貫性テスト
+  - 実装方針: テーブル駆動テストで LocalFs と FsEnvFilesystem を同じテストケースで検証
+  - 配置: filesystems/ パッケージ内（ファイルシステム実装と同じ場所）
+  - テストカバレッジ:
+    - ✅ 有効なパスでのファイル取得
+    - ✅ ネストされたパスの処理
+    - ✅ 単純なJSONの読み込み
+    - ✅ ネストされたJSONの読み込み
+    - ✅ dotenv transform の動作
+    - ✅ ファイル不在時のエラー処理
+    - ✅ 環境変数の読み込み
+    - ✅ 空パス、絶対パス、チルダパスの拒否
+    - ✅ パストラバーサル攻撃の防止
   
 
 #### Transform の統一インターフェース化
@@ -238,13 +275,18 @@
     - ✅ 責務の明確化（Command = UI、Service = ビジネスロジック）
 
 #### 設定管理とパス解決の分離
-- [ ] `internal/config/config.go` の責務を分割
-  - 問題点: 設定ロード、パス解決、ストア取得が混在
-  - 提案:
-    - `ConfigLoader`: 設定ファイルのロード専用
-    - `PathResolver`: パス文字列の解析専用
-    - `StoreRegistry`: ストアの管理・取得専用
-  - 理由: 単一責任の原則に従い、テストしやすくする
+- [x] `internal/config/config.go` の責務を分割
+  - [x] types.go への分割 - データ構造定義 ([internal/config/types.go](internal/config/types.go))
+  - [x] loader.go への分割 - 設定ファイルのロード ([internal/config/loader.go](internal/config/loader.go))
+  - [x] registry.go への分割 - ストアの管理・取得 ([internal/config/registry.go](internal/config/registry.go))
+  - [x] path.go への分割 - パス文字列の解析 ([internal/config/path.go](internal/config/path.go))
+  - [x] 既存テストの動作確認 ([internal/config/config_test.go](internal/config/config_test.go))
+  - 実装方針: 単一責任の原則に従い、4つのファイルに分割（types, loader, registry, path）
+  - 効果:
+    - ✅ config.go を 166行 → 4ファイル 169行に分割（types: 20行, loader: 68行, registry: 17行, path: 64行）
+    - ✅ 各ファイルが明確な責務を持つ
+    - ✅ テスト容易性の向上
+    - ✅ コード可読性の向上
 
 #### デコーダとソースの統合検討
 - [x] `pkg/decoders/` と `pkg/sources/` の関係を整理
@@ -256,6 +298,68 @@
   - [x] テストの追加 ([pkg/sources/source_test.go](pkg/sources/source_test.go), [pkg/decoders/decoder_test.go](pkg/decoders/decoder_test.go))
   - 実装方針: 疎結合を選択（統合ではなく、明示的なインターフェースで分離）
   - 理由: 拡張性、テスト容易性、Go の標準的な設計パターンに準拠
+
+#### 新しいファイルシステムドライバーの実装
+
+##### HTTP ファイルシステム
+- [ ] HTTP ファイルシステムの実装
+  - [ ] HttpFs 構造体の実装
+  - [ ] HTTP リクエストによるファイル取得
+  - [ ] レスポンスボディを JSON として返す
+  - [ ] 設定ファイルでの定義
+    ```yaml
+    namespaces:
+      default:
+        api:
+          driver: http
+          args:
+            base_url: "https://api.example.com"
+            headers:
+              Authorization: "Bearer token"
+            timeout: 30s
+    ```
+  - [ ] エラーハンドリング（タイムアウト、接続エラー、HTTP エラーステータス）
+  - [ ] テストの実装
+  - ユースケース: REST API からの設定取得、外部サービスとの連携
+
+##### データベースファイルシステム
+- [ ] データベースファイルシステムの実装
+  - [ ] DbFs 構造体の実装
+  - [ ] ユーザー定義 SQL クエリのサポート
+    - クエリテンプレートで `{key}` と `{namespace}` をプレースホルダーとして使用
+    - 例: `SELECT value FROM config WHERE key = {key} AND namespace = {namespace}`
+  - [ ] VARCHAR（JSON 想定）を返す
+  - [ ] 設定ファイルでの定義
+    ```yaml
+    namespaces:
+      default:
+        config:
+          driver: db
+          args:
+            connection_string: "postgres://user:pass@localhost/db"
+            query: "SELECT value FROM env WHERE key = {key} AND namespace = {namespace}"
+            # または、より柔軟な設定:
+            # query: "SELECT data FROM my_table WHERE id = {key}"
+            # query: "SELECT json_col FROM config_v2 WHERE tenant = {namespace} AND config_key = {key}"
+            timeout: 10s
+    ```
+  - [ ] プレースホルダーの置換処理
+    - SQL インジェクション対策（プリペアドステートメント使用）
+    - {key} と {namespace} の適切なエスケープ
+  - [ ] サポートするデータベース
+    - [ ] PostgreSQL
+    - [ ] MySQL
+    - [ ] SQLite
+  - [ ] コネクションプーリング
+  - [ ] エラーハンドリング（接続エラー、クエリエラー、データ不在）
+  - [ ] テストの実装（モックまたは testcontainers 使用）
+  - ユースケース:
+    - マルチテナント設定管理
+    - 既存データベーススキーマとの統合
+    - レガシーシステムとの互換性維持
+
+##### S3 ファイルシステム
+- [ ] S3 ファイルシステムの実装
 
 
 ### 優先度：低（将来的に必要だが現在は後回し）
@@ -327,3 +431,257 @@
    - デメリット: やや複雑な API
 
 **推奨:** 現時点では現在の設計（Filesystem レベルで context 保持）で十分。将来的に必要になった場合はオプション2（WithContext メソッド）が最も影響が少ない
+
+---
+
+## プロダクト総評と市場需要予測
+
+### 概要
+
+**kvtool** は、様々な設定ファイル形式（.env, JSON, YAML, HCL, Vault, データベースなど）を統一的なインターフェースで扱い、環境構築の初期段階で設定を統合・管理するための CLI ツールです。
+
+### コアコンセプト
+
+開発者が直面する「設定の複雑性」を解決します：
+- 環境変数、.env ファイル、Vault、データベース、HTTP API など、設定が様々な場所に分散
+- 各データソースごとに異なるツールやライブラリが必要
+- 設定の統合と変換が煩雑
+- ローカル開発環境とプロダクション環境での設定管理の乖離
+
+**kvtool** は、これら全てを統一的な方法で扱える「設定のためのファイルシステム抽象化」を提供します。
+
+### 技術的な強み
+
+#### 1. クリーンアーキテクチャ
+- **レイヤー分離**: Presentation（CLI） → Service → Infrastructure（Filesystem）
+- **依存性注入**: テスト可能で保守性の高い設計
+- **単一責任の原則**: 各パッケージが明確な責務を持つ
+
+#### 2. 拡張性
+- **プラグイン可能なドライバー**: Local, Vault, Env, HTTP, DB など、新しいソースを簡単に追加可能
+- **Transform 機能**: dotenv, JSON, HCL など、任意の形式変換をサポート
+- **統一インターフェース**: Filesystem と File の2つのインターフェースで全てを抽象化
+
+#### 3. セキュリティ
+- パストラバーサル攻撃の防止
+- SQL インジェクション対策（プリペアドステートメント）
+- Vault との統合によるシークレット管理
+
+#### 4. Go の標準的なパターン
+- context.Context による適切なライフサイクル管理
+- io.Reader/io.ReadCloser による標準的な I/O
+- エラーハンドリングのベストプラクティス
+
+### 主要ユースケース
+
+#### 1. 環境構築の初期化（Primary Use Case）
+```bash
+# 開発環境のセットアップスクリプト
+kvtool store get config/app | jq -r '.DATABASE_URL' > .env
+kvtool store get secrets/api-keys --namespace=production | apply-to-k8s
+```
+- Docker Compose の起動前に環境変数を準備
+- Kubernetes のシークレットを一元管理
+- CI/CD パイプラインでの設定注入
+
+#### 2. マルチテナント設定管理
+```yaml
+# データベースから各テナントの設定を取得
+namespaces:
+  tenant-a:
+    config:
+      driver: db
+      args:
+        query: "SELECT value FROM config WHERE tenant = 'tenant-a' AND key = {key}"
+  tenant-b:
+    config:
+      driver: db
+      args:
+        query: "SELECT value FROM config WHERE tenant = 'tenant-b' AND key = {key}"
+```
+
+#### 3. ハイブリッド環境での設定統合
+```yaml
+# ローカルは .env、本番は Vault
+namespaces:
+  development:
+    secrets:
+      driver: local
+      args:
+        root: "./"
+  production:
+    secrets:
+      driver: vault
+      args:
+        address: "https://vault.company.com"
+```
+
+#### 4. レガシーシステムとの統合
+- 既存データベースの設定テーブルから読み込み
+- HTTP API 経由で設定サービスと連携
+- .env ファイルと Vault の段階的な移行
+
+### 市場需要予測
+
+#### 🟢 高い需要が見込まれる領域
+
+##### 1. DevOps / SRE チーム（需要: 高）
+- **課題**: 複数環境（dev/staging/prod）での設定管理の煩雑さ
+- **価値**: 統一的なインターフェースで環境間の差異を吸収
+- **市場規模**: 中〜大企業の開発チームで広く採用される可能性
+
+##### 2. マイクロサービス環境（需要: 高）
+- **課題**: 数十〜数百のサービスそれぞれが異なる設定ソースを持つ
+- **価値**: 設定の中央集権化と標準化
+- **市場規模**: コンテナオーケストレーション（Kubernetes）利用企業
+
+##### 3. スタートアップ / 中小企業（需要: 中〜高）
+- **課題**: 初期段階では .env、成長に伴い Vault や設定サービスへ移行
+- **価値**: 段階的な移行パスを提供、技術的負債の軽減
+- **市場規模**: 急成長中の tech スタートアップ
+
+##### 4. コンサルティング / システムインテグレーター（需要: 中）
+- **課題**: 顧客ごとに異なる設定管理システム
+- **価値**: 標準化されたツールで再利用性向上
+- **市場規模**: クラウド移行案件での採用
+
+#### 🟡 中程度の需要が見込まれる領域
+
+##### 5. CI/CD パイプライン（需要: 中）
+- **課題**: 各ステージで異なる設定ソースからの値取得
+- **価値**: パイプラインスクリプトの簡素化
+- **市場規模**: GitHub Actions / GitLab CI ユーザー
+
+##### 6. データエンジニアリング（需要: 中）
+- **課題**: データパイプラインの設定が複雑化
+- **価値**: Airflow/dbt などとの統合
+- **市場規模**: データ基盤を持つ企業
+
+#### 🔴 競合との比較
+
+**類似ツール:**
+- **Vault CLI**: シークレット特化、他のソースとの統合は弱い
+- **direnv**: ローカル環境特化、リモートソース非対応
+- **dotenv 系ツール**: .env ファイルのみ、拡張性に乏しい
+- **config management tools (Ansible/Chef)**: 重厚、軽量な設定取得には不向き
+
+**kvtool の差別化ポイント:**
+1. **軽量**: 単一バイナリ、依存なし
+2. **柔軟**: プラグイン可能なドライバー
+3. **統一**: 全ての設定ソースを同じ方法で扱う
+4. **シンプル**: 学習コストが低い
+
+### 成長戦略
+
+#### フェーズ 1: MVP と初期ユーザー獲得（現在）
+- ✅ コア機能の実装（Local, Env, Vault）
+- 🔄 統合テストの充実
+- 📝 ドキュメント整備
+- 🎯 ターゲット: OSS コントリビューター、DevOps コミュニティ
+
+#### フェーズ 2: エコシステム拡大（3-6ヶ月）
+- HTTP / DB ファイルシステムの実装
+- HCL / YAML / TOML トランスフォーマー
+- プラグインシステムの導入
+- 🎯 ターゲット: Terraform / Kubernetes ユーザー
+
+#### フェーズ 3: エンタープライズ対応（6-12ヶ月）
+- 監査ログ機能
+- RBAC（ロールベースアクセス制御）
+- GUI / TUI の提供
+- クラウドサービスとの公式統合（AWS SSM, GCP Secret Manager, Azure Key Vault）
+- 🎯 ターゲット: エンタープライズ企業
+
+### 収益化の可能性
+
+#### オープンソースモデル
+- **MIT / Apache 2.0 ライセンス**: 広く採用されやすい
+- **スポンサーシップ**: GitHub Sponsors 経由
+- **コミュニティ駆動**: コントリビューション文化の醸成
+
+#### 商用サービス展開
+1. **kvtool Cloud**: マネージドサービス版
+   - 設定のホスティング
+   - チーム管理機能
+   - SaaS モデル（$10-50/月）
+
+2. **エンタープライズサポート**:
+   - 導入支援
+   - カスタマイズ開発
+   - SLA 付きサポート契約
+
+3. **トレーニング / コンサルティング**:
+   - 企業向けワークショップ
+   - ベストプラクティス提供
+
+### 潜在的なリスク
+
+#### 技術的リスク
+- **Go エコシステムの変化**: 標準ライブラリの変更に追従
+- **依存ライブラリのメンテナンス**: Vault SDK などの更新対応
+
+#### 市場リスク
+- **大手プレイヤーの参入**: HashiCorp が同様の機能を Vault に統合する可能性
+- **クラウドベンダーのロックイン**: AWS/GCP/Azure が自社ツールを強化
+
+#### ユーザー獲得リスク
+- **既存ツールへの慣れ**: 移行コストが障壁に
+- **ニッチ過ぎる可能性**: 市場が想定より小さい
+
+### リスク軽減策
+
+1. **コミュニティファースト**: 早期からユーザーフィードバックを取り入れる
+2. **相互運用性重視**: 既存ツールとの併用を前提とした設計
+3. **マイグレーションガイド**: 既存ツールからの移行を容易に
+4. **クラウド中立**: 特定ベンダーに依存しない
+
+### 総合評価
+
+#### 強み
+- ✅ **明確な課題解決**: 設定管理の複雑性を実際に解決
+- ✅ **技術的な洗練**: Go のベストプラクティスに従った設計
+- ✅ **拡張性**: 新しいドライバーやトランスフォーマーの追加が容易
+- ✅ **軽量**: シングルバイナリで導入が簡単
+
+#### 弱み・改善点
+- ⚠️ **認知度**: まだ知られていない新しいツール
+- ⚠️ **エコシステム**: プラグインやコミュニティが未成熟
+- ⚠️ **ドキュメント**: 実例やチュートリアルの充実が必要
+- ⚠️ **GUI**: CLI のみでは非エンジニアに敷居が高い
+
+### 市場需要スコア（10点満点）
+
+| 項目 | スコア | 説明 |
+|------|--------|------|
+| 課題の深刻度 | 8/10 | 設定管理は実際に多くの開発チームが抱える問題 |
+| ソリューションの独自性 | 7/10 | 類似ツールはあるが、統一的なアプローチは新しい |
+| 技術的実現性 | 9/10 | 既に MVP レベルの実装が完了 |
+| 市場規模 | 7/10 | DevOps/SRE 市場は成長中だが、ニッチな可能性も |
+| 収益化可能性 | 6/10 | OSS として広まれば商用サービス展開も可能 |
+| 競合優位性 | 7/10 | 軽量・柔軟・統一という差別化要素あり |
+| 成長ポテンシャル | 8/10 | マイクロサービス/Kubernetes の普及が追い風 |
+
+**総合スコア: 7.4/10** 🟢
+
+### 結論
+
+**kvtool** は、環境構築と設定管理の領域において**実用的で需要のあるツール**です。
+
+#### 成功の鍵
+1. **早期のユーザー獲得**: DevOps コミュニティでの認知度向上
+2. **実践的なドキュメント**: 実例とベストプラクティスの提供
+3. **エコシステムの充実**: プラグイン、統合、ツールチェーンの拡大
+4. **継続的な改善**: ユーザーフィードバックに基づく機能追加
+
+#### 推奨される次のステップ
+1. 📝 **ドキュメント整備**: README、チュートリアル、ユースケース集
+2. 🎥 **デモ動画作成**: 実際の使用例を視覚的に示す
+3. 🌟 **コミュニティ構築**: GitHub Discussions、Slack/Discord チャンネル
+4. 📢 **プロモーション**: Hacker News、Reddit (r/devops)、Dev.to などでの紹介
+5. 🔧 **パートナーシップ**: Terraform、Vault、Kubernetes コミュニティとの連携
+
+**市場タイミング**: ✅ **Good**
+マイクロサービス・Kubernetes・クラウドネイティブの普及により、設定管理の複雑性は増大しています。今がツールを投入する好機です。
+
+**長期的な展望**: 🌟 **Promising**
+適切に成長戦略を実行すれば、DevOps ツールチェーンの標準的な一部となる可能性があります。特に「環境構築の最初のステップ」という明確なポジショニングは、採用の障壁を下げる重要な要素です。

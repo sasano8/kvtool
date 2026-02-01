@@ -36,6 +36,11 @@ type LocalFs struct {
 	Root    string
 }
 
+type LocalFile struct {
+	fs   *LocalFs
+	path string
+}
+
 func GetLocalFs(parent context.Context, config *LocalFsConfig) (*LocalFs, error) {
 	root := strings.TrimSpace(config.Root)
 	fs := LocalFs{
@@ -44,6 +49,14 @@ func GetLocalFs(parent context.Context, config *LocalFsConfig) (*LocalFs, error)
 		Root:    root,
 	}
 	return &fs, nil
+}
+
+// GetFile は Filesystem インターフェースを実装
+func (fs *LocalFs) GetFile(path string) (File, error) {
+	return &LocalFile{
+		fs:   fs,
+		path: path,
+	}, nil
 }
 
 func (fs *LocalFs) OpenReader(path string) (io.ReadCloser, error) {
@@ -112,6 +125,16 @@ func (fs *LocalFs) LoadAsJson(path string) (any, error) {
 		return nil, err
 	}
 	return v, nil
+}
+
+// LocalFile の File インターフェース実装
+
+func (f *LocalFile) LoadAsJson() (any, error) {
+	return f.fs.LoadAsJson(f.path)
+}
+
+func (f *LocalFile) OpenReader() (io.ReadCloser, error) {
+	return f.fs.OpenReader(f.path)
 }
 
 func (fs *FsLocalFile) Exists() bool {

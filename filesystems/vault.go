@@ -1,8 +1,11 @@
 package filesystems
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -74,8 +77,8 @@ func GetVaultFs(parent context.Context, fs *VaultConfig) (*VaultFs, error) {
 	return &fs2, nil
 }
 
-func (fs *VaultFs) GetFile(path string) (VaultFsFile, error) {
-	return VaultFsFile{
+func (fs *VaultFs) GetFile(path string) (File, error) {
+	return &VaultFsFile{
 		fs:   fs,
 		Path: path,
 	}, nil
@@ -101,4 +104,19 @@ func (file *VaultFsFile) LoadAsJson() (any, error) {
 		return nil, fmt.Errorf("secret has no data (deleted or empty)")
 	}
 	return sec.Data, nil
+}
+
+// OpenReader は JSON エンコードされたストリームを返す
+func (file *VaultFsFile) OpenReader() (io.ReadCloser, error) {
+	data, err := file.LoadAsJson()
+	if err != nil {
+		return nil, err
+	}
+
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode JSON: %w", err)
+	}
+
+	return io.NopCloser(bytes.NewReader(jsonBytes)), nil
 }

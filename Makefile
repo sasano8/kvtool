@@ -26,7 +26,8 @@ test:
 
 .PHONY: test-v
 test-v:
-	@go test -v ./...
+	@echo "=== Running tests (verbose) ==="
+	@go test -v ./... 2>&1 | grep -E "^(===|---|\?|ok |FAIL)"
 
 .PHONY: test-coverage
 test-coverage:
@@ -49,7 +50,7 @@ test-full:
 	@docker compose up vault-init
 	@echo ""
 	@echo "=== Running all tests (with Vault) ==="
-	@VAULT_ADDR=http://localhost:8200 VAULT_TOKEN=root go test ./...
+	@VAULT_ADDR=http://localhost:8200 VAULT_TOKEN=root go test -v ./...
 	@echo ""
 	@echo "=== Stopping Vault ==="
 	@docker compose down

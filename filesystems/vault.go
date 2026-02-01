@@ -3,7 +3,6 @@ package filesystems
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -90,9 +89,7 @@ func (file *VaultFsFile) LoadAsJson() (any, error) {
 
 	// Version == 0(latest) 以外許容しない
 	if fs.Version != 0 {
-		return nil, fmt.Errorf("Error version.")
-		// fmt.Printf("aaa")
-		// sec, err = vault_client.GetVersion(ctx, secretPath, fs.Version)
+		return nil, fmt.Errorf("version must be 0 (latest), got %d", fs.Version)
 	}
 
 	sec, err := fs.Client.Get(ctx, secretPath)
@@ -100,45 +97,8 @@ func (file *VaultFsFile) LoadAsJson() (any, error) {
 		return nil, err
 	}
 
-	// KVv2 helper が古いVaultで metadata 互換が崩れるケースがあるので、
-	// 失敗したら HTTP API の /data を直接叩くフォールバックに落とす（data だけ取る）
-	// if err != nil {
-	// 	fmt.Printf("asdfasd")
-	// 	raw, err2 := readVaultKVv2Raw(ctx, client, mount, secretPath, fs.Version)
-	// 	if err2 == nil {
-	// 		return raw, nil
-	// 	}
-	// 	return nil, err
-	// }
-
 	if sec == nil || sec.Data == nil {
 		return nil, fmt.Errorf("secret has no data (deleted or empty)")
 	}
 	return sec.Data, nil
-}
-
-// KV v2 の HTTP API を直接叩いて data だけ抜くフォールバック
-// v2 の Read API は /<mount>/data/<path> を使う :contentReference[oaicite:1]{index=1}
-func readVaultKVv2Raw(ctx context.Context, client *vaultapi.Client, mount, secretPath string, version int) (any, error) {
-	apiPath := fmt.Sprintf("%s/data/%s", strings.Trim(mount, "/"), strings.Trim(secretPath, "/"))
-	q := map[string][]string{}
-	if version > 0 {
-		q["version"] = []string{strconv.Itoa(version)}
-	}
-
-	sec, err := client.Logical().ReadWithDataWithContext(ctx, apiPath, q)
-	if err != nil {
-		return nil, err
-	}
-	if sec == nil || sec.Data == nil {
-		return nil, fmt.Errorf("secret not found")
-	}
-
-	// KV v2 のレスポンスは Data["data"] に本体が入る :contentReference[oaicite:2]{index=2}
-	rawData, ok := sec.Data["data"].(map[string]interface{})
-	if !ok || rawData == nil {
-		return nil, fmt.Errorf("unexpected KV v2 response format at %s", apiPath)
-	}
-	// fmt.Printf("%v", rawData)
-	return rawData, nil
 }

@@ -1,5 +1,6 @@
 bin/
 dist/
+.cache/
 .kvtool.json
 .kvtool.yml
 .env

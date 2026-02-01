@@ -1,0 +1,11 @@
+version: 0.1
+namespaces:
+  default:
+    vault:
+      driver: vault
+      args:
+        conn:
+          addr: "http://localhost:8200"
+          token: "root"
+          mount: "secret"
+        root: "app/prod"

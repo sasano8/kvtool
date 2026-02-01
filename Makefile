@@ -24,6 +24,58 @@ install: build
 test:
 	@go test ./...
 
+.PHONY: test-v
+test-v:
+	@go test -v ./...
+
+.PHONY: test-coverage
+test-coverage:
+	@echo "=== Running tests with coverage ==="
+	@mkdir -p .cache
+	@go test -coverprofile=.cache/coverage.out ./...
+	@go tool cover -html=.cache/coverage.out -o .cache/coverage.html
+	@echo "Coverage report generated: .cache/coverage.html"
+
+.PHONY: test-full
+test-full:
+	@echo "=== Running lint ==="
+	@go mod tidy
+	@go vet ./...
+	@echo ""
+	@echo "=== Starting Vault ==="
+	@docker compose up -d vault
+	@echo "Waiting for Vault to be ready..."
+	@sleep 2
+	@docker compose up vault-init
+	@echo ""
+	@echo "=== Running all tests (with Vault) ==="
+	@VAULT_ADDR=http://localhost:8200 VAULT_TOKEN=root go test ./...
+	@echo ""
+	@echo "=== Stopping Vault ==="
+	@docker compose down
+	@echo ""
+	@echo "=== All tests passed! ==="
+
+.PHONY: vault-up
+vault-up:
+	@echo "Starting Vault..."
+	@docker compose up -d vault
+	@echo "Waiting for Vault to be ready..."
+	@sleep 2
+	@docker compose up vault-init
+	@echo "Vault is ready at http://localhost:8200"
+	@echo "  Token: root"
+	@echo "  UI: http://localhost:8200/ui"
+
+.PHONY: vault-down
+vault-down:
+	@echo "Stopping Vault..."
+	@docker compose down
+
+.PHONY: vault-logs
+vault-logs:
+	@docker compose logs -f vault
+
 .PHONY: format
 format:
 	@go fmt ./...

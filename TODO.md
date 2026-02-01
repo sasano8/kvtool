@@ -101,16 +101,16 @@
 ## ゴミ処理（一時タスク - 完了後削除予定）
 
 ### Proto ファイルの削除
-- [ ] kv.proto を削除
-- [ ] proto/v1.proto を削除
-- [ ] proto/v2.proto を削除
-- [ ] proto/ ディレクトリを削除
+- [x] kv.proto を削除
+- [x] proto/v1.proto を削除
+- [x] proto/v2.proto を削除
+- [x] proto/ ディレクトリを削除
 
 ### 不要なディレクトリの削除
-- [ ] encoders/ ディレクトリを削除（空ディレクトリ、pkg/encoders/ は使用中）
-- [ ] vencor/ ディレクトリを削除（README.md のみ、vendor のタイポ？）
+- [x] encoders/ ディレクトリを削除（空ディレクトリ、pkg/encoders/ は使用中）
+- [x] vencor/ ディレクトリを削除（README.md のみ、vendor のタイポ？）
 - [x] bin/ と dist/ は .gitignore に追加済み（ビルド成果物）
 
 ### store load コマンドの整理
-- [ ] cmd/cmd_store/load.go を削除（未実装、store get と機能重複）
-- [ ] cmd/cmd_store/cmd.go から load の登録を削除
+- [x] cmd/cmd_store/load.go を削除（未実装、store get と機能重複）
+- [x] cmd/root.go から load の登録を削除

@@ -64,7 +64,6 @@ func init() {
 
 	stores := map[*cobra.Command]map[string]any{
 		cmd_store.CmdInit:  {"implemented": true},
-		cmd_store.CmdLoad:  {"implemented": false},
 		cmd_store.CmdServe: {"implemented": false},
 		cmd_store.CmdGet:   {"implemented": true},
 	}

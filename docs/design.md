@@ -83,7 +83,7 @@ func (fs *LocalFs) OpenReader(path string) (io.ReadCloser, error) {
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
-│  Config Layer (internal/shared)     │
+│  Config Layer (internal/config)     │
 │  - 設定ファイルの解決               │
 │  - パスパーサー                     │
 └──────────────┬──────────────────────┘
@@ -110,7 +110,7 @@ func (fs *LocalFs) OpenReader(path string) (io.ReadCloser, error) {
   - `init.go`: 設定ファイル初期化
   - `get.go`: ファイル取得
 
-#### 2. Config Layer (`internal/shared/`)
+#### 2. Config Layer (`internal/config/`)
 
 設定ファイルの管理。
 

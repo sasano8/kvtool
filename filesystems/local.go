@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/sasano8/kvtool/pkg/decoders"
 )
 
 // 名前なしフィールド（埋め込みフィールド）を定義すると、内側の構造体のメソッドを外側の構造体から呼べる（method promotion）
@@ -21,8 +23,9 @@ func (n nopWriteCloser) Close() error { return nil }
 type Path string
 
 type LocalFsConfig struct {
-	Timeout time.Duration
-	Root    string
+	Timeout   time.Duration
+	Root      string
+	Transform string // "dotenv", "json", "" など。空文字列の場合はデフォルト（json）
 }
 
 type FsLocalFile struct {
@@ -31,9 +34,10 @@ type FsLocalFile struct {
 }
 
 type LocalFs struct {
-	Ctx     context.Context
-	Timeout time.Duration
-	Root    string
+	Ctx       context.Context
+	Timeout   time.Duration
+	Root      string
+	Transform string // ファイル読み込み時の変換形式
 }
 
 type LocalFile struct {
@@ -44,9 +48,10 @@ type LocalFile struct {
 func GetLocalFs(parent context.Context, config *LocalFsConfig) (*LocalFs, error) {
 	root := strings.TrimSpace(config.Root)
 	fs := LocalFs{
-		Ctx:     parent,
-		Timeout: config.Timeout,
-		Root:    root,
+		Ctx:       parent,
+		Timeout:   config.Timeout,
+		Root:      root,
+		Transform: config.Transform,
 	}
 	return &fs, nil
 }
@@ -130,7 +135,29 @@ func (fs *LocalFs) LoadAsJson(path string) (any, error) {
 // LocalFile の File インターフェース実装
 
 func (f *LocalFile) LoadAsJson() (any, error) {
-	return f.fs.LoadAsJson(f.path)
+	// Transform 設定に基づいて適切なデコーダーを選択
+	reader, err := f.OpenReader()
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	switch f.fs.Transform {
+	case "dotenv":
+		// dotenv 形式として読み込み
+		return decoders.DotenvToJson(reader)
+	case "json", "":
+		// デフォルトは JSON
+		var v any
+		dec := json.NewDecoder(reader)
+		dec.UseNumber()
+		if err := dec.Decode(&v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	default:
+		return nil, fmt.Errorf("unsupported transform format: %s", f.fs.Transform)
+	}
 }
 
 func (f *LocalFile) OpenReader() (io.ReadCloser, error) {

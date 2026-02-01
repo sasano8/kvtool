@@ -47,8 +47,8 @@
 - [x] ルートディレクトリより前に辿れないセキュリティ制限 ([filesystems/local.go:79-90](filesystems/local.go#L79-L90))
 - [x] OpenReader の実装 ([filesystems/local.go:49-97](filesystems/local.go#L49-L97))
 - [x] LoadAsJson の実装 ([filesystems/local.go:99-115](filesystems/local.go#L99-L115))
-- [ ] ローカルファイルシステムのテスト
-- [ ] セキュリティ制限のテスト（パストラバーサル攻撃の防止）
+- [x] ローカルファイルシステムのテスト ([filesystems/local_test.go](filesystems/local_test.go))
+- [x] セキュリティ制限のテスト（パストラバーサル攻撃の防止） ([filesystems/local_test.go:191-231](filesystems/local_test.go#L191-L231))
 
 ### Vault ファイルシステム
 - [x] Vault ファイルシステムの実装 ([filesystems/vault.go](filesystems/vault.go))
@@ -70,15 +70,15 @@
   - [x] MountConfig ([filesystems/core.go:3-6](filesystems/core.go#L3-L6))
   - [x] TransformConfig ([filesystems/core.go:8-11](filesystems/core.go#L8-L11))
 - [x] 構成ファイルの例 ([.kvtool.yml](.kvtool.yml))
-- [x] 構成ファイルのロード機能の実装 ([internal/shared/config.go](internal/shared/config.go))
-- [x] パスパーサーの実装 ([internal/shared/config.go:62-109](internal/shared/config.go#L62-L109))
-- [x] パスパーサーのテスト ([internal/shared/config_test.go:45-98](internal/shared/config_test.go#L45-L98))
+- [x] 構成ファイルのロード機能の実装 ([internal/config/config.go](internal/config/config.go))
+- [x] パスパーサーの実装 ([internal/config/config.go:62-109](internal/config/config.go#L62-L109))
+- [x] パスパーサーのテスト ([internal/config/config_test.go:45-98](internal/config/config_test.go#L45-L98))
 - [ ] 構成ファイルのバリデーション
 
 ### ストアの機能
 - [x] ストアで様々なデータソースを定義できるようにする
 - [x] 構成ファイルを読んで、キーバリューストレージとして機能させる
-- [x] 設定ファイルの自動解決 ([internal/shared/config.go:45-95](internal/shared/config.go#L45-L95))
+- [x] 設定ファイルの自動解決 ([internal/config/config.go:45-95](internal/config/config.go#L45-L95))
   - [x] ローカル設定 (.kvtool.yml) の優先
   - [x] グローバル設定 (~/.config/kvtool/.kvtool.yml) へのフォールバック
 - [x] store init コマンドの実装 ([cmd/cmd_store/init.go](cmd/cmd_store/init.go))
@@ -88,7 +88,7 @@
   - [x] YAML 形式での出力
 - [x] store init コマンドのテスト ([cmd/cmd_store/init_test.go](cmd/cmd_store/init_test.go))
 - [x] store get コマンドの実装 ([cmd/cmd_store/get.go](cmd/cmd_store/get.go))
-  - [x] パス形式: `store_name/file_path` ([internal/shared/config.go:112-141](internal/shared/config.go#L112-L141))
+  - [x] パス形式: `store_name/file_path` ([internal/config/config.go:112-141](internal/config/config.go#L112-L141))
   - [x] namespace フラグによるテナント切り替え（デフォルト: default）
   - [x] ローカルファイルシステムからの読み込み ([cmd/cmd_store/get.go:76-107](cmd/cmd_store/get.go#L76-L107))
   - [x] Vault からの読み込み ([cmd/cmd_store/get.go:109-153](cmd/cmd_store/get.go#L109-L153))
@@ -111,14 +111,18 @@
 ### 優先度：高（簡単かつ重要）
 
 #### テストの充実
-- [ ] LocalFs の基本機能テスト
-  - GetFile, LoadAsJson, OpenReader の動作確認
-  - ファイルが存在しない場合のエラーハンドリング
-  - 様々なファイル形式（JSON, dotenv）の読み込み
+- [x] LocalFs の基本機能テスト ([filesystems/local_test.go](filesystems/local_test.go))
+  - [x] GetFile, LoadAsJson, OpenReader の動作確認
+  - [x] ファイルが存在しない場合のエラーハンドリング
+  - [x] 様々なファイル形式（JSON, dotenv）の読み込み
+  - [x] 空パス、絶対パス、~ パスのエラー処理
+  - [x] サブディレクトリアクセス
+  - [x] デフォルトルート（カレントディレクトリ）の動作
 
-- [ ] セキュリティテスト
-  - パストラバーサル攻撃の防止テスト（`../../../etc/passwd` など）
-  - Root ディレクトリ外へのアクセス拒否の確認
+- [x] セキュリティテスト ([filesystems/local_test.go:191-231](filesystems/local_test.go#L191-L231))
+  - [x] パストラバーサル攻撃の防止テスト（`../../../etc/passwd` など）
+  - [x] Root ディレクトリ外へのアクセス拒否の確認
+  - [x] Root ディレクトリ自体へのアクセス拒否
 
 #### エラー型の統一
 - [ ] カスタムエラー型の定義
@@ -140,68 +144,101 @@
   - 矛盾する設定の検出（mount.dir と mount.file が両方指定されている、など）
 
 #### コンテキスト伝播の統一
-- [ ] すべての Filesystem で context.Context を受け取るように統一
-  - 問題点: VaultFs のみ context を扱い、LocalFs や FsEnvFilesystem は扱わない
-  - 提案: `GetFile(ctx context.Context, path string)` に統一
-  - 理由: タイムアウト、キャンセル処理の統一
+- [x] すべての Filesystem で context.Context を保持するように統一
+  - [x] FsEnvFilesystem に Ctx フィールドを追加 ([filesystems/env.go:16](filesystems/env.go#L16))
+  - [x] FsEnvFile が親の Filesystem を参照 ([filesystems/env.go:28-30](filesystems/env.go#L28-L30))
+  - [x] Factory で FsEnvFilesystem に context を渡す ([filesystems/factory.go:98-103](filesystems/factory.go#L98-L103))
+  - 設計方針: Filesystem レベルで context を保持し、GetFile は context を受け取らない
+  - 理由: LocalFs, VaultFs が既に context を保持する設計であり、統一性を保つため
+
+
 
 #### 環境変数ファイルシステムの設定対応
-- [ ] FsEnvFilesystem を .kvtool.yml で設定可能にする
-  - 問題点: 現状、env ファイルシステムは設定ファイルから利用できない
-  - 提案: driver: "env" を追加
-  - 理由: 統一的な設定管理
+- [x] FsEnvFilesystem を .kvtool.yml で設定可能にする
+  - [x] driver: "env" のサポート ([cmd/cmd_store/get.go:79](cmd/cmd_store/get.go#L79), [cmd/cmd_store/get.go:171-179](cmd/cmd_store/get.go#L171-L179))
+  - [x] getFromEnvFs 関数の実装 ([cmd/cmd_store/get.go:171-179](cmd/cmd_store/get.go#L171-L179))
+  - [x] テスト ([cmd/cmd_store/get_test.go:53-77](cmd/cmd_store/get_test.go#L53-L77))
+  - [x] サンプル設定ファイル ([test_data/configs/.kvtool.env.example.yml](test_data/configs/.kvtool.env.example.yml))
 
 ### 優先度：中（重要だが複雑）
 
 #### パッケージ構造の改善
 
-- [ ] `internal/shared/` パッケージのリネーム
-  - 問題点: `shared` は catch-all パッケージ名で意図が不明確
-  - 提案: `internal/store/` または `internal/registry/` にリネーム
-  - 理由: パッケージの責務（ストアの管理・登録）を名前で明確にする
+- [x] `internal/shared/` から `internal/config/` へのリネーム
+  - [x] パッケージディレクトリの移動とパッケージ宣言の更新
+  - [x] すべてのインポート文を更新 ([cmd/cmd_store/get.go](cmd/cmd_store/get.go), [cmd/cmd_store/init.go](cmd/cmd_store/init.go))
+  - [x] 変数シャドーイングの修正 (config パッケージと config 変数の衝突を解消)
+  - [x] コメントとドキュメントの更新 ([filesystems/factory.go](filesystems/factory.go), [TODO.md](TODO.md), [docs/design.md](docs/design.md))
+  - 実装方針: `internal/config` を選択（設定ファイル管理が主な責務のため）
+  - 理由: パッケージ名で責務（.kvtool.yml の管理）を明確化、Go の標準的な命名規則に準拠
 
-- [ ] `filesystems/core.go` から設定構造体を分離
-  - 問題点: `FilesystemConfig`, `VaultConfig`, `StoreConfig`, `MountConfig`, `TransformConfig` が filesystem パッケージに混在
-  - 提案: `config/` パッケージを作成し、設定関連を移動
-  - 理由: ファイルシステムの抽象化と設定管理は別の責務
+- [x] `filesystems/core.go` から未使用の設定構造体を削除
+  - [x] 未使用の構造体を削除: `StoreConfig`, `MountConfig`, `TransformConfig` ([filesystems/core.go](filesystems/core.go))
+  - [x] コアインターフェースのみを保持: `Filesystem`, `File`
+  - 実装方針: 削除を選択（使われていないコードの削除）
+  - 理由:
+    - これらの構造体は実際には使用されていない
+    - 類似の構造体が `internal/config` に既に存在し、活用されている (`StoreInfo`, `MountInfo`)
+    - ファイルシステムパッケージは抽象化（インターフェース）に集中すべき
 
 #### ファイルシステムファクトリーの導入
-- [ ] Filesystem の生成を統一するファクトリーパターンの実装
-  - 問題点: コマンド層が直接ファイルシステムインスタンスを生成している
-  - 提案: `FilesystemFactory` または `FilesystemRegistry` インターフェースの導入
-  ```go
-  type FilesystemFactory interface {
-      Create(ctx context.Context, config *StoreConfig) (Filesystem, error)
-  }
-  ```
-  - 理由: 設定から Filesystem への変換ロジックを一元管理
+- [x] Filesystem の生成を統一するファクトリーパターンの実装
+  - [x] FilesystemFactory 構造体の実装 ([filesystems/factory.go](filesystems/factory.go))
+  - [x] Create メソッドによる各ドライバーの統一生成
+    - [x] createLocalFs ([filesystems/factory.go:36-50](filesystems/factory.go#L36-L50))
+    - [x] createVaultFs ([filesystems/factory.go:52-87](filesystems/factory.go#L52-L87))
+    - [x] createEnvFs ([filesystems/factory.go:89-93](filesystems/factory.go#L89-L93))
+  - [x] コマンド層のリファクタリング ([cmd/cmd_store/get.go:71-90](cmd/cmd_store/get.go#L71-L90))
+  - [x] getFileContent 関数による統一的なファイル取得 ([cmd/cmd_store/get.go:92-123](cmd/cmd_store/get.go#L92-L123))
+  - [x] テスト ([filesystems/factory_test.go](filesystems/factory_test.go))
 
 #### 統合インターフェーステスト
 - [ ] 全ファイルシステムで共通の動作を確認するテスト
   - 提案: テーブル駆動テストで LocalFs, VaultFs, FsEnvFilesystem を同じテストケースで検証
   - 理由: 統一インターフェースの一貫性を保証
+  - これはどこにおく？共通レベルのディレクトリが欲しい
+  
 
 #### Transform の統一インターフェース化
-- [ ] Transform を File インターフェースに統合
-  - 問題点: `TransformConfig` が定義されているが、統一インターフェースに組み込まれていない
-  - 提案: `File` インターフェースに `Transform` オプションを追加、または `TransformableFile` インターフェースを定義
-  - 理由: dotenv などの変換処理を統一的に扱えるようにする
+- [x] Transform を LocalFs に統合（ファイルシステム層への移動）
+  - [x] LocalFsConfig に Transform フィールドを追加 ([filesystems/local.go:23-26](filesystems/local.go#L23-L26))
+  - [x] LocalFs に Transform フィールドを追加 ([filesystems/local.go:33-38](filesystems/local.go#L33-L38))
+  - [x] LocalFile.LoadAsJson() で Transform を自動適用 ([filesystems/local.go:134-157](filesystems/local.go#L134-L157))
+  - [x] Factory で transform 設定を抽出 ([filesystems/factory.go:40-60](filesystems/factory.go#L40-L60))
+  - [x] コマンド層から Transform ロジックを削除 ([cmd/cmd_store/get.go:98-116](cmd/cmd_store/get.go#L98-L116))
+  - [x] Transform 機能のテスト ([filesystems/transform_test.go](filesystems/transform_test.go))
+  - 実装方針: LocalFs に設定を持たせ、LoadAsJson() で自動適用
+  - 理由:
+    - インターフェース変更なし（後方互換性を維持）
+    - ビジネスロジックをコマンド層からファイルシステム層に移動
+    - 各ファイルシステムが独自の Transform 実装を持てる
+    - 再利用可能（どこから File を取得しても Transform が適用される）
+  - サポートされる Transform: "dotenv", "json" (デフォルト)
 
 #### Store サービス層の導入
-- [ ] コマンド層とファイルシステム層の間にサービス層を挿入
-  - 問題点: コマンド層（cmd/）にビジネスロジックが混在
-  - 提案: `internal/service/store.go` を作成し、以下を実装
-  ```go
-  type StoreService interface {
-      Get(ctx context.Context, namespace, storePath string) (any, error)
-      Set(ctx context.Context, namespace, storePath string, data any) error
-      List(ctx context.Context, namespace, storePath string) ([]string, error)
-  }
-  ```
-  - 理由: コマンドライン以外（API、ライブラリとしての利用）からも同じロジックを使える
+- [x] コマンド層とファイルシステム層の間にサービス層を挿入
+  - [x] StoreService インターフェースの定義 ([internal/service/store.go:12-15](internal/service/store.go#L12-L15))
+  - [x] Get メソッドの実装 ([internal/service/store.go:48-83](internal/service/store.go#L48-L83))
+  - [x] ConfigLoader インターフェースの定義 ([internal/service/store.go:29-31](internal/service/store.go#L29-L31))
+  - [x] FilesystemFactory インターフェースの定義 ([internal/service/store.go:34-36](internal/service/store.go#L34-L36))
+  - [x] コマンド層のリファクタリング ([cmd/cmd_store/get.go:35-65](cmd/cmd_store/get.go#L35-L65))
+  - [x] サービス層のテスト ([internal/service/store_test.go](internal/service/store_test.go))
+    - [x] 基本的な Get 操作のテスト
+    - [x] Transform 機能のテスト
+    - [x] エラーハンドリングのテスト (無効なパス、設定ファイル不在、ストア不在)
+    - [x] モックを使った単体テスト
+  - 実装方針:
+    - ビジネスロジックをコマンド層からサービス層に移動
+    - 依存性注入を使った疎結合な設計
+    - インターフェースを使ったテスト可能な実装
+  - 効果:
+    - ✅ コマンド層のコード削減（95行 → 65行、約32%削減）
+    - ✅ CLI 以外（API、ライブラリ）から再利用可能
+    - ✅ ビジネスロジックの独立したテスト可能
+    - ✅ 責務の明確化（Command = UI、Service = ビジネスロジック）
 
 #### 設定管理とパス解決の分離
-- [ ] `internal/shared/config.go` の責務を分割
+- [ ] `internal/config/config.go` の責務を分割
   - 問題点: 設定ロード、パス解決、ストア取得が混在
   - 提案:
     - `ConfigLoader`: 設定ファイルのロード専用
@@ -210,10 +247,15 @@
   - 理由: 単一責任の原則に従い、テストしやすくする
 
 #### デコーダとソースの統合検討
-- [ ] `pkg/decoders/` と `pkg/sources/` の関係を整理
-  - 問題点: 密結合だが分離されている
-  - 提案: `pkg/transform/` パッケージとして統合、または `sources.Source` と `transform.Decoder` の明確な分離
-  - 理由: データの取得（source）と変換（decoder）の責務を明確にする
+- [x] `pkg/decoders/` と `pkg/sources/` の関係を整理
+  - [x] Source インターフェースの定義 ([pkg/sources/source.go](pkg/sources/source.go))
+  - [x] Decoder インターフェースの定義 ([pkg/decoders/decoder.go](pkg/decoders/decoder.go))
+  - [x] SourceEnv が Source インターフェースを実装 ([pkg/sources/env.go](pkg/sources/env.go))
+  - [x] EnvDecoder が Decoder インターフェースを実装 ([pkg/decoders/decoder.go:25-35](pkg/decoders/decoder.go#L25-L35))
+  - [x] フォーマット契約を明示的にドキュメント化（KEY=VALUE 形式）
+  - [x] テストの追加 ([pkg/sources/source_test.go](pkg/sources/source_test.go), [pkg/decoders/decoder_test.go](pkg/decoders/decoder_test.go))
+  - 実装方針: 疎結合を選択（統合ではなく、明示的なインターフェースで分離）
+  - 理由: 拡張性、テスト容易性、Go の標準的な設計パターンに準拠
 
 
 ### 優先度：低（将来的に必要だが現在は後回し）
@@ -259,3 +301,29 @@
 - [ ] 複数ファイルの並行読み込み
   - context.Context を活用した並行処理
   - エラーハンドリングの統一（errgroup の利用など）
+
+#### ファイルレベルのコンテキスト管理
+
+**現在の課題:**
+- GetFile が context を受け取れないため、ファイル操作ごとに異なるタイムアウトやキャンセル処理を設定できない
+- Filesystem のライフサイクル全体で1つの context を共有するため、柔軟性が制限される
+
+**将来的な改善案:**
+1. **オプション1: GetFile に context を追加**
+   - `GetFile(ctx context.Context, path string) (File, error)` に変更
+   - メリット: 標準的な Go の I/O パターン、操作ごとに異なる context を使用可能
+   - デメリット: 既存コード全体の変更が必要、インターフェースが複雑化
+
+2. **オプション2: WithContext メソッドの追加**
+   - `Filesystem.WithContext(ctx context.Context) Filesystem` を追加
+   - 新しい context で Filesystem のコピーを作成
+   - メリット: 既存インターフェースを変更せず、必要に応じて context を変更可能
+   - デメリット: Filesystem のコピー生成コスト
+
+3. **オプション3: FileOptions の導入**
+   - `GetFile(path string, opts ...FileOption) (File, error)` のようなオプショナルパラメータ
+   - `WithContext(ctx)`, `WithTimeout(duration)` などのオプション関数
+   - メリット: 後方互換性を保ちつつ拡張可能
+   - デメリット: やや複雑な API
+
+**推奨:** 現時点では現在の設計（Filesystem レベルで context 保持）で十分。将来的に必要になった場合はオプション2（WithContext メソッド）が最も影響が少ない

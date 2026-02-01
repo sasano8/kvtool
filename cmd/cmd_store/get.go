@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
-	"github.com/sasano8/kvtool/filesystems"
-	"github.com/sasano8/kvtool/internal/shared"
-	"github.com/sasano8/kvtool/pkg/decoders"
+	"github.com/sasano8/kvtool/internal/config"
+	"github.com/sasano8/kvtool/internal/service"
 	"github.com/sasano8/kvtool/pkg/encoders"
 	"github.com/spf13/cobra"
 )
@@ -43,42 +41,22 @@ Examples:
 
 		// If --global flag is set, use global config
 		if useGlobal {
-			globalPath, err := shared.GetGlobalConfigPath()
+			globalPath, err := config.GetGlobalConfigPath()
 			if err != nil {
 				return err
 			}
 			configPath = globalPath
 		}
 
-		// Parse the store path
-		parsed, err := shared.ParseStorePath(storePath)
-		if err != nil {
-			return err
-		}
+		// Use service to get content
+		ctx := context.Background()
+		storeService := service.NewStoreService()
 
-		// Load config with automatic path resolution
-		config, err := shared.LoadConfigAuto(configPath)
-		if err != nil {
-			return err
-		}
-
-		// Get store info
-		storeInfo, err := config.GetStore(namespace, parsed.StoreName)
-		if err != nil {
-			return err
-		}
-
-		// Get file content based on driver
-		var content interface{}
-		switch storeInfo.Driver {
-		case "local":
-			content, err = getFromLocalFs(storeInfo, parsed.FilePath)
-		case "vault":
-			content, err = getFromVaultFs(storeInfo, parsed.FilePath)
-		default:
-			return fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
-		}
-
+		content, err := storeService.Get(ctx, service.GetOptions{
+			ConfigPath: configPath,
+			Namespace:  namespace,
+			StorePath:  storePath,
+		})
 		if err != nil {
 			return err
 		}
@@ -86,95 +64,6 @@ Examples:
 		// Output based on format
 		return outputContent(content, outputFormat, os.Stdout)
 	},
-}
-
-func getFromLocalFs(storeInfo *shared.StoreInfo, filePath string) (interface{}, error) {
-	args := storeInfo.Args
-	root, _ := args["root"].(string)
-	if root == "" {
-		root = "."
-	}
-
-	ctx := context.Background()
-	fs, err := filesystems.GetLocalFs(ctx, &filesystems.LocalFsConfig{
-		Root:    root,
-		Timeout: 10 * time.Second,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Check for transform
-	transform := getTransform(args, "read")
-
-	if transform == "dotenv" {
-		reader, err := fs.OpenReader(filePath)
-		if err != nil {
-			return nil, err
-		}
-		defer reader.Close()
-
-		return decoders.DotenvToJson(reader)
-	}
-
-	// Default: load as JSON
-	return fs.LoadAsJson(filePath)
-}
-
-func getFromVaultFs(storeInfo *shared.StoreInfo, filePath string) (interface{}, error) {
-	args := storeInfo.Args
-
-	// Parse vault connection args
-	connArgs, ok := args["conn"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("vault store missing 'conn' configuration")
-	}
-
-	addr, _ := connArgs["addr"].(string)
-	token, _ := connArgs["token"].(string)
-	mount, _ := connArgs["mount"].(string)
-
-	if addr == "" || token == "" || mount == "" {
-		return nil, fmt.Errorf("vault store missing required configuration (addr, token, mount)")
-	}
-
-	root, _ := args["root"].(string)
-	if root != "" {
-		filePath = root + "/" + filePath
-	}
-
-	config := filesystems.VaultConfig{
-		Addr:      addr,
-		Token:     token,
-		Namespace: "admin",
-		Mount:     mount,
-		KvVer:     2,
-		Version:   0,
-		Timeout:   10 * time.Second,
-	}
-
-	ctx := context.Background()
-	vaultFs, err := filesystems.GetVaultFs(ctx, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := vaultFs.GetFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	return file.LoadAsJson()
-}
-
-func getTransform(args map[string]interface{}, direction string) string {
-	transform, ok := args["transform"].(map[string]interface{})
-	if !ok {
-		return ""
-	}
-
-	val, _ := transform[direction].(string)
-	return val
 }
 
 func outputContent(content interface{}, format string, w io.Writer) error {

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sasano8/kvtool/internal/shared"
+	"github.com/sasano8/kvtool/internal/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -39,7 +39,7 @@ Examples:
 		if len(args) > 0 {
 			configPath = args[0]
 		} else if global {
-			globalPath, err := shared.GetGlobalConfigPath()
+			globalPath, err := config.GetGlobalConfigPath()
 			if err != nil {
 				return err
 			}
@@ -64,9 +64,9 @@ Examples:
 		}
 
 		// Create default config
-		config := shared.KvtoolConfig{
+		config := config.KvtoolConfig{
 			Version: 0.1,
-			Namespaces: map[string]map[string]shared.StoreInfo{
+			Namespaces: map[string]map[string]config.StoreInfo{
 				"default": {
 					".env": {
 						Driver: "local",
@@ -77,7 +77,7 @@ Examples:
 							},
 							"root": ".",
 						},
-						Mount: &shared.MountInfo{
+						Mount: &config.MountInfo{
 							File: stringPtr(""),
 						},
 					},

@@ -48,3 +48,39 @@ namespaces:
 	err = cmd.Execute()
 	require.NoError(err)
 }
+
+func TestStoreGetEnvDriver(t *testing.T) {
+	require := require.New(t)
+
+	// Set test environment variables
+	os.Setenv("TEST_ENV_VAR_1", "value1")
+	os.Setenv("TEST_ENV_VAR_2", "value2")
+	defer os.Unsetenv("TEST_ENV_VAR_1")
+	defer os.Unsetenv("TEST_ENV_VAR_2")
+
+	// Create a temporary directory for config file
+	tmpDir := t.TempDir()
+
+	// Create test config file with env driver
+	configContent := `version: 0.1
+namespaces:
+  default:
+    "env":
+      driver: "env"
+      args: {}
+      mount:
+        file: ""
+`
+	configPath := filepath.Join(tmpDir, ".kvtool.yml")
+	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(err)
+
+	// Test the command - path is ignored for env driver
+	cmd := CmdGet
+	cmd.SetArgs([]string{"env/ignored", "-c", configPath})
+
+	err = cmd.Execute()
+	require.NoError(err)
+	// Note: This test only verifies the command executes without error
+	// To verify the actual output, we would need to capture stdout
+}

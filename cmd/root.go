@@ -16,18 +16,6 @@ import (
 
 // init は Go言語の仕様で、パッケージインポート時に各モジュールの init が自動で呼び出される
 func init() {
-	// global flag
-	// rootCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// local flag
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	// checkDuplicated := func(commands []*cobra.Command) {
-	// 	// 重複チェック
-	// 	// for _, c := range commands {
-	// 	// 	c.Use
-	// 	// }
-	// }
-
 	belongsTo := func(root *cobra.Command, subs map[*cobra.Command]map[string]any) *cobra.Command {
 		// 順序は保障されない
 		for k, v := range subs {

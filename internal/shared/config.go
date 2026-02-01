@@ -10,7 +10,7 @@ import (
 
 // KvtoolConfig represents the structure of .kvtool.yml
 type KvtoolConfig struct {
-	Version    float64                          `yaml:"version"`
+	Version    float64                         `yaml:"version"`
 	Namespaces map[string]map[string]StoreInfo `yaml:"namespaces"`
 }
 

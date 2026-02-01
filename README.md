@@ -1,88 +1,203 @@
-# tool-kv
+# kvtool
 
-# Getting Started
+kvtool は、設定ファイル（.env、Vault など）を統一的なインターフェースで扱うためのツールです。
 
-```
+## 特徴
+
+- **ストア機能**: 複数の設定ソース（ローカルファイル、Vault など）を統一的に管理
+- **柔軟な設定**: ローカル設定とグローバル設定の自動解決
+- **マルチテナント**: namespace による環境の切り替え
+- **複数フォーマット対応**: .env、JSON、YAML、Vault など
+- **変換機能**: 各種フォーマット間の相互変換
+
+## ドキュメント
+
+- [設定ファイル仕様](docs/configuration.md) - 設定ファイルの詳細仕様と解決ロジック
+- [コマンドリファレンス](docs/commands.md) - 全コマンドの使い方
+- [設計思想・仕様](docs/design.md) - アーキテクチャと設計判断
+
+## インストール
+
+```bash
 make install
 ```
 
-## env to json
+## クイックスタート
 
-```
-kvtool env2json
-```
+### 1. 設定ファイルの初期化
 
-## json to .env
+```bash
+# ローカル設定ファイルを作成（カレントディレクトリに .kvtool.yml）
+kvtool store init
 
-```
-kvtool json2env -i test_data/json/simple.json
-```
-
-## .env to json
-
-```
-kvtool dotenv2json -i test_data/dot_env/simple.env
+# グローバル設定ファイルを作成（~/.config/kvtool/.kvtool.yml）
+kvtool store init --global
 ```
 
-## vault
+生成される設定ファイル例：
 
-```
-./bin/kvtool vault -addr http://localhost:8200 -token root -mount secret -path app/prod
-```
-
-
-## use store
-
-次のコマンドでストアコンフィグ(`.kvtool.json`)を生成します。
-
-```
-kvtool init
-```
-
-ストアコンフィグは以下の構成になっています。
-必要に応じて編集してください。
-
-```
-{
-  "version": 0.1,
-  "namespaces": {
-    // 名前空間を定義します。default はデフォルトで指定される名前空間です。
-    "default": {
-      // キー（ルートパス）とタイプとそのタイプの引数を指定します
-      ".env": {
-        "type": ".env",
-        "args": {
-          "input": ".env"
-        }
-      }
-    }
-  }
-}
-
+```yaml
+version: 0.1
+namespaces:
+  default:
+    .env:
+      driver: local
+      args:
+        root: .
+        transform:
+          read: dotenv
+          write: dotenv
+      mount:
+        file: ""
 ```
 
-ここでは ストアコンフィグ例に従い `.env` を作成します。
+### 2. 設定ファイルの取得
 
+パス形式: `store_name/file_path`
+
+```bash
+# .env ファイルを JSON 形式で取得
+kvtool store get .env/test.env
+
+# raw 形式（key=value）で取得
+kvtool store get .env/test.env -o raw
+
+# 特定の namespace を指定
+kvtool store get .env/test.env --namespace production
+kvtool store get .env/test.env -n staging
+
+# グローバル設定を使用
+kvtool store get .env/test.env --global
 ```
-A=test
+
+## 設定ファイルの解決
+
+kvtool はデフォルトでカレントディレクトリの `.kvtool.yml` を参照します。
+
+グローバル設定を使用する場合は、明示的に指定する必要があります：
+
+```bash
+# グローバル設定を使用
+kvtool store get .env/APP_NAME --global
+
+# カスタムパスを指定
+kvtool store get .env/APP_NAME -c /path/to/.kvtool.yml
 ```
 
-以下のように構成ファイルを読み込むことができます。
+**注意**: ローカルに `.kvtool.yml` がない場合、自動的にグローバル設定にフォールバックすることはありません。明示的に `--global` フラグまたは `--config` フラグを指定してください。
 
+## ストアの設定
+
+### ローカルファイルシステム
+
+```yaml
+version: 0.1
+namespaces:
+  default:
+    .env:
+      driver: local
+      args:
+        root: .              # ルートディレクトリ
+        transform:
+          read: dotenv       # 読み込み時の変換方法
+          write: dotenv      # 書き込み時の変換方法
+      mount:
+        file: ""
 ```
-kvtool store -ns default .env
+
+### Vault
+
+```yaml
+version: 0.1
+namespaces:
+  default:
+    vault:
+      driver: vault
+      args:
+        conn:
+          addr: "http://localhost:8200"
+          token: root
+          mount: secret
+        root: app/prod       # Vault 内のルートパス
 ```
 
+## マルチテナント（namespace）
 
-## Usage 2
+異なる環境（開発、本番など）を namespace で切り替えることができます：
 
+```yaml
+version: 0.1
+namespaces:
+  development:
+    .env:
+      driver: local
+      args:
+        root: ./config/dev
+        transform:
+          read: dotenv
+          write: dotenv
+  production:
+    .env:
+      driver: local
+      args:
+        root: ./config/prod
+        transform:
+          read: dotenv
+          write: dotenv
 ```
+
+使用例：
+
+```bash
+# 開発環境の設定を取得
+kvtool store get .env/app.env -n development
+
+# 本番環境の設定を取得
+kvtool store get .env/app.env -n production
+```
+
+## 出力形式
+
+```bash
+# JSON 形式（デフォルト）
+kvtool store get .env/test.env
+# 出力:
+# {
+#   "APP_NAME": "myapp",
+#   "APP_ENV": "production"
+# }
+
+# raw 形式（key=value）
+kvtool store get .env/test.env -o raw
+# 出力:
+# APP_NAME=myapp
+# APP_ENV=production
+```
+
+## その他のコマンド
+
+### 環境変数を JSON に変換
+
+```bash
 kvtool load env
-cat test_data/dot_env/simple.env | kvtool load dotenv
+```
+
+### .env ファイルを JSON に変換
+
+```bash
+kvtool load dotenv -i test_data/dot_env/simple.env
+```
+
+### Vault から直接読み込み
+
+```bash
 kvtool load vault -addr http://localhost:8200 -token root -mount secret app/prod
+```
+
+### JSON を他の形式に変換
+
+```bash
 cat test_data/json/simple.json | kvtool convert dotenv
-cat test_data/json/simple.json | kvtool convert toml
 cat test_data/json/simple.json | kvtool convert yaml
-kvtool load store --config kvtool.json env
 ```
 

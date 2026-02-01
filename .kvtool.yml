@@ -2,13 +2,35 @@ version: 0.1
 namespaces:
   default:
     ".env":
-      type: ".env"
+      driver: "local"
       args:
-        input: ".env"
-    vault:
-      type: vault
+        ext: ".env"
+        transform:
+          read: dotenv
+          write: dotenv
+        root: "."
+      mount:
+        # dir: ""
+        file: ""
+
+    "vault":
+      driver: vault
       args:
-        addr: "http://localhost:8200"
-        token: root
-        mount: secret
-        path: app/prod
+        conn:
+          addr: "http://localhost:8200"
+          token: root
+          mount: secret
+        transform:
+          read: null
+          write: null
+        root: app/prod
+
+    "test":
+      driver: "local"
+      args:
+        transform:
+          read: dotenv
+          write: dotenv
+        root: "."
+      mount:
+        file: ""

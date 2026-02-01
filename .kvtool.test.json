@@ -3,18 +3,39 @@
   "namespaces": {
     "default": {
       ".env": {
-        "type": ".env",
+        "backend": {
+          "type": "local",
+          "args": {
+            "type": ".env"
+          }
+        },
         "args": {
-          "input": ".env"
+          "dir": ".",
+          "file": ""
         }
       },
       "vault": {
-        "type": "vault",
+        "backend": {
+          "type": "vault",
+          "args": {
+            "addr": "http://localhost:8200",
+            "token": "root",
+            "namespace": ""
+          }
+        },
         "args": {
-          "addr": "http://localhost:8200",
-          "token": "root",
-          "mount": "secret",
-          "path": "app/prod"
+          "mountpoint": "secret",
+          "dir": "app",
+          "file": "prod"
+        }
+      },
+      "db": {
+        "backend": {
+          "type": "db",
+          "subtype": "postgres",
+          "args": {
+            "query": "select key, value from configs where key = :namespace + '/' + :key"
+          }
         }
       }
     }

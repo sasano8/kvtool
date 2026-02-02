@@ -1,0 +1,21 @@
+[book]
+title = "kvtool Documentation"
+authors = ["kvtool contributors"]
+language = "ja"
+multilingual = false
+src = "docs"
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://github.com/sasano8/kvtool"
+git-repository-icon = "fa-github"
+additional-css = []
+additional-js = []
+
+[output.html.playground]
+editable = false
+copyable = true
+copy-js = true
+line-numbers = true

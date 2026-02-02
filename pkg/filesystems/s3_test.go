@@ -8,15 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// getTestMinIOEndpoint returns MinIO endpoint for testing
-// Makefile の test-ci ターゲットで MINIO_ENDPOINT を設定する
-func getTestMinIOEndpoint() string {
-	if endpoint := os.Getenv("MINIO_ENDPOINT"); endpoint != "" {
-		return endpoint
-	}
-	return "http://localhost:9000" // ローカル開発用デフォルト
-}
-
 // TestNewS3Fs_Validation は S3FsConfig のバリデーションをテスト
 func TestNewS3Fs_Validation(t *testing.T) {
 	// MinIO が起動していない場合はスキップ

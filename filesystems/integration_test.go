@@ -77,11 +77,11 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
-					Bucket:       "kvtool-test",
-					Region:       "us-east-1",
-					Root:         "config",
-					Endpoint:     "http://localhost:9000",
-					UsePathStyle: true,
+					Bucket:          "kvtool-test",
+					Region:          "us-east-1",
+					Root:            "config",
+					Endpoint:        "http://localhost:9000",
+					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",
 				})
@@ -99,11 +99,11 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
-					Bucket:       "kvtool-test",
-					Region:       "us-east-1",
-					Root:         "config",
-					Endpoint:     "http://localhost:9000",
-					UsePathStyle: true,
+					Bucket:          "kvtool-test",
+					Region:          "us-east-1",
+					Root:            "config",
+					Endpoint:        "http://localhost:9000",
+					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",
 				})

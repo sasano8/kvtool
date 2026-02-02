@@ -20,14 +20,21 @@ jobs:
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
+        # MinIO はデフォルトで "server /data" を実行する
+        # health check は MinIO が完全に起動するまで待つ必要がないため、簡易チェックのみ
+
+      vault:
+        image: hashicorp/vault:latest
+        ports:
+          - 8200:8200
+        env:
+          VAULT_DEV_ROOT_TOKEN_ID: root
+          VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
         options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-cmd "vault status || exit 0"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        # MinIO を起動
-        # docker run コマンドの引数として server /data を渡す必要がある
-        # GitHub Actions services では CMD を指定できないので、別の方法が必要
 
     steps:
       - name: Checkout code
@@ -41,50 +48,21 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Run tests (without S3)
-        run: |
-          # S3 テストをスキップして実行
-          go test -v ./... -short
+      - name: Run tests (without S3 and Vault)
+        run: go test -v -short ./...
 
-      - name: Setup MinIO
+      - name: Setup MinIO bucket
         run: |
           # MinIO CLI をインストール
-          wget https://dl.min.io/client/mc/release/linux-amd64/mc
+          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x mc
           sudo mv mc /usr/local/bin/
 
-          # Docker で MinIO を起動
-          docker run -d \
-            --name minio \
-            -p 9000:9000 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            minio/minio server /data
-
-          # MinIO の起動を待つ
-          sleep 5
-
-          # MinIO に接続設定
+          # MinIO に接続
           mc alias set local http://localhost:9000 minioadmin minioadmin
 
           # テスト用バケットを作成
           mc mb local/kvtool-test || true
-
-      - name: Setup Vault
-        run: |
-          # Docker で Vault を起動
-          docker run -d \
-            --name vault \
-            -p 8200:8200 \
-            -e VAULT_DEV_ROOT_TOKEN_ID=root \
-            -e VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200 \
-            hashicorp/vault:latest
-
-          # Vault の起動を待つ
-          sleep 3
-
-          # Vault が起動したことを確認
-          curl -s http://localhost:8200/v1/sys/health || echo "Vault is starting..."
 
       - name: Run full tests (with S3 and Vault)
         run: go test -v ./...

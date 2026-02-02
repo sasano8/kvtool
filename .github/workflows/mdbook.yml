@@ -5,9 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'book.toml'
       - 'docs/**'
+      - 'book.toml'
       - '.github/workflows/mdbook.yml'
   workflow_dispatch:
 

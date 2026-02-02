@@ -73,6 +73,40 @@ jobs:
           # テスト用バケットを作成
           mc mb kvtest/kvtool-test || true
 
+          # テストデータをアップロード
+          echo '{"app_name":"kvtool","version":"1.0.0"}' | mc pipe kvtest/kvtool-test/config/app.json
+          echo 'APP_NAME=kvtool
+          APP_ENV=production
+          DATABASE_URL=postgres://localhost/mydb' | mc pipe kvtest/kvtool-test/config/production.env
+
+      - name: Setup Vault test data
+        run: |
+          # Vault CLI をインストール
+          wget -q https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip
+          unzip -q vault_1.15.0_linux_amd64.zip
+          sudo mv vault /usr/local/bin/
+
+          # Vault 環境変数を設定
+          export VAULT_ADDR=http://127.0.0.1:8200
+          export VAULT_TOKEN=root
+
+          # Vault が起動するまで待つ
+          echo "Waiting for Vault..."
+          for i in {1..30}; do
+            if vault status >/dev/null 2>&1; then
+              echo "Vault is ready"
+              break
+            fi
+            echo "Waiting for Vault... ($i/30)"
+            sleep 1
+          done
+
+          # KV v2 エンジンを有効化（すでに有効の場合はエラーを無視）
+          vault secrets enable -path=secret kv-v2 || true
+
+          # テストデータを書き込み
+          vault kv put secret/app/prod username=alice password=pa55w0rd
+
       - name: Run all tests
         run: make test-ci
 

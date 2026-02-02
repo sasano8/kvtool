@@ -28,8 +28,8 @@ jobs:
         run: ./scripts/test-with-services.sh --ci
 
   code-quality:
-    # main ブランチへの push 時のみ実行
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # ドキュメントデプロイ後に実行
+    needs: deploy-docs
     runs-on: ubuntu-latest
 
     steps:

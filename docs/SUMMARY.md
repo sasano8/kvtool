@@ -11,8 +11,6 @@
 # リファレンス
 
 - [API リファレンス](./api-reference.md)
-- [Filesystem ドライバー](../pkg/filesystems/README.md)
-  - [S3 Filesystem](../pkg/filesystems/s3.md)
 
 # 開発者向け
 

@@ -1,7 +1,7 @@
 /* kvtool Documentation - Custom Theme */
 
-/* サイドバーのサブナビ（各ページの見出し）を非表示 */
-.sidebar-nav .section li.chapter-item ul {
+/* サイドバーのサブナビ（各ページ内の見出し）を非表示 */
+.sidebar ol.chapter li.chapter-item > ol.section {
     display: none;
 }
 

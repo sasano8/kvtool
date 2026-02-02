@@ -67,26 +67,19 @@ jobs:
           chmod +x mc
           sudo mv mc /usr/local/bin/
 
-          # MinIO に接続（リトライ付き）
+          # MinIO クライアントを設定
           echo "Configuring MinIO client..."
-          for i in {1..30}; do
-            if mc alias set kvtest http://127.0.0.1:9000 minioadmin minioadmin 2>/dev/null; then
-              echo "MinIO client configured successfully"
-              break
-            fi
-            echo "Retrying MinIO connection... ($i/30)"
-            sleep 1
-          done
+          mc alias set kvtest http://127.0.0.1:9000 minioadmin minioadmin
 
-          # MinIO が完全に準備できるまで待つ
-          echo "Verifying MinIO is ready..."
-          for i in {1..30}; do
+          # MinIO が完全に準備できるまで待つ（リトライ付き）
+          echo "Waiting for MinIO to be fully ready..."
+          for i in {1..60}; do
             if mc ls kvtest >/dev/null 2>&1; then
-              echo "MinIO is fully ready"
+              echo "MinIO is ready"
               break
             fi
-            echo "Waiting for MinIO to be fully ready... ($i/30)"
-            sleep 1
+            echo "Retrying ($i/60)..."
+            sleep 2
           done
 
           # テスト用バケットを作成

@@ -27,6 +27,31 @@ jobs:
       - name: Run tests with services
         run: ./scripts/test-with-services.sh --ci
 
+  code-quality:
+    # main ブランチへの push 時のみ実行
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Run code quality analysis
+        run: |
+          echo "=== Coverage ==="
+          go test -cover ./... 2>&1 | grep -E "^(ok|\?)" | awk '{print $2, $5}'
+          echo ""
+          echo "=== Lint (golangci-lint) ==="
+          ~/go/bin/golangci-lint run --out-format=line-number || true
+
   deploy-docs:
     # テストが成功した場合のみドキュメントをデプロイ
     needs: test

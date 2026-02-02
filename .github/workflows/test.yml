@@ -67,8 +67,16 @@ jobs:
           chmod +x mc
           sudo mv mc /usr/local/bin/
 
-          # MinIO に接続（IPv4 アドレスを明示的に使用）
-          mc alias set kvtest http://127.0.0.1:9000 minioadmin minioadmin
+          # MinIO に接続（リトライ付き）
+          echo "Configuring MinIO client..."
+          for i in {1..30}; do
+            if mc alias set kvtest http://127.0.0.1:9000 minioadmin minioadmin 2>/dev/null; then
+              echo "MinIO client configured successfully"
+              break
+            fi
+            echo "Retrying MinIO connection... ($i/30)"
+            sleep 1
+          done
 
           # テスト用バケットを作成
           mc mb kvtest/kvtool-test || true

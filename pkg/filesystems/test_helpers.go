@@ -8,7 +8,7 @@ func getTestMinIOEndpoint() string {
 	if endpoint := os.Getenv("MINIO_ENDPOINT"); endpoint != "" {
 		return endpoint
 	}
-	return "http://localhost:9000" // ローカル開発用デフォルト
+	return "http://127.0.0.1:9000" // ローカル開発用デフォルト
 }
 
 // getTestVaultAddr returns Vault address for testing
@@ -17,7 +17,7 @@ func getTestVaultAddr() string {
 	if addr := os.Getenv("VAULT_ADDR"); addr != "" {
 		return addr
 	}
-	return "http://localhost:8200" // ローカル開発用デフォルト
+	return "http://127.0.0.1:8200" // ローカル開発用デフォルト
 }
 
 // getTestVaultToken returns Vault token for testing

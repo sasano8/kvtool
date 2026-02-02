@@ -15,6 +15,21 @@
 ### 環境変数
 - [x] 環境変数を読んで JSON にする ([pkg/sources/env.go](pkg/sources/env.go), [pkg/decoders/env_to_json.go](pkg/decoders/env_to_json.go))
 - [x] テスト ([pkg/decoders/env_to_json_test.go](pkg/decoders/env_to_json_test.go))
+- [ ] **環境変数エスケープ処理のバグ修正と拡充テスト** ([pkg/sources/env.go](pkg/sources/env.go))
+  - [ ] 改行を含む環境変数のエスケープ処理（`\n` → `\\n`）
+  - [ ] タブ文字を含む環境変数のエスケープ処理（`\t` → `\\t`）
+  - [ ] キャリッジリターンを含む環境変数のエスケープ処理（`\r` → `\\r`）
+  - [ ] バックスラッシュを含む環境変数のエスケープ処理（`\` → `\\`）
+  - [ ] ダブルクォートを含む環境変数のエスケープ処理（`"` → `\"`）
+  - [ ] 複数の特殊文字を含む環境変数のエスケープ処理
+  - [ ] 空の値を持つ環境変数（`KEY=`）
+  - [ ] 値に `=` を含む環境変数（`KEY=VALUE=VALUE2`）
+  - [ ] 非常に長い値を持つ環境変数（10KB以上）
+  - [ ] Unicode 文字を含む環境変数（絵文字、日本語など）
+  - [ ] SourceEnv と EnvDecoder の統合テスト（end-to-end）
+  - **現在の問題**: 環境変数に改行が含まれると `bufio.Scanner` が複数行として扱い、パースエラーが発生する
+  - **影響範囲**: `SourceEnv.Load()` → `EnvDecoder.Decode()` のパイプライン
+  - **解決策**: dotenv 形式に従い、特殊文字を含む値をダブルクォートで囲んでエスケープする
 
 ### Vault
 - [x] Vault から構成を読んで JSON にする ([p../pkg/filesystems/vault.go:85-118](p../pkg/filesystems/vault.go#L85-L118))

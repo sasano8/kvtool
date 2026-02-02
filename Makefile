@@ -34,8 +34,8 @@ test:
 # CI 環境用のテスト（GitHub Actions services 対応）
 .PHONY: test-ci
 test-ci:
-	MINIO_ENDPOINT=http://localhost:9000 \
-	VAULT_ADDR=http://localhost:8200 \
+	MINIO_ENDPOINT=http://127.0.0.1:9000 \
+	VAULT_ADDR=http://127.0.0.1:8200 \
 	VAULT_TOKEN=root \
 	go test -v ./...
 

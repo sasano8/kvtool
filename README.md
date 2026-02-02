@@ -93,6 +93,7 @@ namespaces:
 
 ## ドキュメント
 
+- **[オンラインドキュメント](https://sasano8.github.io/kvtool/)**: mdBook による公式ドキュメントサイト
 - **[API リファレンス](docs/api-reference.md)**: 設定パラメータ一覧（自動生成）
 - **[CLAUDE.md](CLAUDE.md)**: 開発ガイド（コード規約、アーキテクチャ、暗黙知）
 - **[S3 仕様](docs/filesystems/s3.md)**: S3 ドライバーの詳細仕様
@@ -114,6 +115,8 @@ make vault-down
 
 # ドキュメント生成
 make gen-docs                     # docs/api-reference.md を生成
+make book-build                   # mdBook をビルド
+make book-serve                   # mdBook サーバー起動
 
 # コード品質
 make lint                         # 静的解析

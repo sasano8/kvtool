@@ -12,37 +12,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      minio:
-        image: minio/minio
-        ports:
-          - 9000:9000
-          - 9001:9001
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-        # MinIO のコマンドを明示的に指定
-        # Note: GitHub Actions services では command パラメータが使えないため、
-        # イメージのデフォルトコマンドが使用される
-
-      vault:
-        image: hashicorp/vault:latest
-        ports:
-          - 8200:8200
-        env:
-          VAULT_DEV_ROOT_TOKEN_ID: root
-          VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-        options: >-
-          --health-cmd "curl -f http://localhost:8200/v1/sys/health || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,62 +24,27 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Wait for MinIO
-        run: ./scripts/wait-for-minio.sh
-
-      - name: Setup MinIO bucket
-        run: |
-          # MinIO CLI をインストール
-          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x mc
-          sudo mv mc /usr/local/bin/
-
-          # MinIO クライアントを設定
-          echo "Configuring MinIO client..."
-          mc alias set kvtest http://127.0.0.1:9000 minioadmin minioadmin
-
-          # MinIO が完全に準備できるまで待つ（リトライ付き）
-          echo "Waiting for MinIO to be fully ready..."
-          for i in {1..60}; do
-            if mc ls kvtest >/dev/null 2>&1; then
-              echo "MinIO is ready"
-              break
-            fi
-            echo "Retrying ($i/60)..."
-            sleep 2
-          done
-
-          # テスト用バケットを作成
-          mc mb kvtest/kvtool-test || true
-
-          # テストデータをアップロード
-          echo '{"app_name":"kvtool","version":"1.0.0"}' | mc pipe kvtest/kvtool-test/config/app.json
-          echo 'APP_NAME=kvtool
-          APP_ENV=production
-          DATABASE_URL=postgres://localhost/mydb' | mc pipe kvtest/kvtool-test/config/production.env
+      - name: Start services
+        run: docker compose up -d vault minio
 
       - name: Wait for Vault
         run: ./scripts/wait-for-vault.sh
 
-      - name: Setup Vault test data
-        run: |
-          # Vault CLI をインストール
-          wget -q https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip
-          unzip -q vault_1.15.0_linux_amd64.zip
-          sudo mv vault /usr/local/bin/
+      - name: Initialize Vault
+        run: docker compose up vault-init
 
-          # Vault 環境変数を設定
-          export VAULT_ADDR=http://127.0.0.1:8200
-          export VAULT_TOKEN=root
+      - name: Wait for MinIO
+        run: ./scripts/wait-for-minio.sh
 
-          # KV v2 エンジンを有効化（すでに有効の場合はエラーを無視）
-          vault secrets enable -path=secret kv-v2 || true
-
-          # テストデータを書き込み
-          vault kv put secret/app/prod username=alice password=pa55w0rd
+      - name: Initialize MinIO
+        run: docker compose up minio-init
 
       - name: Run all tests
         run: make test-ci
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
 
   deploy-docs:
     # テストが成功した場合のみドキュメントをデプロイ

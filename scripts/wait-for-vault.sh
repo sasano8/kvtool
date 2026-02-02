@@ -27,7 +27,15 @@ for i in $(seq 1 $MAX_RETRIES); do
         echo "✓ Vault is ready! (attempt $i/$MAX_RETRIES)"
         exit 0
     fi
-    echo "Retrying... ($i/$MAX_RETRIES)"
+
+    # デバッグ: 最初の数回と最後の数回は詳細を表示
+    if [ $i -le 3 ] || [ $i -ge $((MAX_RETRIES - 2)) ]; then
+        echo "Retrying... ($i/$MAX_RETRIES) - curl exit code: $?"
+        curl -v "${VAULT_ADDR}/v1/sys/health" 2>&1 | head -5 || true
+    else
+        echo "Retrying... ($i/$MAX_RETRIES)"
+    fi
+
     sleep $RETRY_INTERVAL
 done
 

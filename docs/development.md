@@ -67,7 +67,7 @@ make format
 
 ## 新しいファイルシステムドライバーの追加
 
-1. **仕様策定**: `docs/filesystems/{driver}.md` を作成
+1. **仕様策定**: `do../pkg/filesystems/{driver}.md` を作成
 2. **構造体定義**: 設定構造体を定義（`doc`, `required`, `default`, `example` タグを含む）
 3. **インターフェース実装**: `Filesystem` と `File` インターフェースを実装
 4. **テスト**: `filesystems/integration_test.go` にテストケースを追加

@@ -4,7 +4,7 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd_file_load
 
 import (
-	"github.com/sasano8/kvtool/filesystems"
+	"github.com/sasano8/kvtool/pkg/filesystems"
 	"github.com/sasano8/kvtool/pkg/common"
 	"github.com/sasano8/kvtool/pkg/decoders"
 	"github.com/sasano8/kvtool/pkg/encoders"

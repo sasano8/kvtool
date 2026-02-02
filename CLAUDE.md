@@ -28,10 +28,10 @@ kvtool
 
 ### ドライバー
 
-- **LocalFs**: ローカルファイルシステム ([filesystems/local.go](filesystems/local.go))
-- **VaultFs**: HashiCorp Vault ([filesystems/vault.go](filesystems/vault.go))
-- **S3Fs**: Amazon S3 / MinIO ([filesystems/s3.go](filesystems/s3.go))
-- **EnvFs**: 環境変数 ([filesystems/env_fs.go](filesystems/env_fs.go))
+- **LocalFs**: ローカルファイルシステム ([p../pkg/filesystems/local.go](p../pkg/filesystems/local.go))
+- **VaultFs**: HashiCorp Vault ([p../pkg/filesystems/vault.go](p../pkg/filesystems/vault.go))
+- **S3Fs**: Amazon S3 / MinIO ([p../pkg/filesystems/s3.go](p../pkg/filesystems/s3.go))
+- **EnvFs**: 環境変数 ([p../pkg/filesystems/env_fs.go](p../pkg/filesystems/env_fs.go))
 
 ### Transform
 
@@ -39,7 +39,7 @@ kvtool
 
 ### 統一インターフェース
 
-全ドライバーは以下を実装 ([filesystems/core.go](filesystems/core.go)):
+全ドライバーは以下を実装 ([p../pkg/filesystems/core.go](p../pkg/filesystems/core.go)):
 
 ```go
 type Filesystem interface {
@@ -54,7 +54,7 @@ type File interface {
 
 ### Factory パターン
 
-`FilesystemFactory` ([filesystems/factory.go](filesystems/factory.go)) が設定から適切なドライバーを生成。
+`FilesystemFactory` ([p../pkg/filesystems/factory.go](p../pkg/filesystems/factory.go)) が設定から適切なドライバーを生成。
 
 ## コード規約
 
@@ -150,7 +150,7 @@ func TestSomething(t *testing.T) {
 
 #### 統合テスト
 
-[filesystems/integration_test.go](filesystems/integration_test.go) に全ドライバーの共通テストを追加。
+[p../pkg/filesystems/integration_test.go](p../pkg/filesystems/integration_test.go) に全ドライバーの共通テストを追加。
 
 ## ドキュメント生成
 
@@ -176,7 +176,7 @@ make gen-docs  # docs/api-reference.md を生成
 
 ### 新ドライバー追加
 
-1. **仕様策定**: `docs/filesystems/{driver}.md` を作成（手動）
+1. **仕様策定**: `do../pkg/filesystems/{driver}.md` を作成（手動）
 2. **構造体定義**: 設定構造体を定義（タグ含む）
 3. **インターフェース実装**: `Filesystem` と `File` を実装
 4. **Factory 登録**: `filesystems/factory.go` に追加
@@ -213,7 +213,7 @@ make gen-docs  # docs/api-reference.md を生成
 - **README.md**: 導入の概要のみ（コンパクト）
 - **CLAUDE.md**: 開発ガイド、暗黙知、コード規約
 - **docs/api-reference.md**: 自動生成
-- **docs/filesystems/**: ドライバーごとの詳細仕様
+- **do../pkg/filesystems/**: ドライバーごとの詳細仕様
 
 ### Makefile のコメント
 
@@ -235,6 +235,6 @@ make gen-docs  # docs/api-reference.md を生成
 
 - [TODO.md](TODO.md): タスク管理・実装計画
 - [docs/api-reference.md](docs/api-reference.md): API リファレンス（自動生成）
-- [docs/filesystems/s3.md](docs/filesystems/s3.md): S3 仕様
-- [filesystems/core.go](filesystems/core.go): 統一インターフェース
-- [filesystems/integration_test.go](filesystems/integration_test.go): 統合テスト
+- [do../pkg/filesystems/s3.md](do../pkg/filesystems/s3.md): S3 仕様
+- [p../pkg/filesystems/core.go](p../pkg/filesystems/core.go): 統一インターフェース
+- [p../pkg/filesystems/integration_test.go](p../pkg/filesystems/integration_test.go): 統合テスト

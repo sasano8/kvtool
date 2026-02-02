@@ -6,7 +6,7 @@
 
 ## LocalFsConfig
 
-ファイル: [local.go](filesystems/local.go)
+ファイル: [local.go](p../pkg/filesystems/local.go)
 
 ### オプションパラメータ
 
@@ -20,7 +20,7 @@
 
 ## S3FsConfig
 
-ファイル: [s3.go](filesystems/s3.go)
+ファイル: [s3.go](p../pkg/filesystems/s3.go)
 
 ### 必須パラメータ
 
@@ -64,7 +64,7 @@ s3fs:
 
 ## FilesystemConfig
 
-ファイル: [vault.go](filesystems/vault.go)
+ファイル: [vault.go](p../pkg/filesystems/vault.go)
 
 ### オプションパラメータ
 
@@ -77,7 +77,7 @@ s3fs:
 
 ## VaultConfig
 
-ファイル: [vault.go](filesystems/vault.go)
+ファイル: [vault.go](p../pkg/filesystems/vault.go)
 
 ### オプションパラメータ
 

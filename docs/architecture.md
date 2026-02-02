@@ -14,11 +14,11 @@ Infrastructure (Filesystem)
 
 - **Presentation**: Cobra を使った CLI インターフェース (`cmd/`)
 - **Service**: ビジネスロジック
-- **Infrastructure**: ファイルシステムドライバー (`filesystems/`)
+- **Infrastructure**: ファイルシステムドライバー (`pkg/filesystems/`)
 
 ## 統一インターフェース
 
-全てのファイルシステムは以下のインターフェースを実装します ([filesystems/core.go](../filesystems/core.go)):
+全てのファイルシステムは以下のインターフェースを実装します ([p../pkg/filesystems/core.go](../pkg/filesystems/core.go)):
 
 ```go
 type Filesystem interface {
@@ -35,14 +35,14 @@ type File interface {
 
 ### 実装済みドライバー
 
-- **LocalFs**: ローカルファイルシステム ([filesystems/local.go](../filesystems/local.go))
-- **VaultFs**: HashiCorp Vault ([filesystems/vault.go](../filesystems/vault.go))
-- **FsEnvFilesystem**: 環境変数 ([filesystems/env_fs.go](../filesystems/env_fs.go))
-- **S3Fs**: Amazon S3 / S3互換ストレージ ([filesystems/s3.go](../filesystems/s3.go))
+- **LocalFs**: ローカルファイルシステム ([p../pkg/filesystems/local.go](../pkg/filesystems/local.go))
+- **VaultFs**: HashiCorp Vault ([p../pkg/filesystems/vault.go](../pkg/filesystems/vault.go))
+- **FsEnvFilesystem**: 環境変数 ([p../pkg/filesystems/env_fs.go](../pkg/filesystems/env_fs.go))
+- **S3Fs**: Amazon S3 / S3互換ストレージ ([p../pkg/filesystems/s3.go](../pkg/filesystems/s3.go))
 
 ### ドライバーの作成
 
-`FilesystemFactory` がドライバー名から適切なファイルシステムインスタンスを生成します ([filesystems/factory.go](../filesystems/factory.go))。
+`FilesystemFactory` がドライバー名から適切なファイルシステムインスタンスを生成します ([p../pkg/filesystems/factory.go](../pkg/filesystems/factory.go))。
 
 ## Transform（変換機能）
 
@@ -54,7 +54,7 @@ type File interface {
 
 ## テスト戦略
 
-- **統合テスト**: [filesystems/integration_test.go](../filesystems/integration_test.go) で全ファイルシステムの共通動作を検証
+- **統合テスト**: [p../pkg/filesystems/integration_test.go](../pkg/filesystems/integration_test.go) で全ファイルシステムの共通動作を検証
 - **テーブル駆動テスト**: 全てのテストはテーブル駆動テストで記述
 - **Docker 統合**: Vault などの外部サービスは Docker で起動してテスト
 

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sasano8/kvtool/filesystems"
+	"github.com/sasano8/kvtool/pkg/filesystems"
 	"github.com/sasano8/kvtool/internal/config"
 	"github.com/stretchr/testify/require"
 )

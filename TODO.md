@@ -17,8 +17,8 @@
 - [x] テスト ([pkg/decoders/env_to_json_test.go](pkg/decoders/env_to_json_test.go))
 
 ### Vault
-- [x] Vault から構成を読んで JSON にする ([filesystems/vault.go:85-118](filesystems/vault.go#L85-L118))
-- [x] Vault ファイルシステムのテスト ([filesystems/vault_test.go](filesystems/vault_test.go))
+- [x] Vault から構成を読んで JSON にする ([p../pkg/filesystems/vault.go:85-118](p../pkg/filesystems/vault.go#L85-L118))
+- [x] Vault ファイルシステムのテスト ([p../pkg/filesystems/vault_test.go](p../pkg/filesystems/vault_test.go))
 - [x] Vault からの読み込みの統合テスト ([Makefile:40-58](Makefile#L40-L58))
 
 ### HCL (HashiCorp Configuration Language)
@@ -46,52 +46,52 @@
 
 ## インターフェースの統一
 
-- [x] 統一インターフェースの定義 ([filesystems/core.go:7-19](filesystems/core.go#L7-L19))
+- [x] 統一インターフェースの定義 ([p../pkg/filesystems/core.go:7-19](p../pkg/filesystems/core.go#L7-L19))
   - [x] Filesystem インターフェース (GetFile)
   - [x] File インターフェース (LoadAsJson, OpenReader)
 - [x] VaultFs の統一インターフェース実装
-  - [x] VaultFs.GetFile ([filesystems/vault.go:80](filesystems/vault.go#L80))
-  - [x] VaultFsFile.LoadAsJson ([filesystems/vault.go:87](filesystems/vault.go#L87))
-  - [x] VaultFsFile.OpenReader ([filesystems/vault.go:109](filesystems/vault.go#L109))
+  - [x] VaultFs.GetFile ([p../pkg/filesystems/vault.go:80](p../pkg/filesystems/vault.go#L80))
+  - [x] VaultFsFile.LoadAsJson ([p../pkg/filesystems/vault.go:87](p../pkg/filesystems/vault.go#L87))
+  - [x] VaultFsFile.OpenReader ([p../pkg/filesystems/vault.go:109](p../pkg/filesystems/vault.go#L109))
 - [x] LocalFs の統一インターフェース実装
-  - [x] LocalFs.GetFile ([filesystems/local.go:54](filesystems/local.go#L54))
-  - [x] LocalFile.LoadAsJson ([filesystems/local.go:135](filesystems/local.go#L135))
-  - [x] LocalFile.OpenReader ([filesystems/local.go:139](filesystems/local.go#L139))
+  - [x] LocalFs.GetFile ([p../pkg/filesystems/local.go:54](p../pkg/filesystems/local.go#L54))
+  - [x] LocalFile.LoadAsJson ([p../pkg/filesystems/local.go:135](p../pkg/filesystems/local.go#L135))
+  - [x] LocalFile.OpenReader ([p../pkg/filesystems/local.go:139](p../pkg/filesystems/local.go#L139))
 - [x] FsEnvFile の統一インターフェース実装
-  - [x] FsEnvFilesystem.GetFile ([filesystems/env.go](filesystems/env.go))
-  - [x] FsEnvFile.LoadAsJson ([filesystems/env.go](filesystems/env.go))
-  - [x] FsEnvFile.OpenReader ([filesystems/env.go](filesystems/env.go))
-  - [x] Tests ([filesystems/env_test.go](filesystems/env_test.go))
+  - [x] FsEnvFilesystem.GetFile ([p../pkg/filesystems/env.go](p../pkg/filesystems/env.go))
+  - [x] FsEnvFile.LoadAsJson ([p../pkg/filesystems/env.go](p../pkg/filesystems/env.go))
+  - [x] FsEnvFile.OpenReader ([p../pkg/filesystems/env.go](p../pkg/filesystems/env.go))
+  - [x] Tests ([p../pkg/filesystems/env_test.go](p../pkg/filesystems/env_test.go))
 
 ## ファイルシステムの実装
 
 ### ローカルファイルシステム
-- [x] ファイルシステムの実装 ([filesystems/local.go](filesystems/local.go))
-- [x] ルートディレクトリより前に辿れないセキュリティ制限 ([filesystems/local.go:79-90](filesystems/local.go#L79-L90))
-- [x] OpenReader の実装 ([filesystems/local.go:49-97](filesystems/local.go#L49-L97))
-- [x] LoadAsJson の実装 ([filesystems/local.go:99-115](filesystems/local.go#L99-L115))
-- [x] ローカルファイルシステムのテスト ([filesystems/local_test.go](filesystems/local_test.go))
-- [x] セキュリティ制限のテスト（パストラバーサル攻撃の防止） ([filesystems/local_test.go:191-231](filesystems/local_test.go#L191-L231))
+- [x] ファイルシステムの実装 ([p../pkg/filesystems/local.go](p../pkg/filesystems/local.go))
+- [x] ルートディレクトリより前に辿れないセキュリティ制限 ([p../pkg/filesystems/local.go:79-90](p../pkg/filesystems/local.go#L79-L90))
+- [x] OpenReader の実装 ([p../pkg/filesystems/local.go:49-97](p../pkg/filesystems/local.go#L49-L97))
+- [x] LoadAsJson の実装 ([p../pkg/filesystems/local.go:99-115](p../pkg/filesystems/local.go#L99-L115))
+- [x] ローカルファイルシステムのテスト ([p../pkg/filesystems/local_test.go](p../pkg/filesystems/local_test.go))
+- [x] セキュリティ制限のテスト（パストラバーサル攻撃の防止） ([p../pkg/filesystems/local_test.go:191-231](p../pkg/filesystems/local_test.go#L191-L231))
 
 ### Vault ファイルシステム
-- [x] Vault ファイルシステムの実装 ([filesystems/vault.go](filesystems/vault.go))
-- [x] VaultFs の実装 ([filesystems/vault.go:51-79](filesystems/vault.go#L51-L79))
-- [x] VaultFsFile の実装 ([filesystems/vault.go:80-85](filesystems/vault.go#L80-L85))
-- [x] Vault ファイルシステムのテスト ([filesystems/vault_test.go](filesystems/vault_test.go))
+- [x] Vault ファイルシステムの実装 ([p../pkg/filesystems/vault.go](p../pkg/filesystems/vault.go))
+- [x] VaultFs の実装 ([p../pkg/filesystems/vault.go:51-79](p../pkg/filesystems/vault.go#L51-L79))
+- [x] VaultFsFile の実装 ([p../pkg/filesystems/vault.go:80-85](p../pkg/filesystems/vault.go#L80-L85))
+- [x] Vault ファイルシステムのテスト ([p../pkg/filesystems/vault_test.go](p../pkg/filesystems/vault_test.go))
 - [x] エラーハンドリングのテスト
 
 ### ファイル抽象化
-- [x] ファイルはキー（パス）を固定 ([filesystems/vault.go:43-46](filesystems/vault.go#L43-L46), [filesystems/local.go:28-31](filesystems/local.go#L28-L31))
-- [x] ファイルシステムをバックエンドの参照に持つ ([filesystems/vault.go:44](filesystems/vault.go#L44))
+- [x] ファイルはキー（パス）を固定 ([p../pkg/filesystems/vault.go:43-46](p../pkg/filesystems/vault.go#L43-L46), [p../pkg/filesystems/local.go:28-31](p../pkg/filesystems/local.go#L28-L31))
+- [x] ファイルシステムをバックエンドの参照に持つ ([p../pkg/filesystems/vault.go:44](p../pkg/filesystems/vault.go#L44))
 - [ ] ファイル操作の統合テスト
 
 ## ストアの実装
 
 ### ストア設定
-- [x] ストア設定の構造体定義 ([filesystems/core.go](filesystems/core.go))
-  - [x] StoreConfig ([filesystems/core.go:13-17](filesystems/core.go#L13-L17))
-  - [x] MountConfig ([filesystems/core.go:3-6](filesystems/core.go#L3-L6))
-  - [x] TransformConfig ([filesystems/core.go:8-11](filesystems/core.go#L8-L11))
+- [x] ストア設定の構造体定義 ([p../pkg/filesystems/core.go](p../pkg/filesystems/core.go))
+  - [x] StoreConfig ([p../pkg/filesystems/core.go:13-17](p../pkg/filesystems/core.go#L13-L17))
+  - [x] MountConfig ([p../pkg/filesystems/core.go:3-6](p../pkg/filesystems/core.go#L3-L6))
+  - [x] TransformConfig ([p../pkg/filesystems/core.go:8-11](p../pkg/filesystems/core.go#L8-L11))
 - [x] 構成ファイルの例 ([.kvtool.yml](.kvtool.yml))
 - [x] 構成ファイルのロード機能の実装 ([internal/config/config.go](internal/config/config.go))
 - [x] パスパーサーの実装 ([internal/config/config.go:62-109](internal/config/config.go#L62-L109))
@@ -134,7 +134,7 @@
 ### 優先度：高（簡単かつ重要）
 
 #### テストの充実
-- [x] LocalFs の基本機能テスト ([filesystems/local_test.go](filesystems/local_test.go))
+- [x] LocalFs の基本機能テスト ([p../pkg/filesystems/local_test.go](p../pkg/filesystems/local_test.go))
   - [x] GetFile, LoadAsJson, OpenReader の動作確認
   - [x] ファイルが存在しない場合のエラーハンドリング
   - [x] 様々なファイル形式（JSON, dotenv）の読み込み
@@ -142,7 +142,7 @@
   - [x] サブディレクトリアクセス
   - [x] デフォルトルート（カレントディレクトリ）の動作
 
-- [x] セキュリティテスト ([filesystems/local_test.go:191-231](filesystems/local_test.go#L191-L231))
+- [x] セキュリティテスト ([p../pkg/filesystems/local_test.go:191-231](p../pkg/filesystems/local_test.go#L191-L231))
   - [x] パストラバーサル攻撃の防止テスト（`../../../etc/passwd` など）
   - [x] Root ディレクトリ外へのアクセス拒否の確認
   - [x] Root ディレクトリ自体へのアクセス拒否
@@ -168,9 +168,9 @@
 
 #### コンテキスト伝播の統一
 - [x] すべての Filesystem で context.Context を保持するように統一
-  - [x] FsEnvFilesystem に Ctx フィールドを追加 ([filesystems/env.go:16](filesystems/env.go#L16))
-  - [x] FsEnvFile が親の Filesystem を参照 ([filesystems/env.go:28-30](filesystems/env.go#L28-L30))
-  - [x] Factory で FsEnvFilesystem に context を渡す ([filesystems/factory.go:98-103](filesystems/factory.go#L98-L103))
+  - [x] FsEnvFilesystem に Ctx フィールドを追加 ([p../pkg/filesystems/env.go:16](p../pkg/filesystems/env.go#L16))
+  - [x] FsEnvFile が親の Filesystem を参照 ([p../pkg/filesystems/env.go:28-30](p../pkg/filesystems/env.go#L28-L30))
+  - [x] Factory で FsEnvFilesystem に context を渡す ([p../pkg/filesystems/factory.go:98-103](p../pkg/filesystems/factory.go#L98-L103))
   - 設計方針: Filesystem レベルで context を保持し、GetFile は context を受け取らない
   - 理由: LocalFs, VaultFs が既に context を保持する設計であり、統一性を保つため
 
@@ -191,12 +191,12 @@
   - [x] パッケージディレクトリの移動とパッケージ宣言の更新
   - [x] すべてのインポート文を更新 ([cmd/cmd_store/get.go](cmd/cmd_store/get.go), [cmd/cmd_store/init.go](cmd/cmd_store/init.go))
   - [x] 変数シャドーイングの修正 (config パッケージと config 変数の衝突を解消)
-  - [x] コメントとドキュメントの更新 ([filesystems/factory.go](filesystems/factory.go), [TODO.md](TODO.md), [docs/design.md](docs/design.md))
+  - [x] コメントとドキュメントの更新 ([p../pkg/filesystems/factory.go](p../pkg/filesystems/factory.go), [TODO.md](TODO.md), [docs/design.md](docs/design.md))
   - 実装方針: `internal/config` を選択（設定ファイル管理が主な責務のため）
   - 理由: パッケージ名で責務（.kvtool.yml の管理）を明確化、Go の標準的な命名規則に準拠
 
 - [x] `filesystems/core.go` から未使用の設定構造体を削除
-  - [x] 未使用の構造体を削除: `StoreConfig`, `MountConfig`, `TransformConfig` ([filesystems/core.go](filesystems/core.go))
+  - [x] 未使用の構造体を削除: `StoreConfig`, `MountConfig`, `TransformConfig` ([p../pkg/filesystems/core.go](p../pkg/filesystems/core.go))
   - [x] コアインターフェースのみを保持: `Filesystem`, `File`
   - 実装方針: 削除を選択（使われていないコードの削除）
   - 理由:
@@ -206,17 +206,17 @@
 
 #### ファイルシステムファクトリーの導入
 - [x] Filesystem の生成を統一するファクトリーパターンの実装
-  - [x] FilesystemFactory 構造体の実装 ([filesystems/factory.go](filesystems/factory.go))
+  - [x] FilesystemFactory 構造体の実装 ([p../pkg/filesystems/factory.go](p../pkg/filesystems/factory.go))
   - [x] Create メソッドによる各ドライバーの統一生成
-    - [x] createLocalFs ([filesystems/factory.go:36-50](filesystems/factory.go#L36-L50))
-    - [x] createVaultFs ([filesystems/factory.go:52-87](filesystems/factory.go#L52-L87))
-    - [x] createEnvFs ([filesystems/factory.go:89-93](filesystems/factory.go#L89-L93))
+    - [x] createLocalFs ([p../pkg/filesystems/factory.go:36-50](p../pkg/filesystems/factory.go#L36-L50))
+    - [x] createVaultFs ([p../pkg/filesystems/factory.go:52-87](p../pkg/filesystems/factory.go#L52-L87))
+    - [x] createEnvFs ([p../pkg/filesystems/factory.go:89-93](p../pkg/filesystems/factory.go#L89-L93))
   - [x] コマンド層のリファクタリング ([cmd/cmd_store/get.go:71-90](cmd/cmd_store/get.go#L71-L90))
   - [x] getFileContent 関数による統一的なファイル取得 ([cmd/cmd_store/get.go:92-123](cmd/cmd_store/get.go#L92-L123))
-  - [x] テスト ([filesystems/factory_test.go](filesystems/factory_test.go))
+  - [x] テスト ([p../pkg/filesystems/factory_test.go](p../pkg/filesystems/factory_test.go))
 
 #### 統合インターフェーステスト
-- [x] 全ファイルシステムで共通の動作を確認するテスト ([filesystems/integration_test.go](filesystems/integration_test.go))
+- [x] 全ファイルシステムで共通の動作を確認するテスト ([p../pkg/filesystems/integration_test.go](p../pkg/filesystems/integration_test.go))
   - [x] GetFile インターフェースの一貫性テスト
   - [x] LoadAsJson インターフェースの一貫性テスト
   - [x] OpenReader インターフェースの一貫性テスト
@@ -238,12 +238,12 @@
 
 #### Transform の統一インターフェース化
 - [x] Transform を LocalFs に統合（ファイルシステム層への移動）
-  - [x] LocalFsConfig に Transform フィールドを追加 ([filesystems/local.go:23-26](filesystems/local.go#L23-L26))
-  - [x] LocalFs に Transform フィールドを追加 ([filesystems/local.go:33-38](filesystems/local.go#L33-L38))
-  - [x] LocalFile.LoadAsJson() で Transform を自動適用 ([filesystems/local.go:134-157](filesystems/local.go#L134-L157))
-  - [x] Factory で transform 設定を抽出 ([filesystems/factory.go:40-60](filesystems/factory.go#L40-L60))
+  - [x] LocalFsConfig に Transform フィールドを追加 ([p../pkg/filesystems/local.go:23-26](p../pkg/filesystems/local.go#L23-L26))
+  - [x] LocalFs に Transform フィールドを追加 ([p../pkg/filesystems/local.go:33-38](p../pkg/filesystems/local.go#L33-L38))
+  - [x] LocalFile.LoadAsJson() で Transform を自動適用 ([p../pkg/filesystems/local.go:134-157](p../pkg/filesystems/local.go#L134-L157))
+  - [x] Factory で transform 設定を抽出 ([p../pkg/filesystems/factory.go:40-60](p../pkg/filesystems/factory.go#L40-L60))
   - [x] コマンド層から Transform ロジックを削除 ([cmd/cmd_store/get.go:98-116](cmd/cmd_store/get.go#L98-L116))
-  - [x] Transform 機能のテスト ([filesystems/transform_test.go](filesystems/transform_test.go))
+  - [x] Transform 機能のテスト ([p../pkg/filesystems/transform_test.go](p../pkg/filesystems/transform_test.go))
   - 実装方針: LocalFs に設定を持たせ、LoadAsJson() で自動適用
   - 理由:
     - インターフェース変更なし（後方互換性を維持）

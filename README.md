@@ -96,7 +96,7 @@ namespaces:
 - **[オンラインドキュメント](https://sasano8.github.io/kvtool/)**: mdBook による公式ドキュメントサイト
 - **[API リファレンス](docs/api-reference.md)**: 設定パラメータ一覧（自動生成）
 - **[CLAUDE.md](CLAUDE.md)**: 開発ガイド（コード規約、アーキテクチャ、暗黙知）
-- **[S3 仕様](docs/filesystems/s3.md)**: S3 ドライバーの詳細仕様
+- **[S3 仕様](do../pkg/filesystems/s3.md)**: S3 ドライバーの詳細仕様
 
 ## 開発
 

@@ -16,7 +16,7 @@ additional-css = ["theme/css/custom.css"]
 additional-js = []
 default-theme = "light"
 preferred-dark-theme = "navy"
-no-section-label = false
+no-section-label = true
 smart-punctuation = true
 
 [output.html.fold]

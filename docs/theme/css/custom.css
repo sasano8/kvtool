@@ -1,5 +1,10 @@
 /* kvtool Documentation - Custom Theme */
 
+/* サイドバーのサブナビ（各ページの見出し）を非表示 */
+.sidebar-nav .section li.chapter-item ul {
+    display: none;
+}
+
 :root {
     --sidebar-width: 280px;
     --content-max-width: 900px;

@@ -17,11 +17,18 @@ jobs:
         image: minio/minio
         ports:
           - 9000:9000
+          - 9001:9001
         env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
-        # MinIO はデフォルトで "server /data" を実行する
-        # health check は MinIO が完全に起動するまで待つ必要がないため、簡易チェックのみ
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        # MinIO のコマンドを明示的に指定
+        # Note: GitHub Actions services では command パラメータが使えないため、
+        # イメージのデフォルトコマンドが使用される
 
       vault:
         image: hashicorp/vault:latest
@@ -31,8 +38,8 @@ jobs:
           VAULT_DEV_ROOT_TOKEN_ID: root
           VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
         options: >-
-          --health-cmd "vault status || exit 0"
-          --health-interval 10s
+          --health-cmd "curl -f http://localhost:8200/v1/sys/health || exit 1"
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
 

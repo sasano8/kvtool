@@ -38,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	// filesystems ディレクトリを解析
-	configs, err := parseFilesystems("./filesystems")
+	configs, err := parseFilesystems("./pkg/filesystems")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing filesystems: %v\n", err)
 		os.Exit(1)
@@ -215,73 +215,34 @@ func generateAPIReference(configs []ConfigStructInfo) error {
 
 		sb.WriteString(fmt.Sprintf("ファイル: [%s](%s)\n\n", filepath.Base(config.FileName), config.FileName))
 
-		// 必須パラメータ
-		requiredFields := []FieldInfo{}
-		optionalFields := []FieldInfo{}
+		// パラメータテーブル（必須/オプションを一つのテーブルに）
+		if len(config.Fields) > 0 {
+			sb.WriteString("| パラメータ | 型 | 必須 | デフォルト | 説明 |\n")
+			sb.WriteString("|-----------|-----|:----:|----------|------|\n")
 
-		for _, field := range config.Fields {
-			if field.Required {
-				requiredFields = append(requiredFields, field)
-			} else {
-				optionalFields = append(optionalFields, field)
-			}
-		}
-
-		if len(requiredFields) > 0 {
-			sb.WriteString("### 必須パラメータ\n\n")
-			sb.WriteString("| パラメータ | 型 | 説明 | 設定例 |\n")
-			sb.WriteString("|-----------|-----|------|--------|\n")
-
-			for _, field := range requiredFields {
+			for _, field := range config.Fields {
 				doc := field.Doc
 				if doc == "" {
 					doc = field.Comment
 				}
 				doc = strings.ReplaceAll(doc, "\n", " ")
 
-				example := field.Example
-				if example == "" {
-					example = "-"
+				required := ""
+				if field.Required {
+					required = "✓"
 				}
-
-				sb.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n",
-					field.YAMLName,
-					field.Type,
-					doc,
-					example,
-				))
-			}
-			sb.WriteString("\n")
-		}
-
-		if len(optionalFields) > 0 {
-			sb.WriteString("### オプションパラメータ\n\n")
-			sb.WriteString("| パラメータ | 型 | デフォルト | 説明 | 設定例 |\n")
-			sb.WriteString("|-----------|-----|----------|------|--------|\n")
-
-			for _, field := range optionalFields {
-				doc := field.Doc
-				if doc == "" {
-					doc = field.Comment
-				}
-				doc = strings.ReplaceAll(doc, "\n", " ")
 
 				defaultValue := field.DefaultValue
 				if defaultValue == "" {
 					defaultValue = "-"
 				}
 
-				example := field.Example
-				if example == "" {
-					example = "-"
-				}
-
 				sb.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s |\n",
 					field.YAMLName,
 					field.Type,
+					required,
 					defaultValue,
 					doc,
-					example,
 				))
 			}
 			sb.WriteString("\n")
@@ -289,7 +250,7 @@ func generateAPIReference(configs []ConfigStructInfo) error {
 
 		// 設定例を生成
 		if hasExamples(config.Fields) {
-			sb.WriteString("### 設定例\n\n")
+			sb.WriteString("**設定例:**\n\n")
 			sb.WriteString("```yaml\n")
 			sb.WriteString(fmt.Sprintf("%s:\n", strings.ToLower(strings.TrimSuffix(config.Name, "Config"))))
 			sb.WriteString("  driver: " + inferDriverName(config.Name) + "\n")

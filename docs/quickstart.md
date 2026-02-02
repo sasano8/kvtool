@@ -1,6 +1,6 @@
 # クイックスタート
 
-## 1. 設定ファイルの初期化
+## 設定ファイルの初期化
 
 ```bash
 # カレントディレクトリに .kvtool.yml を作成
@@ -10,7 +10,7 @@ kvtool store init
 kvtool store init --global
 ```
 
-## 2. ストアからデータ取得
+## ストアからデータ取得
 
 ```bash
 # .envストアからAPP_NAMEを取得（JSON形式で出力）
@@ -26,7 +26,7 @@ kvtool store load vault/db/password
 kvtool store load s3config/app.json
 ```
 
-## 3. 接続確認
+## 接続確認
 
 ```bash
 # 設定ファイル内の全ストアをテスト
@@ -36,7 +36,7 @@ kvtool store connect
 kvtool store connect s3-test
 ```
 
-## 4. ファイル直接操作（低レベル）
+## ファイル直接操作（低レベル）
 
 設定ファイルを使わず、直接ファイルシステムにアクセスする場合：
 

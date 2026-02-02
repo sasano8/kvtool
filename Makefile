@@ -145,18 +145,18 @@ doc-serve:
 	# go install golang.org/x/pkgsite/cmd/pkgsite@latest
 	@~/go/bin/pkgsite
 
-# mdBook でドキュメントをビルドします（出力: book/）
+# mdBook でドキュメントをビルドします（出力: docs/book/）
 .PHONY: book-build
 book-build:
 	@echo "=== Building mdBook ==="
-	@mdbook build
+	@mdbook build docs
 	@echo "✅ Book built successfully"
 
 # mdBook サーバーを起動します（http://localhost:3000）
 .PHONY: book-serve
 book-serve:
 	@echo "=== Starting mdBook server ==="
-	@mdbook serve --open
+	@mdbook serve docs --open
 
 .PHONY: cobra-init
 cobra-init:

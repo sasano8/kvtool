@@ -4,4 +4,4 @@ dist/
 .kvtool.json
 .kvtool.yml
 .env
-book/
+docs/book/

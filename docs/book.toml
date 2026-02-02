@@ -3,7 +3,7 @@ title = "kvtool Documentation"
 authors = ["kvtool contributors"]
 language = "ja"
 multilingual = false
-src = "docs"
+src = "."
 
 [build]
 build-dir = "book"

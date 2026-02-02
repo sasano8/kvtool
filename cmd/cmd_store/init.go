@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sasano8/kvtool/internal/config"
+	"github.com/sasano8/kvtool/pkg/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/sasano8/kvtool/internal/config"
-	"github.com/sasano8/kvtool/internal/service"
+	"github.com/sasano8/kvtool/pkg/config"
+	"github.com/sasano8/kvtool/pkg/service"
 	"github.com/sasano8/kvtool/pkg/encoders"
 	"github.com/spf13/cobra"
 )

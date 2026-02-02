@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sasano8/kvtool/internal/config"
+	"github.com/sasano8/kvtool/pkg/config"
 	"github.com/sasano8/kvtool/pkg/filesystems"
 )
 

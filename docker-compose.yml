@@ -39,3 +39,50 @@ services:
         vault kv put secret/app/prod username=alice password=pa55w0rd >/dev/null
         echo "[vault-init] done."
     restart: "no"
+
+  # MinIO (S3 互換ストレージ)
+  minio:
+    image: minio/minio:latest
+    container_name: minio-dev
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Web UI
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # MinIO 初期化: テスト用バケットとデータを作成
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        echo "[minio-init] configuring MinIO client..."
+        mc alias set minio http://minio:9000 minioadmin minioadmin
+
+        echo "[minio-init] creating test bucket..."
+        mc mb minio/kvtool-test --ignore-existing
+
+        echo "[minio-init] uploading test data..."
+        echo '{"app_name":"kvtool","version":"1.0.0"}' | mc pipe minio/kvtool-test/config/app.json
+        echo 'APP_NAME=kvtool
+        APP_ENV=production
+        DATABASE_URL=postgres://localhost/mydb' | mc pipe minio/kvtool-test/config/production.env
+
+        echo "[minio-init] done."
+    restart: "no"
+
+volumes:
+  minio-data:

@@ -68,6 +68,52 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 			testPath:    "anypath",
 			expectError: false,
 		},
+		{
+			name: "S3Fs - 有効なパス",
+			setupFs: func(t *testing.T) Filesystem {
+				// MinIO が起動していない場合はスキップ
+				if os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				}
+
+				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+					Bucket:       "kvtool-test",
+					Region:       "us-east-1",
+					Root:         "config",
+					Endpoint:     "http://localhost:9000",
+					UsePathStyle: true,
+					AccessKeyID:     "minioadmin",
+					SecretAccessKey: "minioadmin",
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath:    "app.json",
+			expectError: false,
+		},
+		{
+			name: "S3Fs - パストラバーサル攻撃の防止",
+			setupFs: func(t *testing.T) Filesystem {
+				if os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				}
+
+				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+					Bucket:       "kvtool-test",
+					Region:       "us-east-1",
+					Root:         "config",
+					Endpoint:     "http://localhost:9000",
+					UsePathStyle: true,
+					AccessKeyID:     "minioadmin",
+					SecretAccessKey: "minioadmin",
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath:       "../../../etc/passwd",
+			expectError:    true,
+			errorSubstring: "escapes root",
+		},
 	}
 
 	for _, tt := range tests {
@@ -199,6 +245,60 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 			// 全ての環境変数を予測できないため、一部の存在をチェック
 			expectedData: nil, // カスタム検証を実行
 			expectError:  false,
+		},
+		{
+			name: "S3Fs - JSON ファイルを読み込む",
+			setupFs: func(t *testing.T) Filesystem {
+				if os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				}
+
+				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+					Bucket:          "kvtool-test",
+					Region:          "us-east-1",
+					Root:            "config",
+					Endpoint:        "http://localhost:9000",
+					UsePathStyle:    true,
+					AccessKeyID:     "minioadmin",
+					SecretAccessKey: "minioadmin",
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath: "app.json",
+			expectedData: map[string]any{
+				"app_name": "kvtool",
+				"version":  "1.0.0",
+			},
+			expectError: false,
+		},
+		{
+			name: "S3Fs - dotenv transform",
+			setupFs: func(t *testing.T) Filesystem {
+				if os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				}
+
+				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+					Bucket:          "kvtool-test",
+					Region:          "us-east-1",
+					Root:            "config",
+					Endpoint:        "http://localhost:9000",
+					UsePathStyle:    true,
+					AccessKeyID:     "minioadmin",
+					SecretAccessKey: "minioadmin",
+					Transform:       "dotenv",
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath: "production.env",
+			expectedData: map[string]any{
+				"APP_NAME":     "kvtool",
+				"APP_ENV":      "production",
+				"DATABASE_URL": "postgres://localhost/mydb",
+			},
+			expectError: false,
 		},
 	}
 

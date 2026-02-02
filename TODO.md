@@ -396,6 +396,59 @@
   - 各フィールドの説明と例
   - driver ごとの args 仕様
 
+- [ ] **mdBook による公式ドキュメントサイトの構築**
+  - [ ] mdBook のインストールと初期化
+  - [ ] ドキュメント構造の整理
+    - [ ] Getting Started ガイド
+    - [ ] ファイルシステムドライバー仕様（Local, Vault, S3, HTTP, DB）
+    - [ ] Transform 仕様（dotenv, JSON, HCL）
+    - [ ] API リファレンス
+    - [ ] チュートリアル集
+  - [ ] 既存マークダウンの移行と整理
+  - [ ] CI/CD での自動ビルド & デプロイ
+    - GitHub Actions で mdBook をビルド
+    - GitHub Pages または Vercel へ自動デプロイ
+  - [ ] カスタムテーマの適用（オプション）
+  - [ ] 検索機能の有効化
+
+  **おすすめ理由:**
+  1. **設定ファイルが最小限** (book.toml のみ、5行程度)
+  2. **Rust 製で超高速** - ビルドが一瞬で完了
+  3. **ゼロ依存** - バイナリ1つで完結、Node.js 不要
+  4. **検索機能組み込み** - デフォルトで全文検索が利用可能
+  5. **オフライン対応** - ビルド済み HTML は完全に静的
+  6. **PDF 出力対応** - ドキュメントを PDF として配布可能
+  7. **Go ユーザーに親和性高い** - Rust/Go 両方ビルドツールという共通点
+  8. **Markdown のみ** - 既存ドキュメントをそのまま利用可能
+  9. **GitHub Actions 対応** - mdbook-action で簡単にデプロイ
+  10. **実績豊富** - Rust Book など多くの公式ドキュメントで採用
+
+  **実装例:**
+  ```bash
+  # インストール（1回のみ）
+  cargo install mdbook
+
+  # 初期化
+  mdbook init docs
+
+  # ローカルプレビュー（ホットリロード付き）
+  mdbook serve
+
+  # ビルド
+  mdbook build
+  ```
+
+  **最小限の設定ファイル (book.toml):**
+  ```toml
+  [book]
+  title = "kvtool Documentation"
+  authors = ["kvtool contributors"]
+  language = "ja"
+
+  [output.html]
+  git-repository-url = "https://github.com/your-username/kvtool"
+  ```
+
 #### パフォーマンス最適化（現時点では不要）
 
 - [ ] ファイル内容のキャッシュ（オプション）

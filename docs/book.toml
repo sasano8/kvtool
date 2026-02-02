@@ -2,7 +2,6 @@
 title = "kvtool Documentation"
 authors = ["kvtool contributors"]
 language = "ja"
-multilingual = false
 src = "."
 
 [build]

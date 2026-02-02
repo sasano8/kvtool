@@ -72,8 +72,8 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 			name: "S3Fs - 有効なパス",
 			setupFs: func(t *testing.T) Filesystem {
 				// MinIO が起動していない場合はスキップ
-				if os.Getenv("SKIP_S3_TESTS") == "true" {
-					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				if testing.Short() || os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
@@ -94,8 +94,8 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 		{
 			name: "S3Fs - パストラバーサル攻撃の防止",
 			setupFs: func(t *testing.T) Filesystem {
-				if os.Getenv("SKIP_S3_TESTS") == "true" {
-					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				if testing.Short() || os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
@@ -249,8 +249,8 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 		{
 			name: "S3Fs - JSON ファイルを読み込む",
 			setupFs: func(t *testing.T) Filesystem {
-				if os.Getenv("SKIP_S3_TESTS") == "true" {
-					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				if testing.Short() || os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
@@ -275,8 +275,8 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 		{
 			name: "S3Fs - dotenv transform",
 			setupFs: func(t *testing.T) Filesystem {
-				if os.Getenv("SKIP_S3_TESTS") == "true" {
-					t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+				if testing.Short() || os.Getenv("SKIP_S3_TESTS") == "true" {
+					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{

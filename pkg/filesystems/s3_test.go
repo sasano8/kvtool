@@ -11,8 +11,8 @@ import (
 // TestNewS3Fs_Validation は S3FsConfig のバリデーションをテスト
 func TestNewS3Fs_Validation(t *testing.T) {
 	// MinIO が起動していない場合はスキップ
-	if os.Getenv("SKIP_S3_TESTS") == "true" {
-		t.Skip("MinIO tests skipped (SKIP_S3_TESTS=true)")
+	if testing.Short() || os.Getenv("SKIP_S3_TESTS") == "true" {
+		t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 	}
 
 	tests := []struct {

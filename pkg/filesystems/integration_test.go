@@ -11,6 +11,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// getTestMinIOEndpoint returns MinIO endpoint for testing
+// Makefile の test-ci ターゲットで MINIO_ENDPOINT を設定する
+func getTestMinIOEndpoint() string {
+	if endpoint := os.Getenv("MINIO_ENDPOINT"); endpoint != "" {
+		return endpoint
+	}
+	return "http://localhost:9000" // ローカル開発用デフォルト
+}
+
 // TestFilesystemInterface_GetFile は全てのファイルシステムが GetFile を一貫して実装していることをテスト
 func TestFilesystemInterface_GetFile(t *testing.T) {
 	tests := []struct {
@@ -80,7 +89,7 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Root:            "config",
-					Endpoint:        "http://localhost:9000",
+					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",
@@ -102,7 +111,7 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Root:            "config",
-					Endpoint:        "http://localhost:9000",
+					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",
@@ -257,7 +266,7 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Root:            "config",
-					Endpoint:        "http://localhost:9000",
+					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",
@@ -283,7 +292,7 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Root:            "config",
-					Endpoint:        "http://localhost:9000",
+					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
 					SecretAccessKey: "minioadmin",

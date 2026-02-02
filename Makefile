@@ -31,6 +31,14 @@ install: build
 test:
 	@go test ./...
 
+# CI 環境用のテスト（GitHub Actions services 対応）
+.PHONY: test-ci
+test-ci:
+	MINIO_ENDPOINT=http://minio:9000 \
+	VAULT_ADDR=http://vault:8200 \
+	VAULT_TOKEN=root \
+	go test -v ./...
+
 # テストを詳細表示で実行します（主要な出力のみ）
 .PHONY: test-v
 test-v:

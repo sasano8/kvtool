@@ -3,31 +3,80 @@
 ## データソースから JSON への変換
 
 ### .env ファイル
+
+**仕様方針**: Node.js dotenv ベース + 行末コメント対応
+
+| 機能 | 対応 | 備考 |
+|------|------|------|
+| ダブルクォート | ✅ | エスケープ処理あり |
+| シングルクォート | ✅ | リテラル（エスケープなし） |
+| エスケープ `\n` | ✅ | 改行 |
+| エスケープ `\r` | ✅ | CR（Windows互換） |
+| エスケープ `\"` | ✅ | クォート内に `"` を含めるため |
+| エスケープ `\t` | ❌ | Node.js 互換で非対応 |
+| エスケープ `\\` | ❌ | Node.js 互換で非対応 |
+| 行末コメント | ✅ | 実装予定 |
+| `export` プレフィックス | ❌ | サポートしない |
+| 変数展開 `${VAR}` | ❌ | サポートしない（リテラル扱い） |
+| コマンド置換 `$(cmd)` | ❌ | サポートしない（リテラル扱い） |
+| 複数行 (heredoc) | ❌ | サポートしない |
+
+#### 実装済み
 - [x] .env ファイルを読んで JSON にする ([pkg/decoders/dotenv_to_json.go](pkg/decoders/dotenv_to_json.go))
 - [x] 行頭（空白含む）コメントアウトの解釈 ([pkg/decoders/env_to_json.go:18](pkg/decoders/env_to_json.go#L18))
 - [x] KEY=VALUE 形式のパース ([pkg/decoders/env_to_json.go:22-28](pkg/decoders/env_to_json.go#L22-L28))
 - [x] クォート囲みの処理（ダブル・シングル） ([pkg/decoders/env_to_json.go:34-43](pkg/decoders/env_to_json.go#L34-L43))
-- [x] エスケープシーケンスの処理 ([pkg/decoders/env_to_json.go:55-83](pkg/decoders/env_to_json.go#L55-L83))
 - [x] テスト ([pkg/decoders/dotenv_to_json_test.go](pkg/decoders/dotenv_to_json_test.go))
-- [ ] 行末コメント処理（未実装）
+
+#### 未実装
+- [x] エスケープシーケンスの仕様変更 ([pkg/decoders/env_to_json.go:54-81](pkg/decoders/env_to_json.go#L54-L81))
+  - [x] `\n`, `\r`, `\"` のみサポートに変更
+  - [x] `\t`, `\\` のサポートを削除（Node.js dotenv 互換）
+- [x] 行末コメント処理 ([pkg/decoders/env_to_json.go:53-77](pkg/decoders/env_to_json.go#L53-L77))
+  - [x] `KEY=value # comment` → `KEY=value`
+  - [x] クォート内の `#` はコメントとして扱わない
+  - [x] テスト追加 ([pkg/decoders/dotenv_to_json_test.go:28-87](pkg/decoders/dotenv_to_json_test.go#L28-L87))
+- [x] シングルクォート内のエスケープ（リテラル扱い）の確認
+  - `'line\nhere'` → `line\nhere`（エスケープせずそのまま）
 - [ ] クォート囲みがないスペースのエラー処理（`VALUE=hello world`）
+- [x] キー名の検証（POSIX 準拠: `[a-zA-Z_][a-zA-Z0-9_]*`）
+  - [x] 数字で始まるキー（`1KEY=value`）のエラー処理 ([pkg/decoders/env_to_json.go:32-34](pkg/decoders/env_to_json.go#L32-L34))
+  - [x] 空のキー（`=value`）のエラー処理 ([pkg/decoders/env_to_json.go:29-31](pkg/decoders/env_to_json.go#L29-L31))
+  - [x] テスト追加 ([pkg/decoders/dotenv_to_json_test.go:90-161](pkg/decoders/dotenv_to_json_test.go#L90-L161))
+- [ ] BOM (Byte Order Mark) の処理
+  - UTF-8 BOM (`EF BB BF`) をスキップする
+
+※ 非サポート機能の詳細は [docs/dotenv-spec.md](docs/dotenv-spec.md) を参照
 
 ### 環境変数
+
+**仕様**: SourceEnv は環境変数を .env 形式で出力する（上記 .env ファイル仕様に準拠）
+
+#### 実装済み
 - [x] 環境変数を読んで JSON にする ([pkg/sources/env.go](pkg/sources/env.go), [pkg/decoders/env_to_json.go](pkg/decoders/env_to_json.go))
 - [x] テスト ([pkg/decoders/env_to_json_test.go](pkg/decoders/env_to_json_test.go))
-- [x] **環境変数エスケープ処理のバグ修正と拡充テスト** ([pkg/sources/env.go](pkg/sources/env.go))
-  - [x] 改行を含む環境変数のエスケープ処理（`\n` → `\\n`） ([pkg/sources/env.go:54-73](pkg/sources/env.go#L54-L73))
-  - [x] タブ文字を含む環境変数のエスケープ処理（`\t` → `\\t`） ([pkg/sources/source_test.go:75-99](pkg/sources/source_test.go#L75-L99))
-  - [x] キャリッジリターンを含む環境変数のエスケープ処理（`\r` → `\\r`） ([pkg/sources/env.go:59](pkg/sources/env.go#L59))
-  - [x] バックスラッシュを含む環境変数のエスケープ処理（`\` → `\\`） ([pkg/sources/source_test.go:101-125](pkg/sources/source_test.go#L101-L125))
-  - [x] ダブルクォートを含む環境変数のエスケープ処理（`"` → `\"`） ([pkg/sources/source_test.go:127-151](pkg/sources/source_test.go#L127-L151))
-  - [x] 複数の特殊文字を含む環境変数のエスケープ処理 ([pkg/sources/source_test.go:153-177](pkg/sources/source_test.go#L153-L177))
-  - [ ] 空の値を持つ環境変数（`KEY=`）
-  - [ ] 値に `=` を含む環境変数（`KEY=VALUE=VALUE2`）
-  - [ ] 非常に長い値を持つ環境変数（10KB以上）
-  - [ ] Unicode 文字を含む環境変数（絵文字、日本語など）
-  - [x] SourceEnv と EnvDecoder の統合テスト（end-to-end） ([pkg/sources/integration_test.go](pkg/sources/integration_test.go))
-  - **解決済み**: dotenv 形式に従い、特殊文字を含む値をダブルクォートで囲んでエスケープする実装を完了
+- [x] 改行を含む環境変数のエスケープ処理（`\n` → `\\n`） ([pkg/sources/env.go:54-73](pkg/sources/env.go#L54-L73))
+- [x] キャリッジリターンを含む環境変数のエスケープ処理（`\r` → `\\r`） ([pkg/sources/env.go:59](pkg/sources/env.go#L59))
+- [x] ダブルクォートを含む環境変数のエスケープ処理（`"` → `\"`） ([pkg/sources/source_test.go:127-151](pkg/sources/source_test.go#L127-L151))
+- [x] 空の値を持つ環境変数（`KEY=`） ([pkg/sources/source_test.go:211-230](pkg/sources/source_test.go#L211-L230))
+- [x] 値に `=` を含む環境変数（`KEY=VALUE=VALUE2`） ([pkg/sources/source_test.go:232-251](pkg/sources/source_test.go#L232-L251))
+- [x] 非常に長い値を持つ環境変数（10KB以上） ([pkg/sources/source_test.go:253-268](pkg/sources/source_test.go#L253-L268))
+- [x] Unicode 文字を含む環境変数（絵文字、日本語など） ([pkg/sources/source_test.go:270-289](pkg/sources/source_test.go#L270-L289))
+- [x] SourceEnv と EnvDecoder の統合テスト（end-to-end） ([pkg/sources/integration_test.go](pkg/sources/integration_test.go))
+
+#### 実装済み（仕様変更）
+- [x] エスケープの仕様変更（Node.js dotenv 互換） ([pkg/sources/env.go:32-75](pkg/sources/env.go#L32-L75))
+  - [x] `\t` エスケープを削除（タブはそのまま出力）
+  - [x] `\\` エスケープを削除（バックスラッシュはそのまま出力）
+  - [x] テストの更新 ([pkg/sources/source_test.go:102-154](pkg/sources/source_test.go#L102-L154))
+
+#### 未実装
+- [ ] 環境変数インジェクション耐性の確認
+  - 改行を含む値が別の KEY=VALUE として解釈されないことの確認（実装済みだがテスト追加）
+
+#### 追加の検証観点
+- [ ] シングルクォートを含む値（`it's`）- エスケープ不要
+- [ ] NULL 文字（`\x00`）を含む値の処理方針決定
 
 ### Vault
 - [x] Vault から構成を読んで JSON にする ([p../pkg/filesystems/vault.go:85-118](p../pkg/filesystems/vault.go#L85-L118))

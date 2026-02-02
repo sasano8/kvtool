@@ -2,6 +2,7 @@ package sources
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/sasano8/kvtool/pkg/decoders"
@@ -47,6 +48,30 @@ func TestSourceEnvWithDecoderIntegration(t *testing.T) {
 			envValue: "line1\nline2\t\"quoted\"",
 			expected: "line1\nline2\t\"quoted\"",
 		},
+		{
+			name:     "空の値",
+			envKey:   "TEST_EMPTY",
+			envValue: "",
+			expected: "",
+		},
+		{
+			name:     "値に = を含む",
+			envKey:   "TEST_EQUALS",
+			envValue: "VALUE=VALUE2=VALUE3",
+			expected: "VALUE=VALUE2=VALUE3",
+		},
+		{
+			name:     "Unicode 文字（日本語）",
+			envKey:   "TEST_JAPANESE",
+			envValue: "こんにちは世界",
+			expected: "こんにちは世界",
+		},
+		{
+			name:     "Unicode 文字（絵文字）",
+			envKey:   "TEST_EMOJI",
+			envValue: "Hello 🌍🚀 World",
+			expected: "Hello 🌍🚀 World",
+		},
 	}
 
 	for _, tt := range tests {
@@ -77,4 +102,33 @@ func TestSourceEnvWithDecoderIntegration(t *testing.T) {
 			require.Equal(tt.expected, actualValue, "value should match expected")
 		})
 	}
+}
+
+// TestSourceEnvWithDecoderLongValue は非常に長い値（10KB以上）の統合テスト
+func TestSourceEnvWithDecoderLongValue(t *testing.T) {
+	require := require.New(t)
+
+	// 非常に長い値（10KB以上）
+	longValue := strings.Repeat("a", 10*1024) // 10KB
+	os.Setenv("TEST_LONG_VALUE", longValue)
+	defer os.Unsetenv("TEST_LONG_VALUE")
+
+	// SourceEnv でデータを取得
+	var source Source = &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	// EnvDecoder でデコード
+	var decoder decoders.Decoder = &decoders.EnvDecoder{}
+	result, err := decoder.Decode(reader)
+	require.NoError(err)
+
+	// 結果を確認
+	dataMap, ok := result.(map[string]any)
+	require.True(ok, "result should be map[string]any")
+
+	actualValue, exists := dataMap["TEST_LONG_VALUE"]
+	require.True(exists, "key should exist in result")
+	require.Equal(longValue, actualValue, "long value should be preserved correctly")
+	require.Len(actualValue, 10*1024, "value length should be 10KB")
 }

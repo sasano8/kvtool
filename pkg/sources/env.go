@@ -29,8 +29,9 @@ func (s *SourceEnv) Load() (io.Reader, error) {
 			key := kv[:idx]
 			val := kv[idx+1:]
 
-			// エスケープが必要かチェック
-			needsQuote := strings.ContainsAny(val, "\n\r\t\"\\")
+			// エスケープが必要かチェック（\n, \r, " のみ）
+			// Node.js dotenv 互換: \t, \\ はエスケープしない
+			needsQuote := strings.ContainsAny(val, "\n\r\"")
 			if needsQuote {
 				// ダブルクォートで囲んでエスケープ
 				escapedVal := escapeEnvValue(val)
@@ -52,7 +53,8 @@ func (s *SourceEnv) Load() (io.Reader, error) {
 }
 
 // escapeEnvValue は dotenv 形式に従って値をエスケープする
-// 改行、タブ、キャリッジリターン、バックスラッシュ、ダブルクォートをエスケープ
+// サポートするエスケープ: \n (改行), \r (CR), \" (ダブルクォート)
+// Node.js dotenv 互換: \t, \\ はエスケープしない
 func escapeEnvValue(s string) string {
 	var b strings.Builder
 	for i := 0; i < len(s); i++ {
@@ -62,10 +64,6 @@ func escapeEnvValue(s string) string {
 			b.WriteString("\\n")
 		case '\r':
 			b.WriteString("\\r")
-		case '\t':
-			b.WriteString("\\t")
-		case '\\':
-			b.WriteString("\\\\")
 		case '"':
 			b.WriteString("\\\"")
 		default:

@@ -102,6 +102,7 @@ func TestSourceEnvEscapeNewline(t *testing.T) {
 func TestSourceEnvEscapeTab(t *testing.T) {
 	require := require.New(t)
 
+	// Node.js dotenv 互換: タブはエスケープしない（そのまま出力）
 	os.Setenv("TAB_KEY", "value\twith\ttabs")
 	defer os.Unsetenv("TAB_KEY")
 
@@ -113,22 +114,14 @@ func TestSourceEnvEscapeTab(t *testing.T) {
 	require.NoError(err)
 
 	content := string(data)
-	lines := strings.Split(content, "\n")
-
-	found := false
-	for _, line := range lines {
-		if line == `TAB_KEY="value\twith\ttabs"` {
-			found = true
-			break
-		}
-	}
-
-	require.True(found, "TAB_KEY should be escaped with quotes")
+	// タブはエスケープされずそのまま出力される
+	require.Contains(content, "TAB_KEY=value\twith\ttabs", "TAB_KEY should not be escaped")
 }
 
 func TestSourceEnvEscapeBackslash(t *testing.T) {
 	require := require.New(t)
 
+	// Node.js dotenv 互換: バックスラッシュはエスケープしない（そのまま出力）
 	os.Setenv("BACKSLASH_KEY", `path\to\file`)
 	defer os.Unsetenv("BACKSLASH_KEY")
 
@@ -140,17 +133,8 @@ func TestSourceEnvEscapeBackslash(t *testing.T) {
 	require.NoError(err)
 
 	content := string(data)
-	lines := strings.Split(content, "\n")
-
-	found := false
-	for _, line := range lines {
-		if line == `BACKSLASH_KEY="path\\to\\file"` {
-			found = true
-			break
-		}
-	}
-
-	require.True(found, "BACKSLASH_KEY should be escaped with quotes")
+	// バックスラッシュはエスケープされずそのまま出力される
+	require.Contains(content, `BACKSLASH_KEY=path\to\file`, "BACKSLASH_KEY should not be escaped")
 }
 
 func TestSourceEnvEscapeDoubleQuote(t *testing.T) {
@@ -184,8 +168,31 @@ func TestSourceEnvEscapeMultipleSpecialChars(t *testing.T) {
 	require := require.New(t)
 
 	// 複数の特殊文字を含む環境変数
+	// \n, \r, " はエスケープされる
+	// \t, \ はエスケープされない（Node.js dotenv 互換）
 	os.Setenv("COMPLEX_KEY", "line1\nline2\t\"quoted\"\r\\backslash")
 	defer os.Unsetenv("COMPLEX_KEY")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	// \n, \r, " はエスケープ、\t と \ はそのまま
+	// 期待値: COMPLEX_KEY="line1\nline2<TAB>\"quoted\"\r\backslash"
+	expectedLine := "COMPLEX_KEY=\"line1\\nline2\t\\\"quoted\\\"\\r\\backslash\""
+	require.Contains(content, expectedLine, "COMPLEX_KEY should escape \\n, \\r, \\\" but not \\t, \\\\")
+}
+
+func TestSourceEnvEmptyValue(t *testing.T) {
+	require := require.New(t)
+
+	// 空の値を持つ環境変数
+	os.Setenv("EMPTY_VALUE_KEY", "")
+	defer os.Unsetenv("EMPTY_VALUE_KEY")
 
 	source := &SourceEnv{}
 	reader, err := source.Load()
@@ -199,11 +206,87 @@ func TestSourceEnvEscapeMultipleSpecialChars(t *testing.T) {
 
 	found := false
 	for _, line := range lines {
-		if line == `COMPLEX_KEY="line1\nline2\t\"quoted\"\r\\backslash"` {
+		if line == "EMPTY_VALUE_KEY=" {
 			found = true
 			break
 		}
 	}
 
-	require.True(found, "COMPLEX_KEY should be escaped with all special characters")
+	require.True(found, "EMPTY_VALUE_KEY= should be in output")
+}
+
+func TestSourceEnvValueWithEquals(t *testing.T) {
+	require := require.New(t)
+
+	// 値に = を含む環境変数
+	os.Setenv("EQUALS_KEY", "VALUE=VALUE2=VALUE3")
+	defer os.Unsetenv("EQUALS_KEY")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	lines := strings.Split(content, "\n")
+
+	found := false
+	for _, line := range lines {
+		if line == "EQUALS_KEY=VALUE=VALUE2=VALUE3" {
+			found = true
+			break
+		}
+	}
+
+	require.True(found, "EQUALS_KEY=VALUE=VALUE2=VALUE3 should be in output")
+}
+
+func TestSourceEnvLongValue(t *testing.T) {
+	require := require.New(t)
+
+	// 非常に長い値（10KB以上）を持つ環境変数
+	longValue := strings.Repeat("a", 10*1024) // 10KB
+	os.Setenv("LONG_VALUE_KEY", longValue)
+	defer os.Unsetenv("LONG_VALUE_KEY")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	expectedLine := "LONG_VALUE_KEY=" + longValue
+	require.Contains(content, expectedLine, "Long value should be preserved correctly")
+}
+
+func TestSourceEnvUnicodeValue(t *testing.T) {
+	require := require.New(t)
+
+	// Unicode 文字を含む環境変数（絵文字、日本語など）
+	os.Setenv("UNICODE_KEY", "こんにちは世界🌍🚀日本語テスト")
+	defer os.Unsetenv("UNICODE_KEY")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	lines := strings.Split(content, "\n")
+
+	found := false
+	for _, line := range lines {
+		if line == "UNICODE_KEY=こんにちは世界🌍🚀日本語テスト" {
+			found = true
+			break
+		}
+	}
+
+	require.True(found, "UNICODE_KEY should preserve Unicode characters including emoji and Japanese")
 }

@@ -49,16 +49,7 @@ jobs:
         run: go mod download
 
       - name: Wait for MinIO
-        run: |
-          # MinIO が起動するまで待つ（最大30秒）
-          for i in {1..30}; do
-            if curl -sf http://127.0.0.1:9000/minio/health/live > /dev/null 2>&1; then
-              echo "MinIO is ready"
-              break
-            fi
-            echo "Waiting for MinIO... ($i/30)"
-            sleep 1
-          done
+        run: ./scripts/wait-for-minio.sh
 
       - name: Setup MinIO bucket
         run: |
@@ -91,6 +82,9 @@ jobs:
           APP_ENV=production
           DATABASE_URL=postgres://localhost/mydb' | mc pipe kvtest/kvtool-test/config/production.env
 
+      - name: Wait for Vault
+        run: ./scripts/wait-for-vault.sh
+
       - name: Setup Vault test data
         run: |
           # Vault CLI をインストール
@@ -101,17 +95,6 @@ jobs:
           # Vault 環境変数を設定
           export VAULT_ADDR=http://127.0.0.1:8200
           export VAULT_TOKEN=root
-
-          # Vault が起動するまで待つ
-          echo "Waiting for Vault..."
-          for i in {1..30}; do
-            if vault status >/dev/null 2>&1; then
-              echo "Vault is ready"
-              break
-            fi
-            echo "Waiting for Vault... ($i/30)"
-            sleep 1
-          done
 
           # KV v2 エンジンを有効化（すでに有効の場合はエラーを無視）
           vault secrets enable -path=secret kv-v2 || true

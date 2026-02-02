@@ -54,23 +54,32 @@ test-coverage:
 	@go tool cover -html=.cache/coverage.out -o .cache/coverage.html
 	@echo "Coverage report generated: .cache/coverage.html"
 
-# Vault を起動してから全テストを実行します（統合テスト含む）
+# Vault と MinIO を起動してから全テストを実行します（統合テスト含む）
 .PHONY: test-full
 test-full:
 	@echo "=== Running lint ==="
 	@go mod tidy
 	@go vet ./...
 	@echo ""
-	@echo "=== Starting Vault ==="
-	@docker compose up -d vault
-	@echo "Waiting for Vault to be ready..."
-	@sleep 2
+	@echo "=== Starting Vault and MinIO ==="
+	@docker compose up -d vault minio
+	@echo ""
+	@echo "=== Waiting for Vault to be ready ==="
+	@./scripts/wait-for-vault.sh
+	@echo ""
+	@echo "=== Initializing Vault ==="
 	@docker compose up vault-init
 	@echo ""
-	@echo "=== Running all tests (with Vault) ==="
-	@VAULT_ADDR=http://localhost:8200 VAULT_TOKEN=root go test -v ./...
+	@echo "=== Waiting for MinIO to be ready ==="
+	@./scripts/wait-for-minio.sh
 	@echo ""
-	@echo "=== Stopping Vault ==="
+	@echo "=== Initializing MinIO ==="
+	@docker compose up minio-init
+	@echo ""
+	@echo "=== Running all tests (with Vault and MinIO) ==="
+	@VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=root MINIO_ENDPOINT=http://127.0.0.1:9000 go test -v ./...
+	@echo ""
+	@echo "=== Stopping services ==="
 	@docker compose down
 	@echo ""
 	@echo "=== All tests passed! ==="

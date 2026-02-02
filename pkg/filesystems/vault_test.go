@@ -10,22 +10,16 @@ import (
 )
 
 func TestVaultFs(t *testing.T) {
-	// Skip if VAULT_ADDR is not set (Vault not running)
-	vaultAddr := os.Getenv("VAULT_ADDR")
-	if vaultAddr == "" {
-		t.Skip("VAULT_ADDR not set, skipping Vault tests")
-	}
-
-	vaultToken := os.Getenv("VAULT_TOKEN")
-	if vaultToken == "" {
-		vaultToken = "root" // default for dev mode
+	// Vault が起動していない場合はスキップ
+	if testing.Short() || os.Getenv("SKIP_VAULT_TESTS") == "true" {
+		t.Skip("Vault tests skipped (-short flag or SKIP_VAULT_TESTS=true)")
 	}
 
 	require := require.New(t)
 
 	config := &VaultConfig{
-		Addr:      vaultAddr,
-		Token:     vaultToken,
+		Addr:      getTestVaultAddr(),
+		Token:     getTestVaultToken(),
 		Namespace: "admin",
 		Mount:     "secret",
 		KvVer:     2,
@@ -54,22 +48,16 @@ func TestVaultFs(t *testing.T) {
 }
 
 func TestVaultFsNonExistentPath(t *testing.T) {
-	// Skip if VAULT_ADDR is not set
-	vaultAddr := os.Getenv("VAULT_ADDR")
-	if vaultAddr == "" {
-		t.Skip("VAULT_ADDR not set, skipping Vault tests")
-	}
-
-	vaultToken := os.Getenv("VAULT_TOKEN")
-	if vaultToken == "" {
-		vaultToken = "root"
+	// Vault が起動していない場合はスキップ
+	if testing.Short() || os.Getenv("SKIP_VAULT_TESTS") == "true" {
+		t.Skip("Vault tests skipped (-short flag or SKIP_VAULT_TESTS=true)")
 	}
 
 	require := require.New(t)
 
 	config := &VaultConfig{
-		Addr:      vaultAddr,
-		Token:     vaultToken,
+		Addr:      getTestVaultAddr(),
+		Token:     getTestVaultToken(),
 		Namespace: "admin",
 		Mount:     "secret",
 		KvVer:     2,

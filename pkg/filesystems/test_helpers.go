@@ -10,3 +10,21 @@ func getTestMinIOEndpoint() string {
 	}
 	return "http://localhost:9000" // ローカル開発用デフォルト
 }
+
+// getTestVaultAddr returns Vault address for testing
+// Makefile の test-ci ターゲットで VAULT_ADDR を設定する
+func getTestVaultAddr() string {
+	if addr := os.Getenv("VAULT_ADDR"); addr != "" {
+		return addr
+	}
+	return "http://localhost:8200" // ローカル開発用デフォルト
+}
+
+// getTestVaultToken returns Vault token for testing
+// Makefile の test-ci ターゲットで VAULT_TOKEN を設定する
+func getTestVaultToken() string {
+	if token := os.Getenv("VAULT_TOKEN"); token != "" {
+		return token
+	}
+	return "root" // ローカル開発用デフォルト（dev mode）
+}

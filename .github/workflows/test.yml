@@ -48,6 +48,18 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Wait for MinIO
+        run: |
+          # MinIO が起動するまで待つ（最大30秒）
+          for i in {1..30}; do
+            if curl -sf http://localhost:9000/minio/health/live > /dev/null 2>&1; then
+              echo "MinIO is ready"
+              break
+            fi
+            echo "Waiting for MinIO... ($i/30)"
+            sleep 1
+          done
+
       - name: Setup MinIO bucket
         run: |
           # MinIO CLI をインストール
@@ -55,8 +67,15 @@ jobs:
           chmod +x mc
           sudo mv mc /usr/local/bin/
 
-          # MinIO に接続
-          mc alias set local http://localhost:9000 minioadmin minioadmin
+          # MinIO に接続（リトライ付き）
+          for i in {1..5}; do
+            if mc alias set local http://localhost:9000 minioadmin minioadmin; then
+              echo "Connected to MinIO"
+              break
+            fi
+            echo "Retrying MinIO connection... ($i/5)"
+            sleep 2
+          done
 
           # テスト用バケットを作成
           mc mb local/kvtool-test || true

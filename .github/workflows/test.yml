@@ -24,27 +24,8 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Start services
-        run: docker compose up -d vault minio
-
-      - name: Wait for Vault
-        run: ./scripts/wait-for-vault.sh
-
-      - name: Initialize Vault
-        run: docker compose up vault-init
-
-      - name: Wait for MinIO
-        run: ./scripts/wait-for-minio.sh
-
-      - name: Initialize MinIO
-        run: docker compose up minio-init
-
-      - name: Run all tests
-        run: make test-ci
-
-      - name: Stop services
-        if: always()
-        run: docker compose down
+      - name: Run tests with services
+        run: ./scripts/test-with-services.sh --ci
 
   deploy-docs:
     # テストが成功した場合のみドキュメントをデプロイ

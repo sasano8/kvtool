@@ -55,83 +55,34 @@ test-coverage:
 	@echo "Coverage report generated: .cache/coverage.html"
 
 # Vault と MinIO を起動してから全テストを実行します（統合テスト含む）
+# scripts/test-with-services.sh に処理を委譲（CI と共通化）
 .PHONY: test-full
-test-full:
-	@echo "=== Running lint ==="
-	@go mod tidy
-	@go vet ./...
-	@echo ""
-	@echo "=== Starting Vault and MinIO ==="
+test-full: lint
+	@./scripts/test-with-services.sh
+
+# 開発用サービス（Vault + MinIO）を起動します
+# Vault: http://localhost:8200 (token: root)
+# MinIO: http://localhost:9000 (user: minioadmin)
+.PHONY: services-up
+services-up:
 	@docker compose up -d vault minio
-	@echo ""
-	@echo "=== Waiting for Vault to be ready ==="
 	@./scripts/wait-for-vault.sh
-	@echo ""
-	@echo "=== Initializing Vault ==="
-	@docker compose up vault-init
-	@echo ""
-	@echo "=== Waiting for MinIO to be ready ==="
 	@./scripts/wait-for-minio.sh
+	@docker compose up vault-init minio-init
 	@echo ""
-	@echo "=== Initializing MinIO ==="
-	@docker compose up minio-init
-	@echo ""
-	@echo "=== Running all tests (with Vault and MinIO) ==="
-	@VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=root MINIO_ENDPOINT=http://127.0.0.1:9000 go test -v ./...
-	@echo ""
-	@echo "=== Stopping services ==="
-	@docker compose down
-	@echo ""
-	@echo "=== All tests passed! ==="
+	@echo "Services ready:"
+	@echo "  Vault: http://localhost:8200 (token: root)"
+	@echo "  MinIO: http://localhost:9000 (user: minioadmin)"
 
-# Vault 統合テスト用
-# 開発用 Vault を起動します（http://localhost:8200, token: root）
-.PHONY: vault-up
-vault-up:
-	@echo "Starting Vault..."
-	@docker compose up -d vault
-	@echo "Waiting for Vault to be ready..."
-	@sleep 2
-	@docker compose up vault-init
-	@echo "Vault is ready at http://localhost:8200"
-	@echo "  Token: root"
-	@echo "  UI: http://localhost:8200/ui"
+# 全サービスを停止します
+.PHONY: services-down
+services-down:
+	@docker compose down --remove-orphans
 
-# Vault を停止します
-.PHONY: vault-down
-vault-down:
-	@echo "Stopping Vault..."
-	@docker compose down
-
-# Vault のログを表示します
-.PHONY: vault-logs
-vault-logs:
-	@docker compose logs -f vault
-
-# MinIO (S3 互換) 統合テスト用
-# 開発用 MinIO を起動します（http://localhost:9000, console: http://localhost:9001）
-.PHONY: minio-up
-minio-up:
-	@echo "Starting MinIO..."
-	@docker compose up -d minio
-	@echo "Waiting for MinIO to be ready..."
-	@sleep 2
-	@docker compose up minio-init
-	@echo "MinIO is ready at http://localhost:9000"
-	@echo "  Access Key: minioadmin"
-	@echo "  Secret Key: minioadmin"
-	@echo "  Web Console: http://localhost:9001"
-
-# MinIO を停止します
-.PHONY: minio-down
-minio-down:
-	@echo "Stopping MinIO..."
-	@docker compose down minio
-
-# MinIO のログを表示します
-.PHONY: minio-logs
-minio-logs:
-	@docker compose logs -f minio
+# 全サービスのログを表示します
+.PHONY: services-logs
+services-logs:
+	@docker compose logs -f
 
 # コード品質関連
 # コードをフォーマットします（go fmt）

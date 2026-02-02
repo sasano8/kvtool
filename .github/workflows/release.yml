@@ -1,14 +1,9 @@
-name: Build and Release Go mod
+name: Build and Release
 
 on:
   push:
-    branches:
-      - '**'
     tags:
       - '*'
-
-# env:
-#   MY_VAR: "test"
 
 jobs:
   build:
@@ -24,9 +19,6 @@ jobs:
 
       - name: Show Go version
         run: go version
-
-      - name: Run tests
-        run: make test
 
       - name: Build
         run: make build-full

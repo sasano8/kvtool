@@ -94,7 +94,7 @@ func TestNewS3Fs_Validation(t *testing.T) {
 			config: S3FsConfig{
 				Bucket:          "kvtool-test",
 				Region:          "us-east-1",
-				Endpoint:        "http://localhost:9000/",
+				Endpoint:        "http://127.0.0.1:9000/",
 				UsePathStyle:    true,
 				AccessKeyID:     "minioadmin",
 				SecretAccessKey: "minioadmin",

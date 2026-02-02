@@ -78,6 +78,17 @@ jobs:
             sleep 1
           done
 
+          # MinIO が完全に準備できるまで待つ
+          echo "Verifying MinIO is ready..."
+          for i in {1..30}; do
+            if mc ls kvtest >/dev/null 2>&1; then
+              echo "MinIO is fully ready"
+              break
+            fi
+            echo "Waiting for MinIO to be fully ready... ($i/30)"
+            sleep 1
+          done
+
           # テスト用バケットを作成
           mc mb kvtest/kvtool-test || true
 

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStoreGetCommand(t *testing.T) {
+func TestStoreLoadCommand(t *testing.T) {
 	require := require.New(t)
 
 	// Create a temporary directory for test files
@@ -42,14 +42,14 @@ namespaces:
 	require.NoError(err)
 
 	// Test the command
-	cmd := CmdGet
+	cmd := CmdLoad
 	cmd.SetArgs([]string{"test/test.env", "-c", configPath})
 
 	err = cmd.Execute()
 	require.NoError(err)
 }
 
-func TestStoreGetEnvDriver(t *testing.T) {
+func TestStoreLoadEnvDriver(t *testing.T) {
 	require := require.New(t)
 
 	// Set test environment variables
@@ -76,7 +76,7 @@ namespaces:
 	require.NoError(err)
 
 	// Test the command - path is ignored for env driver
-	cmd := CmdGet
+	cmd := CmdLoad
 	cmd.SetArgs([]string{"env/ignored", "-c", configPath})
 
 	err = cmd.Execute()

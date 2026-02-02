@@ -41,14 +41,14 @@ kvtool store init myconfig.yml
 kvtool store init --force
 ```
 
-### kvtool store get
+### kvtool store load
 
 ストアからファイルを取得します。
 
 #### 使用法
 
 ```bash
-kvtool store get <store_name>/<file_path> [flags]
+kvtool store load <store_name>/<file_path> [flags]
 ```
 
 #### 引数
@@ -73,7 +73,7 @@ kvtool store get <store_name>/<file_path> [flags]
 JSON 形式で出力します（デフォルト）。
 
 ```bash
-kvtool store get .env/test.env
+kvtool store load .env/test.env
 ```
 
 出力例：
@@ -89,7 +89,7 @@ kvtool store get .env/test.env
 key=value 形式で出力します。
 
 ```bash
-kvtool store get .env/test.env -o raw
+kvtool store load .env/test.env -o raw
 ```
 
 出力例：
@@ -102,26 +102,26 @@ APP_ENV=production
 
 ```bash
 # 基本的な使用
-kvtool store get .env/test.env
+kvtool store load .env/test.env
 
 # raw 形式で出力
-kvtool store get .env/test.env -o raw
+kvtool store load .env/test.env -o raw
 
 # 特定の namespace を指定
-kvtool store get .env/app.env -n production
+kvtool store load .env/app.env -n production
 
 # グローバル設定を使用
-kvtool store get .env/test.env --global
+kvtool store load .env/test.env --global
 
 # カスタム設定ファイルを使用
-kvtool store get .env/test.env -c /path/to/config.yml
+kvtool store load .env/test.env -c /path/to/config.yml
 
 # Vault からシークレットを取得
-kvtool store get vault/db/password
+kvtool store load vault/db/password
 
 # 複数の namespace を使い分け
-kvtool store get .env/app.env -n development
-kvtool store get .env/app.env -n production
+kvtool store load .env/app.env -n development
+kvtool store load .env/app.env -n production
 ```
 
 ## その他のコマンド

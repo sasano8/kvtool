@@ -110,7 +110,7 @@
   - [x] 既存ファイルの上書き保護 (--force で上書き可能)
   - [x] YAML 形式での出力
 - [x] store init コマンドのテスト ([cmd/cmd_store/init_test.go](cmd/cmd_store/init_test.go))
-- [x] store get コマンドの実装 ([cmd/cmd_store/get.go](cmd/cmd_store/get.go))
+- [x] store load コマンドの実装 ([cmd/cmd_store/get.go](cmd/cmd_store/get.go))
   - [x] パス形式: `store_name/file_path` ([internal/config/config.go:112-141](internal/config/config.go#L112-L141))
   - [x] namespace フラグによるテナント切り替え（デフォルト: default）
   - [x] ローカルファイルシステムからの読み込み ([cmd/cmd_store/get.go:76-107](cmd/cmd_store/get.go#L76-L107))
@@ -119,11 +119,11 @@
   - [x] JSON 出力形式 ([cmd/cmd_store/get.go:165-175](cmd/cmd_store/get.go#L165-L175))
   - [x] raw 出力形式（key=value） ([cmd/cmd_store/get.go:177-194](cmd/cmd_store/get.go#L177-L194))
   - [x] 設定ファイル自動解決のサポート
-- [x] store get コマンドのテスト ([cmd/cmd_store/get_test.go](cmd/cmd_store/get_test.go))
+- [x] store load コマンドのテスト ([cmd/cmd_store/get_test.go](cmd/cmd_store/get_test.go))
 - [-] store ls コマンドの実装（不要）
 - [-] store set コマンドの実装（不要）
 - [-] store delete コマンドの実装（不要）
-- [-] store load コマンドの実装（不要、store get と機能重複のため削除済み）
+- [-] store load コマンドの実装（不要、store load と機能重複のため削除済み）
 
 ## その他
 - [x] エンコーディングは UTF-8
@@ -377,7 +377,7 @@
 
 #### E2E テスト
 - [ ] コマンドラインの E2E テスト
-  - `store init`, `store get` の実行結果を検証
+  - `store init`, `store load` の実行結果を検証
   - 設定ファイルの自動解決動作の確認
   - namespace フラグの動作確認
 
@@ -530,8 +530,8 @@
 #### 1. 環境構築の初期化（Primary Use Case）
 ```bash
 # 開発環境のセットアップスクリプト
-kvtool store get config/app | jq -r '.DATABASE_URL' > .env
-kvtool store get secrets/api-keys --namespace=production | apply-to-k8s
+kvtool store load config/app | jq -r '.DATABASE_URL' > .env
+kvtool store load secrets/api-keys --namespace=production | apply-to-k8s
 ```
 - Docker Compose の起動前に環境変数を準備
 - Kubernetes のシークレットを一元管理

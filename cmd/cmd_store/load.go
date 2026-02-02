@@ -13,24 +13,24 @@ import (
 )
 
 func init() {
-	cmd := CmdGet
+	cmd := CmdLoad
 	cmd.Flags().StringP("config", "c", ".kvtool.yml", "path to config file")
 	cmd.Flags().BoolP("global", "g", false, "use global config (~/.config/kvtool/.kvtool.yml)")
 	cmd.Flags().StringP("output", "o", "json", "output format (json, yaml, raw)")
 	cmd.Flags().StringP("namespace", "n", "default", "namespace to use")
 }
 
-var CmdGet = &cobra.Command{
-	Use:   "get <store_name>/<file_path>",
-	Short: "Get a file from the store",
-	Long: `Get a file from the store.
+var CmdLoad = &cobra.Command{
+	Use:   "load <store_name>/<file_path>",
+	Short: "Load a file from the store",
+	Long: `Load a file from the store and output its content.
 
 Examples:
-  kvtool store get .env/APP_NAME
-  kvtool store get vault/app/prod/db_password
-  kvtool store get .env/APP_NAME -o raw
-  kvtool store get .env/APP_NAME --namespace production
-  kvtool store get .env/APP_NAME --global`,
+  kvtool store load .env/APP_NAME
+  kvtool store load vault/app/prod/db_password
+  kvtool store load .env/APP_NAME -o raw
+  kvtool store load .env/APP_NAME --namespace production
+  kvtool store load .env/APP_NAME --global`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		configPath, _ := cmd.Flags().GetString("config")

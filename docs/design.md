@@ -23,11 +23,11 @@ kvtool は複数の設定ソース（.env、Vault、JSON など）を **スト�
 **動作:**
 ```bash
 # ローカル .kvtool.yml がない場合、エラー
-$ kvtool store get .env/APP_NAME
+$ kvtool store load .env/APP_NAME
 Error: config file not found: .kvtool.yml (run 'kvtool store init' to create one)
 
 # グローバルを使う場合は明示的に指定
-$ kvtool store get .env/APP_NAME --global
+$ kvtool store load .env/APP_NAME --global
 ```
 
 ### 3. マルチテナント対応
@@ -42,10 +42,10 @@ namespace により複数の環境（開発、ステージング、本番など�
 **使用例:**
 ```bash
 # 開発環境
-kvtool store get .env/config -n development
+kvtool store load .env/config -n development
 
 # 本番環境
-kvtool store get .env/config -n production
+kvtool store load .env/config -n production
 ```
 
 ### 4. セキュリティ第一
@@ -79,7 +79,7 @@ func (fs *LocalFs) OpenReader(path string) (io.ReadCloser, error) {
 ```
 ┌─────────────────────────────────────┐
 │  CLI Layer (cmd/)                   │
-│  - store init, store get            │
+│  - store init, store load            │
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
@@ -135,7 +135,7 @@ func (fs *LocalFs) OpenReader(path string) (io.ReadCloser, error) {
 
 ## データフロー
 
-### store get コマンドの処理フロー
+### store load コマンドの処理フロー
 
 ```
 1. コマンドライン引数をパース

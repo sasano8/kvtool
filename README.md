@@ -79,17 +79,17 @@ namespaces:
 
 ```bash
 # .env ファイルを JSON 形式で取得
-kvtool store get .env/test.env
+kvtool store load .env/test.env
 
 # raw 形式（key=value）で取得
-kvtool store get .env/test.env -o raw
+kvtool store load .env/test.env -o raw
 
 # 特定の namespace を指定
-kvtool store get .env/test.env --namespace production
-kvtool store get .env/test.env -n staging
+kvtool store load .env/test.env --namespace production
+kvtool store load .env/test.env -n staging
 
 # グローバル設定を使用
-kvtool store get .env/test.env --global
+kvtool store load .env/test.env --global
 ```
 
 ## 設定ファイルの解決
@@ -100,10 +100,10 @@ kvtool はデフォルトでカレントディレクトリの `.kvtool.yml` を�
 
 ```bash
 # グローバル設定を使用
-kvtool store get .env/APP_NAME --global
+kvtool store load .env/APP_NAME --global
 
 # カスタムパスを指定
-kvtool store get .env/APP_NAME -c /path/to/.kvtool.yml
+kvtool store load .env/APP_NAME -c /path/to/.kvtool.yml
 ```
 
 **注意**: ローカルに `.kvtool.yml` がない場合、自動的にグローバル設定にフォールバックすることはありません。明示的に `--global` フラグまたは `--config` フラグを指定してください。
@@ -172,17 +172,17 @@ namespaces:
 
 ```bash
 # 開発環境の設定を取得
-kvtool store get .env/app.env -n development
+kvtool store load .env/app.env -n development
 
 # 本番環境の設定を取得
-kvtool store get .env/app.env -n production
+kvtool store load .env/app.env -n production
 ```
 
 ## 出力形式
 
 ```bash
 # JSON 形式（デフォルト）
-kvtool store get .env/test.env
+kvtool store load .env/test.env
 # 出力:
 # {
 #   "APP_NAME": "myapp",
@@ -190,7 +190,7 @@ kvtool store get .env/test.env
 # }
 
 # raw 形式（key=value）
-kvtool store get .env/test.env -o raw
+kvtool store load .env/test.env -o raw
 # 出力:
 # APP_NAME=myapp
 # APP_ENV=production

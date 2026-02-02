@@ -23,13 +23,13 @@ kvtool は以下の優先順位で設定ファイルを探します：
 
 ```bash
 # デフォルト: ローカル設定を使用
-kvtool store get .env/test.env
+kvtool store load .env/test.env
 
 # グローバル設定を明示的に使用
-kvtool store get .env/test.env --global
+kvtool store load .env/test.env --global
 
 # カスタムパスを指定
-kvtool store get .env/test.env -c /path/to/custom.yml
+kvtool store load .env/test.env -c /path/to/custom.yml
 ```
 
 ## 設定ファイルの構造
@@ -99,11 +99,11 @@ namespaces:
 
 ```bash
 # 開発環境
-kvtool store get .env/app.env -n development
+kvtool store load .env/app.env -n development
 
 # 本番環境
-kvtool store get .env/app.env -n production
-kvtool store get vault/db/password -n production
+kvtool store load .env/app.env -n production
+kvtool store load vault/db/password -n production
 ```
 
 ### store
@@ -210,7 +210,7 @@ vault:
 
 ```bash
 # vault の app/prod/db/password にアクセス
-kvtool store get vault/db/password
+kvtool store load vault/db/password
 ```
 
 ## transform 仕様
@@ -248,16 +248,16 @@ store_name/file_path
 
 ```bash
 # 基本形式
-kvtool store get .env/APP_NAME
+kvtool store load .env/APP_NAME
 
 # ネストしたパス
-kvtool store get vault/app/prod/db/password
+kvtool store load vault/app/prod/db/password
 
 # ストア名のみ（ファイルパスなし）
-kvtool store get .env
+kvtool store load .env
 
 # 先頭にスラッシュがあっても OK
-kvtool store get /.env/APP_NAME
+kvtool store load /.env/APP_NAME
 ```
 
 ## 設定ファイルの作成

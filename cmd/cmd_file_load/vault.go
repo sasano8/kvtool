@@ -98,6 +98,9 @@ var CmdLoadFromVault = &cobra.Command{
 
 			encoder := encoders.NewJsonEncoder()
 			bytes, err := encoder.Marshal(result)
+			if err != nil {
+				return nil, err
+			}
 
 			return bytes, nil
 		}

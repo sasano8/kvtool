@@ -492,13 +492,8 @@ func TestFilesystemInterface_Consistency(t *testing.T) {
 			bytes, err := io.ReadAll(reader)
 			require.NoError(err)
 
-			// LoadAsJson の動作に合わせて UseNumber を使用
-			var dataFromReader any
-			decoder := json.NewDecoder(io.NopCloser(io.Reader(reader)))
-			decoder.UseNumber()
-
 			// 既に読み込み済みなのでバイトからデコード
-			decoder = json.NewDecoder(io.NopCloser(io.Reader(io.NopCloser(io.NopCloser(io.MultiReader())))))
+			var dataFromReader any
 			err = json.Unmarshal(bytes, &dataFromReader)
 			require.NoError(err)
 

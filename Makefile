@@ -54,6 +54,22 @@ test-coverage:
 	@go tool cover -html=.cache/coverage.out -o .cache/coverage.html
 	@echo "Coverage report generated: .cache/coverage.html"
 
+# コード品質分析（カバレッジ + 複雑度）
+# 要: make setup-tools
+.PHONY: test-quality
+test-quality:
+	@echo "=== Code Quality Analysis ==="
+	@echo ""
+	@echo "--- Coverage ---"
+	@go test -cover ./... 2>&1 | grep -E "^(ok|\\?)" | awk '{print $$2, $$5}'
+	@echo ""
+	@echo "--- Complexity (golangci-lint) ---"
+	@if [ -f ~/go/bin/golangci-lint ]; then \
+		~/go/bin/golangci-lint run --out-format=line-number || true; \
+	else \
+		echo "(golangci-lint not installed: make setup-tools)"; \
+	fi
+
 # Vault と MinIO を起動してから全テストを実行します（統合テスト含む）
 # scripts/test-with-services.sh に処理を委譲（CI と共通化）
 .PHONY: test-full
@@ -83,6 +99,14 @@ services-down:
 .PHONY: services-logs
 services-logs:
 	@docker compose logs -f
+
+# 開発ツールのインストール（~/go/bin にインストール）
+.PHONY: setup-tools
+setup-tools:
+	@echo "=== Installing development tools ==="
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@echo "✅ Tools installed to ~/go/bin"
+	@echo "   Make sure ~/go/bin is in your PATH"
 
 # コード品質関連
 # コードをフォーマットします（go fmt）

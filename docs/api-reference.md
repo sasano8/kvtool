@@ -53,17 +53,6 @@ s3fs:
 
 ---
 
-## FilesystemConfig
-
-ファイル: [vault.go](pkg/filesystems/vault.go)
-
-| パラメータ | 型 | 必須 | デフォルト | 説明 |
-|-----------|-----|:----:|----------|------|
-|  | string |  | - |  |
-|  | map[string]any |  | - |  |
-
----
-
 ## VaultConfig
 
 ファイル: [vault.go](pkg/filesystems/vault.go)

@@ -1,0 +1,18 @@
+# golangci-lint 設定
+# 実行: golangci-lint run
+
+linters:
+  enable:
+    - gocyclo    # 循環的複雑度
+    - gocognit   # 認知的複雑度
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15  # 15以上で警告
+  gocognit:
+    min-complexity: 20  # 20以上で警告
+
+issues:
+  exclude-dirs:
+    - vendor
+    - .cache

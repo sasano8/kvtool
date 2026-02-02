@@ -12,11 +12,6 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
-type FilesystemConfig struct {
-	Type   string         `json:"type"`
-	Kwargs map[string]any `json:"kwargs"`
-}
-
 type VaultConfig struct {
 	Addr      string        `json:"addr"`
 	Token     string        `json:"token"`
@@ -27,11 +22,6 @@ type VaultConfig struct {
 	Field     string        `json:"field"`
 	Pretty    bool          `json:"pretty"`
 	Timeout   time.Duration `json:"timeout"`
-}
-
-type VaultFile struct {
-	fs   *FilesystemConfig
-	Path string
 }
 
 type VaultFs struct {

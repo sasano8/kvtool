@@ -29,10 +29,6 @@ func TestFactoryCreateLocalFs(t *testing.T) {
 	fs, err := factory.Create(storeInfo)
 	require.NoError(err)
 	require.NotNil(fs)
-
-	// Verify it implements Filesystem interface
-	_, ok := fs.(Filesystem)
-	require.True(ok, "should implement Filesystem interface")
 }
 
 func TestFactoryCreateEnvFs(t *testing.T) {

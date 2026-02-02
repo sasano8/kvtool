@@ -4,13 +4,11 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"os"
 
 	"github.com/sasano8/kvtool/cmd/cmd_file_convert"
 	"github.com/sasano8/kvtool/cmd/cmd_file_load"
 	"github.com/sasano8/kvtool/cmd/cmd_store"
-	"github.com/sasano8/kvtool/exceptions"
 	"github.com/spf13/cobra"
 )
 
@@ -97,9 +95,6 @@ func Execute() {
 	err := CmdRoot.Execute()
 	if err == nil {
 		os.Exit(0)
-	}
-
-	if errors.Is(err, exceptions.ErrSysNotImplemented) {
 	}
 
 	os.Exit(1)

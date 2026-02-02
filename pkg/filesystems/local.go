@@ -22,10 +22,16 @@ func (n nopWriteCloser) Close() error { return nil }
 
 type Path string
 
+// LocalFsConfig はローカルファイルシステムの設定
 type LocalFsConfig struct {
-	Timeout   time.Duration
-	Root      string
-	Transform string // "dotenv", "json", "" など。空文字列の場合はデフォルト（json）
+	// Timeout はリクエストタイムアウト
+	Timeout time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s" example:"60s"`
+
+	// Root はルートディレクトリ
+	Root string `yaml:"root" doc:"ルートディレクトリ。このパスより上位には遡れない" required:"false" default:"." example:"./config"`
+
+	// Transform は読み込み時の変換方法
+	Transform string `yaml:"transform" doc:"読み込み時の変換方法（dotenv, json など）" required:"false" default:"json" example:"dotenv"`
 }
 
 type FsLocalFile struct {

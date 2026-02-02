@@ -23,13 +23,16 @@ make test-full
 ### テスト用サービスの起動
 
 ```bash
-# MinIO (S3互換) 起動
-make minio-up           # http://localhost:9000
-make minio-down
+# 全サービス起動（Vault + MinIO）
+make services-up
+# Vault: http://localhost:8200 (token: root)
+# MinIO: http://localhost:9000 (user: minioadmin)
 
-# Vault 起動
-make vault-up           # http://localhost:8200
-make vault-down
+# 全サービス停止
+make services-down
+
+# ログ確認
+make services-logs
 ```
 
 ## コード規約
@@ -63,6 +66,12 @@ make lint
 
 # コードフォーマット
 make format
+
+# 品質分析（カバレッジ + 複雑度）
+make test-quality
+
+# 開発ツールのインストール（golangci-lint）
+make setup-tools
 ```
 
 ## 新しいファイルシステムドライバーの追加

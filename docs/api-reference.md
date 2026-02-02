@@ -10,9 +10,20 @@
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
 |-----------|-----|:----:|----------|------|
-|  | time.Duration |  | - |  |
-|  | string |  | - |  |
-|  | string |  | - |  |
+| timeout | time.Duration |  | 30s | リクエストタイムアウト |
+| root | string |  | . | ルートディレクトリ。このパスより上位には遡れない |
+| transform | string |  | json | 読み込み時の変換方法（dotenv, json など） |
+
+**設定例:**
+
+```yaml
+localfs:
+  driver: local
+  args:
+    timeout: 60s
+    root: ./config
+    transform: dotenv
+```
 
 ---
 
@@ -59,15 +70,28 @@ s3fs:
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
 |-----------|-----|:----:|----------|------|
-|  | string |  | - |  |
-|  | string |  | - |  |
-|  | string |  | - |  |
-|  | string |  | - |  |
-|  | int |  | - |  |
-|  | int |  | - |  |
-|  | string |  | - |  |
-|  | bool |  | - |  |
-|  | time.Duration |  | - |  |
+| addr | string | ✓ | - | Vault サーバーのアドレス |
+| token | string |  | - | Vault 認証トークン（省略時は VAULT_TOKEN 環境変数から取得） |
+| namespace | string |  | - | Vault 名前空間（Enterprise 機能） |
+| mount | string | ✓ | secret | KV シークレットエンジンのマウントパス |
+| kv_ver | int |  | 2 | KV シークレットエンジンのバージョン（現在は 2 のみサポート） |
+| version | int |  | 0 | 取得するシークレットのバージョン（0 = 最新） |
+| field | string |  | - | 取得する特定のフィールド名（省略時は全フィールド） |
+| pretty | bool |  | false | JSON 出力を整形するか |
+| timeout | time.Duration |  | 30s | リクエストタイムアウト |
+
+**設定例:**
+
+```yaml
+vault:
+  driver: vault
+  args:
+    addr: http://localhost:8200
+    token: root
+    namespace: admin
+    mount: secret
+    timeout: 60s
+```
 
 ---
 

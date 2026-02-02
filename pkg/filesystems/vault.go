@@ -12,16 +12,34 @@ import (
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
+// VaultConfig は HashiCorp Vault ファイルシステムの設定
 type VaultConfig struct {
-	Addr      string        `json:"addr"`
-	Token     string        `json:"token"`
-	Namespace string        `json:"namespace"`
-	Mount     string        `json:"mount"`
-	KvVer     int           `json:"kv_ver"`
-	Version   int           `json:"version"`
-	Field     string        `json:"field"`
-	Pretty    bool          `json:"pretty"`
-	Timeout   time.Duration `json:"timeout"`
+	// Addr は Vault サーバーのアドレス
+	Addr string `yaml:"addr" doc:"Vault サーバーのアドレス" required:"true" example:"http://localhost:8200"`
+
+	// Token は Vault 認証トークン
+	Token string `yaml:"token" doc:"Vault 認証トークン（省略時は VAULT_TOKEN 環境変数から取得）" required:"false" example:"root"`
+
+	// Namespace は Vault 名前空間（Enterprise 機能）
+	Namespace string `yaml:"namespace" doc:"Vault 名前空間（Enterprise 機能）" required:"false" default:"" example:"admin"`
+
+	// Mount は KV シークレットエンジンのマウントパス
+	Mount string `yaml:"mount" doc:"KV シークレットエンジンのマウントパス" required:"true" default:"secret" example:"secret"`
+
+	// KvVer は KV シークレットエンジンのバージョン（現在は 2 のみサポート）
+	KvVer int `yaml:"kv_ver" doc:"KV シークレットエンジンのバージョン（現在は 2 のみサポート）" required:"false" default:"2"`
+
+	// Version はシークレットのバージョン（0 = 最新）
+	Version int `yaml:"version" doc:"取得するシークレットのバージョン（0 = 最新）" required:"false" default:"0"`
+
+	// Field は取得する特定のフィールド名（省略時は全フィールド）
+	Field string `yaml:"field" doc:"取得する特定のフィールド名（省略時は全フィールド）" required:"false" default:""`
+
+	// Pretty は JSON 出力を整形するか
+	Pretty bool `yaml:"pretty" doc:"JSON 出力を整形するか" required:"false" default:"false"`
+
+	// Timeout はリクエストタイムアウト
+	Timeout time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s" example:"60s"`
 }
 
 type VaultFs struct {

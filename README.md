@@ -1,47 +1,22 @@
 # kvtool
 
-kvtool は、設定ファイル（.env、Vault など）を統一的なインターフェースで扱うためのツールです。
+設定ファイル（.env、JSON、YAML、Vault、S3 など）を統一的なインターフェースで扱う CLI ツール。
 
 ## 特徴
 
-- **ストア機能**: 複数の設定ソース（ローカルファイル、Vault など）を統一的に管理
-- **柔軟な設定**: ローカル設定とグローバル設定の自動解決
-- **マルチテナント**: namespace による環境の切り替え
-- **複数フォーマット対応**: .env、JSON、YAML、Vault など
-- **変換機能**: 各種フォーマット間の相互変換
-
-## ドキュメント
-
-### ユーザー向けドキュメント
-
-- [設定ファイル仕様](docs/configuration.md) - 設定ファイルの詳細仕様と解決ロジック
-- [コマンドリファレンス](docs/commands.md) - 全コマンドの使い方
-- [設計思想・仕様](docs/design.md) - アーキテクチャと設計判断
-- [API リファレンス](docs/api-reference.md) - 設定パラメータ一覧（自動生成）
-
-### ファイルシステムドライバー仕様
-
-- [S3 Filesystem](docs/filesystems/s3.md) - Amazon S3 および S3 互換ストレージ対応
-
-### 開発者向けドキュメント
-
-- [CLAUDE.md](CLAUDE.md) - AI アシスタント向けの開発ガイド（コード規約、ドキュメント規約など）
-
-### ドキュメント生成
-
-kvtool では、コード内のコメントと構造体タグからドキュメントを自動生成できます。
-
-```bash
-# ドキュメントを生成
-make gen-docs
-```
-
-詳細は [CLAUDE.md](CLAUDE.md) の「コード規約」セクションを参照してください。
+- **統一インターフェース**: ローカルファイル、Vault、S3 などを同じ方法でアクセス
+- **マルチテナント**: namespace による環境切り替え
+- **フォーマット変換**: dotenv ↔ JSON ↔ YAML
+- **接続確認**: ストアの接続テスト機能
 
 ## インストール
 
 ```bash
+# ビルドとインストール
 make install
+
+# または直接ビルド
+go build -o bin/kvtool .
 ```
 
 ## クイックスタート
@@ -49,177 +24,104 @@ make install
 ### 1. 設定ファイルの初期化
 
 ```bash
-# ローカル設定ファイルを作成（カレントディレクトリに .kvtool.yml）
-kvtool store init
-
-# グローバル設定ファイルを作成（~/.config/kvtool/.kvtool.yml）
-kvtool store init --global
+kvtool store init                 # カレントディレクトリに .kvtool.yml
+kvtool store init --global        # ~/.config/kvtool/.kvtool.yml
 ```
 
-生成される設定ファイル例：
-
-```yaml
-version: 0.1
-namespaces:
-  default:
-    .env:
-      driver: local
-      args:
-        root: .
-        transform:
-          read: dotenv
-          write: dotenv
-      mount:
-        file: ""
-```
-
-### 2. 設定ファイルの取得
-
-パス形式: `store_name/file_path`
+### 2. ストアからデータ取得
 
 ```bash
-# .env ファイルを JSON 形式で取得
-kvtool store load .env/test.env
-
-# raw 形式（key=value）で取得
-kvtool store load .env/test.env -o raw
-
-# 特定の namespace を指定
-kvtool store load .env/test.env --namespace production
-kvtool store load .env/test.env -n staging
-
-# グローバル設定を使用
-kvtool store load .env/test.env --global
+kvtool store load .env/APP_NAME               # JSON形式で出力
+kvtool store load .env/APP_NAME -o raw        # key=value形式
+kvtool store load vault/db/password           # Vaultから取得
+kvtool store load s3config/app.json           # S3から取得
 ```
 
-## 設定ファイルの解決
-
-kvtool はデフォルトでカレントディレクトリの `.kvtool.yml` を参照します。
-
-グローバル設定を使用する場合は、明示的に指定する必要があります：
+### 3. 接続確認
 
 ```bash
-# グローバル設定を使用
-kvtool store load .env/APP_NAME --global
-
-# カスタムパスを指定
-kvtool store load .env/APP_NAME -c /path/to/.kvtool.yml
+kvtool store connect                          # 全ストアをテスト
+kvtool store connect s3-test                  # 特定ストアのみ
 ```
 
-**注意**: ローカルに `.kvtool.yml` がない場合、自動的にグローバル設定にフォールバックすることはありません。明示的に `--global` フラグまたは `--config` フラグを指定してください。
+### 4. ファイル直接操作（低レベル）
 
-## ストアの設定
+```bash
+kvtool file load env                          # 環境変数をJSON化
+kvtool file load vault <path> --addr ... --token ...
+kvtool file convert dotenv                    # 標準入力からdotenv変換
+```
 
-### ローカルファイルシステム
+## コマンド体系
+
+```
+kvtool
+├── file (低レベル: 直接アクセス)
+│   ├── load (env, vault, json, yaml, etc.)
+│   └── convert (dotenv, yaml)
+└── store (高レベル: 設定ファイル経由)
+    ├── init
+    ├── connect
+    ├── load
+    └── serve (未実装)
+```
+
+## 設定例
 
 ```yaml
 version: 0.1
 namespaces:
   default:
-    .env:
+    local-env:
       driver: local
       args:
-        root: .              # ルートディレクトリ
-        transform:
-          read: dotenv       # 読み込み時の変換方法
-          write: dotenv      # 書き込み時の変換方法
-      mount:
-        file: ""
-```
-
-### Vault
-
-```yaml
-version: 0.1
-namespaces:
-  default:
-    vault:
+        root: ./config
+        transform: dotenv
+    vault-prod:
       driver: vault
       args:
-        conn:
-          addr: "http://localhost:8200"
-          token: root
-          mount: secret
-        root: app/prod       # Vault 内のルートパス
-```
-
-## マルチテナント（namespace）
-
-異なる環境（開発、本番など）を namespace で切り替えることができます：
-
-```yaml
-version: 0.1
-namespaces:
-  development:
-    .env:
-      driver: local
+        addr: http://localhost:8200
+        token: root
+        mount: secret
+    s3-config:
+      driver: s3
       args:
-        root: ./config/dev
-        transform:
-          read: dotenv
-          write: dotenv
-  production:
-    .env:
-      driver: local
-      args:
-        root: ./config/prod
-        transform:
-          read: dotenv
-          write: dotenv
+        bucket: my-bucket
+        region: us-east-1
+        endpoint: http://localhost:9000
 ```
 
-使用例：
+## ドキュメント
+
+- **[API リファレンス](docs/api-reference.md)**: 設定パラメータ一覧（自動生成）
+- **[CLAUDE.md](CLAUDE.md)**: 開発ガイド（コード規約、アーキテクチャ、暗黙知）
+- **[S3 仕様](docs/filesystems/s3.md)**: S3 ドライバーの詳細仕様
+
+## 開発
 
 ```bash
-# 開発環境の設定を取得
-kvtool store load .env/app.env -n development
+# テスト
+make test                         # 全テスト実行
+make test-full                    # Vault含む統合テスト
 
-# 本番環境の設定を取得
-kvtool store load .env/app.env -n production
+# MinIO (S3互換) 起動
+make minio-up                     # http://localhost:9000
+make minio-down
+
+# Vault 起動
+make vault-up                     # http://localhost:8200
+make vault-down
+
+# ドキュメント生成
+make gen-docs                     # docs/api-reference.md を生成
+
+# コード品質
+make lint                         # 静的解析
+make format                       # コードフォーマット
 ```
 
-## 出力形式
+詳細は [CLAUDE.md](CLAUDE.md) を参照。
 
-```bash
-# JSON 形式（デフォルト）
-kvtool store load .env/test.env
-# 出力:
-# {
-#   "APP_NAME": "myapp",
-#   "APP_ENV": "production"
-# }
+## ライセンス
 
-# raw 形式（key=value）
-kvtool store load .env/test.env -o raw
-# 出力:
-# APP_NAME=myapp
-# APP_ENV=production
-```
-
-## その他のコマンド
-
-### 環境変数を JSON に変換
-
-```bash
-kvtool file load env
-```
-
-### .env ファイルを JSON に変換
-
-```bash
-kvtool file load dotenv -i test_data/dot_env/simple.env
-```
-
-### Vault から直接読み込み
-
-```bash
-kvtool file load vault -addr http://localhost:8200 -token root -mount secret app/prod
-```
-
-### JSON を他の形式に変換
-
-```bash
-cat test_data/json/simple.json | kvtool file convert dotenv
-cat test_data/json/simple.json | kvtool file convert yaml
-```
-
+MIT

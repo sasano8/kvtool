@@ -1,0 +1,248 @@
+/* kvtool Documentation - Custom Theme */
+
+:root {
+    --sidebar-width: 280px;
+    --content-max-width: 900px;
+    --accent-color: #3584e4;
+    --accent-color-dark: #62a0ea;
+}
+
+/* サイドバー */
+.sidebar {
+    font-size: 0.95em;
+}
+
+.sidebar .sidebar-scrollbox {
+    padding: 20px;
+}
+
+.sidebar-nav > .chapter li > a {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 2px 0;
+    transition: background-color 0.2s;
+}
+
+.sidebar-nav > .chapter li > a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.light .sidebar-nav > .chapter li > a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.rust .sidebar-nav > .chapter li > a:hover,
+.coal .sidebar-nav > .chapter li > a:hover,
+.navy .sidebar-nav > .chapter li > a:hover,
+.ayu .sidebar-nav > .chapter li > a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* コンテンツエリア */
+.content {
+    max-width: var(--content-max-width);
+    padding: 20px 50px;
+}
+
+/* 見出し */
+h1 {
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+h2 {
+    margin-top: 40px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.rust h2, .coal h2, .navy h2, .ayu h2 {
+    border-bottom: 1px solid #444;
+}
+
+/* コードブロック */
+pre {
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+    font-size: 0.9em;
+}
+
+/* インラインコード */
+:not(pre) > code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.rust :not(pre) > code,
+.coal :not(pre) > code,
+.navy :not(pre) > code,
+.ayu :not(pre) > code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* テーブル */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+table th {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+}
+
+table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.rust table td,
+.coal table td,
+.navy table td,
+.ayu table td {
+    border-bottom: 1px solid #444;
+}
+
+table tr:last-child td {
+    border-bottom: none;
+}
+
+table tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.rust table tr:hover,
+.coal table tr:hover,
+.navy table tr:hover,
+.ayu table tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* 引用 */
+blockquote {
+    border-left: 4px solid var(--accent-color);
+    margin: 20px 0;
+    padding: 10px 20px;
+    background-color: rgba(53, 132, 228, 0.05);
+    border-radius: 0 8px 8px 0;
+}
+
+/* リスト */
+ul, ol {
+    padding-left: 24px;
+}
+
+li {
+    margin: 8px 0;
+    line-height: 1.7;
+}
+
+/* リンク */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.rust a, .coal a, .navy a, .ayu a {
+    color: var(--accent-color-dark);
+}
+
+/* ナビゲーションボタン */
+.nav-chapters {
+    font-size: 1.5em;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.nav-chapters:hover {
+    opacity: 1;
+}
+
+/* 検索ボックス */
+#searchbar {
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+#searchbar:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* ページタイトル */
+.page-title {
+    font-size: 2.2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* 警告・情報ボックス */
+.warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+}
+
+.rust .warning,
+.coal .warning,
+.navy .warning,
+.ayu .warning {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+/* スクロールバー */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .content {
+        padding: 15px 20px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+}

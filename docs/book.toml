@@ -1,19 +1,38 @@
 [book]
-title = "kvtool Documentation"
+title = "kvtool"
+description = "設定ファイルを統一的なインターフェースで扱う CLI ツール"
 authors = ["kvtool contributors"]
 language = "ja"
 src = "."
 
 [build]
 build-dir = "book"
+create-missing = false
 
 [output.html]
 git-repository-url = "https://github.com/sasano8/kvtool"
-additional-css = []
+edit-url-template = "https://github.com/sasano8/kvtool/edit/main/docs/{path}"
+additional-css = ["theme/css/custom.css"]
 additional-js = []
+default-theme = "light"
+preferred-dark-theme = "navy"
+no-section-label = false
+smart-punctuation = true
+
+[output.html.fold]
+enable = true
+level = 1
 
 [output.html.playground]
 editable = false
 copyable = true
 copy-js = true
 line-numbers = true
+
+[output.html.search]
+enable = true
+limit-results = 20
+use-hierarchical-split = true
+
+[output.html.print]
+enable = true

@@ -201,25 +201,25 @@ kvtool store load .env/test.env -o raw
 ### 環境変数を JSON に変換
 
 ```bash
-kvtool load env
+kvtool file load env
 ```
 
 ### .env ファイルを JSON に変換
 
 ```bash
-kvtool load dotenv -i test_data/dot_env/simple.env
+kvtool file load dotenv -i test_data/dot_env/simple.env
 ```
 
 ### Vault から直接読み込み
 
 ```bash
-kvtool load vault -addr http://localhost:8200 -token root -mount secret app/prod
+kvtool file load vault -addr http://localhost:8200 -token root -mount secret app/prod
 ```
 
 ### JSON を他の形式に変換
 
 ```bash
-cat test_data/json/simple.json | kvtool convert dotenv
-cat test_data/json/simple.json | kvtool convert yaml
+cat test_data/json/simple.json | kvtool file convert dotenv
+cat test_data/json/simple.json | kvtool file convert yaml
 ```
 

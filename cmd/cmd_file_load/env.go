@@ -1,12 +1,11 @@
 /*
 Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 */
-package cmd_load
+package cmd_file_load
 
 import (
 	"github.com/sasano8/kvtool/filesystems"
 	"github.com/sasano8/kvtool/pkg/common"
-	"github.com/sasano8/kvtool/pkg/decoders"
 	"github.com/sasano8/kvtool/pkg/encoders"
 	"github.com/spf13/cobra"
 )
@@ -15,25 +14,18 @@ func init() {
 }
 
 // envCmd represents the env command
-var CmdLoadFromDotenv = &cobra.Command{
-	Use:   "dotenv",
+var CmdLoadFromEnv = &cobra.Command{
+	Use:   "env",
 	Short: "A brief description of your command",
 	Long:  "",
-	Args:  cobra.ExactArgs(1),
+	// SilenceUsage: true, // エラー時に Usage を表示しない。ただし、引数エラー時にも表示されなくなる
+	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var path string
 		var result any
 		var err error
 
-		if len(args) == 0 {
-			path = filesystems.StdinPath
-		} else {
-			path = args[0]
-		}
-
-		fs := filesystems.FsLocalFileCli{Path: path}
-
-		result, err = fs.Load(decoders.DotenvToJson)
+		fs := filesystems.FsEnvFile{}
+		result, err = fs.LoadAsJson()
 		if err != nil {
 			return err
 		}

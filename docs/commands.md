@@ -130,28 +130,28 @@ kvtool store load .env/app.env -n production
 
 各種データソースから直接データを読み込みます（ストア機能を使わない単発の操作）。
 
-#### kvtool load env
+#### kvtool file load env
 
 環境変数を JSON 形式で出力します。
 
 ```bash
-kvtool load env
+kvtool file load env
 ```
 
-#### kvtool load dotenv
+#### kvtool file load dotenv
 
 .env ファイルを JSON 形式で出力します。
 
 ```bash
-kvtool load dotenv -i test.env
+kvtool file load dotenv -i test.env
 ```
 
-#### kvtool load vault
+#### kvtool file load vault
 
 Vault から直接シークレットを読み込みます。
 
 ```bash
-kvtool load vault -addr http://localhost:8200 -token root -mount secret app/prod
+kvtool file load vault -addr http://localhost:8200 -token root -mount secret app/prod
 ```
 
 ### kvtool convert
@@ -160,10 +160,10 @@ JSON を他の形式に変換します。
 
 ```bash
 # JSON を .env 形式に変換
-cat config.json | kvtool convert dotenv
+cat config.json | kvtool file convert dotenv
 
 # JSON を YAML 形式に変換
-cat config.json | kvtool convert yaml
+cat config.json | kvtool file convert yaml
 ```
 
 ## コマンドの設計思想
@@ -173,7 +173,7 @@ cat config.json | kvtool convert yaml
 kvtool の中核機能は **ストア（store）** です。
 
 - `kvtool store` コマンドが主要な操作
-- `kvtool load` や `kvtool convert` は補助的な機能
+- `kvtool file load` や `kvtool file convert` は補助的な機能
 - 設定ファイルで複数のデータソースを統一的に管理
 
 ### 明示的な操作

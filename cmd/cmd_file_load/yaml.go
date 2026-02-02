@@ -1,7 +1,7 @@
 /*
 Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 */
-package cmd_load
+package cmd_file_load
 
 import (
 	"github.com/sasano8/kvtool/exceptions"
@@ -11,9 +11,8 @@ import (
 func init() {
 }
 
-// envCmd represents the env command
-var CmdLoadFromJsonl = &cobra.Command{
-	Use:   "jsonl",
+var CmdLoadFromYaml = &cobra.Command{
+	Use:   "yaml",
 	Short: "A brief description of your command",
 	Long:  "",
 	Args:  cobra.ExactArgs(1),

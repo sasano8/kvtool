@@ -7,8 +7,8 @@ import (
 	"errors"
 	"os"
 
-	"github.com/sasano8/kvtool/cmd/cmd_convert"
-	"github.com/sasano8/kvtool/cmd/cmd_load"
+	"github.com/sasano8/kvtool/cmd/cmd_file_convert"
+	"github.com/sasano8/kvtool/cmd/cmd_file_load"
 	"github.com/sasano8/kvtool/cmd/cmd_store"
 	"github.com/sasano8/kvtool/exceptions"
 	"github.com/spf13/cobra"
@@ -33,31 +33,54 @@ func init() {
 		return root
 	}
 
-	loads := map[*cobra.Command]map[string]any{
-		cmd_load.CmdLoadFromAuto:   {"implemented": false},
-		cmd_load.CmdLoadFromEnv:    {"implemented": true},
-		cmd_load.CmdLoadFromDotenv: {"implemented": false},
-		cmd_load.CmdLoadFromJson:   {"implemented": false},
-		cmd_load.CmdLoadFromJsonl:  {"implemented": false},
-		cmd_load.CmdLoadFromHcl:    {"implemented": false},
-		cmd_load.CmdLoadFromVault:  {"implemented": false},
-		cmd_load.CmdLoadFromYaml:   {"implemented": false},
-		cmd_load.CmdLoadFromToml:   {"implemented": false},
+	// file load subcommands
+	fileLoads := map[*cobra.Command]map[string]any{
+		cmd_file_load.CmdLoadFromAuto:   {"implemented": false},
+		cmd_file_load.CmdLoadFromEnv:    {"implemented": true},
+		cmd_file_load.CmdLoadFromDotenv: {"implemented": false},
+		cmd_file_load.CmdLoadFromJson:   {"implemented": false},
+		cmd_file_load.CmdLoadFromJsonl:  {"implemented": false},
+		cmd_file_load.CmdLoadFromHcl:    {"implemented": false},
+		cmd_file_load.CmdLoadFromVault:  {"implemented": false},
+		cmd_file_load.CmdLoadFromYaml:   {"implemented": false},
+		cmd_file_load.CmdLoadFromToml:   {"implemented": false},
 	}
 
-	converts := map[*cobra.Command]map[string]any{
-		cmd_convert.CmdConvertToDotenv: {"implemented": false},
-		cmd_convert.CmdConvertToYaml:   {"implemented": false},
+	// file convert subcommands
+	fileConverts := map[*cobra.Command]map[string]any{
+		cmd_file_convert.CmdConvertToDotenv: {"implemented": false},
+		cmd_file_convert.CmdConvertToYaml:   {"implemented": false},
 	}
 
+	// store subcommands
 	stores := map[*cobra.Command]map[string]any{
 		cmd_store.CmdInit:  {"implemented": true},
 		cmd_store.CmdServe: {"implemented": false},
 		cmd_store.CmdLoad:  {"implemented": true},
 	}
 
-	CmdRoot.AddCommand(belongsTo(CmdLoad, loads))
-	CmdRoot.AddCommand(belongsTo(CmdConvert, converts))
+	// Build command hierarchy
+	// CmdFile contains: load and convert subcommands
+	CmdFileLoad := &cobra.Command{
+		Use:   "load",
+		Short: "Load data from various sources",
+		Long:  "Load data from various sources (env, vault, json, yaml, etc.)",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+	CmdFileConvert := &cobra.Command{
+		Use:   "convert",
+		Short: "Convert between formats",
+		Long:  "Convert data between different formats (dotenv, yaml, json, etc.)",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+
+	CmdFile.AddCommand(belongsTo(CmdFileLoad, fileLoads))
+	CmdFile.AddCommand(belongsTo(CmdFileConvert, fileConverts))
+	CmdRoot.AddCommand(CmdFile)
 	CmdRoot.AddCommand(belongsTo(CmdStore, stores))
 }
 

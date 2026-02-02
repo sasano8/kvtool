@@ -1,4 +1,4 @@
-package cmd_load
+package cmd_file_load
 
 import (
 	"context"

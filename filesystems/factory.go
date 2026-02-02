@@ -32,6 +32,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createVaultFs(storeInfo)
 	case "env":
 		return f.createEnvFs(storeInfo)
+	case "s3":
+		return f.createS3Fs(storeInfo)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
 	}
@@ -105,6 +107,54 @@ func (f *FilesystemFactory) createEnvFs(storeInfo *StoreInfo) (Filesystem, error
 	return &FsEnvFilesystem{
 		Ctx: f.ctx,
 	}, nil
+}
+
+func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	// Parse S3 configuration
+	bucket, _ := args["bucket"].(string)
+	region, _ := args["region"].(string)
+	root, _ := args["root"].(string)
+	endpoint, _ := args["endpoint"].(string)
+	accessKeyID, _ := args["access_key_id"].(string)
+	secretAccessKey, _ := args["secret_access_key"].(string)
+	sessionToken, _ := args["session_token"].(string)
+
+	// Parse boolean with type assertion
+	usePathStyle := false
+	if val, ok := args["use_path_style"].(bool); ok {
+		usePathStyle = val
+	}
+
+	// Parse timeout
+	timeout := 30 * time.Second
+	if timeoutVal, ok := args["timeout"].(int); ok {
+		timeout = time.Duration(timeoutVal) * time.Second
+	}
+
+	// Transform 設定を取得
+	transform := getTransformFromArgs(args, "read")
+	if transform == "" {
+		if val, ok := args["transform"].(string); ok {
+			transform = val
+		}
+	}
+
+	config := S3FsConfig{
+		Bucket:          bucket,
+		Region:          region,
+		Root:            root,
+		Endpoint:        endpoint,
+		AccessKeyID:     accessKeyID,
+		SecretAccessKey: secretAccessKey,
+		SessionToken:    sessionToken,
+		UsePathStyle:    usePathStyle,
+		Transform:       transform,
+		Timeout:         timeout,
+	}
+
+	return NewS3Fs(f.ctx, config)
 }
 
 // GetFilesystem is a convenience function that creates a filesystem without storing the factory

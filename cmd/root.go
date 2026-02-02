@@ -54,9 +54,10 @@ func init() {
 
 	// store subcommands
 	stores := map[*cobra.Command]map[string]any{
-		cmd_store.CmdInit:  {"implemented": true},
-		cmd_store.CmdServe: {"implemented": false},
-		cmd_store.CmdLoad:  {"implemented": true},
+		cmd_store.CmdInit:    {"implemented": true},
+		cmd_store.CmdConnect: {"implemented": true},
+		cmd_store.CmdServe:   {"implemented": false},
+		cmd_store.CmdLoad:    {"implemented": true},
 	}
 
 	// Build command hierarchy

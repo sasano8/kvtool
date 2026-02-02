@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/sasano8/kvtool/pkg/config"
-	"github.com/sasano8/kvtool/pkg/service"
 	"github.com/sasano8/kvtool/pkg/encoders"
+	"github.com/sasano8/kvtool/pkg/service"
 	"github.com/spf13/cobra"
 )
 

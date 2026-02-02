@@ -48,9 +48,6 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Run tests (without S3 and Vault)
-        run: go test -v -short ./...
-
       - name: Setup MinIO bucket
         run: |
           # MinIO CLI をインストール
@@ -64,7 +61,7 @@ jobs:
           # テスト用バケットを作成
           mc mb local/kvtool-test || true
 
-      - name: Run full tests (with S3 and Vault)
+      - name: Run all tests
         run: go test -v ./...
         env:
           VAULT_ADDR: http://localhost:8200

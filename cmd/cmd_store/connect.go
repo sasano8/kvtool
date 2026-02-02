@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sasano8/kvtool/pkg/filesystems"
 	"github.com/sasano8/kvtool/internal/config"
+	"github.com/sasano8/kvtool/pkg/filesystems"
 	"github.com/spf13/cobra"
 )
 

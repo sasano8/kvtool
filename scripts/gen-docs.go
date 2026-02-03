@@ -60,9 +60,9 @@ func main() {
 		return
 	}
 
-	// API リファレンスを生成
+	// ドライバーリファレンスを生成
 	if err := generateAPIReference(configs); err != nil {
-		fmt.Fprintf(os.Stderr, "Error generating API reference: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error generating driver reference: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -197,11 +197,11 @@ func getTypeName(expr ast.Expr) string {
 	}
 }
 
-// generateAPIReference は API リファレンスを生成します
+// generateAPIReference はドライバーリファレンスを生成します
 func generateAPIReference(configs []ConfigStructInfo) error {
 	var sb strings.Builder
 
-	sb.WriteString("# API リファレンス\n\n")
+	sb.WriteString("# ドライバー\n\n")
 	sb.WriteString("このドキュメントは自動生成されています。手動で編集しないでください。\n\n")
 	sb.WriteString("生成コマンド: `go run scripts/gen-docs.go`\n\n")
 

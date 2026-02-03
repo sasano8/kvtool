@@ -1,6 +1,6 @@
-# 設定ファイル
+# ストア構成ファイル
 
-kvtool の設定ファイルは YAML 形式 (`.kvtool.yml`) または HCL 形式 (`.kvtool.hcl`) で記述できます。
+kvtool のストア構成ファイルは YAML 形式 (`.kvtool.yml`) または HCL 形式 (`.kvtool.hcl`) で記述できます。
 
 ## 対応形式
 
@@ -8,6 +8,17 @@ kvtool の設定ファイルは YAML 形式 (`.kvtool.yml`) または HCL 形式
 |------|-----------|------|
 | YAML | `.kvtool.yml` | シンプル、広く普及 |
 | HCL | `.kvtool.hcl` | 変数定義、環境変数展開をサポート |
+
+## 利用可能なドライバー
+
+| ドライバー | 説明 |
+|-----------|------|
+| `local` | ローカルファイルシステム |
+| `vault` | HashiCorp Vault |
+| `s3` | Amazon S3 / S3 互換ストレージ |
+| `env` | 環境変数 |
+
+各ドライバーの詳細は [ドライバー](./api-reference.md) を参照してください。
 
 ## 基本構造
 

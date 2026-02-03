@@ -38,13 +38,14 @@
   - [x] テスト追加 ([pkg/decoders/dotenv_to_json_test.go:28-87](pkg/decoders/dotenv_to_json_test.go#L28-L87))
 - [x] シングルクォート内のエスケープ（リテラル扱い）の確認
   - `'line\nhere'` → `line\nhere`（エスケープせずそのまま）
-- [ ] クォート囲みがないスペースのエラー処理（`VALUE=hello world`）
+- [x] クォート囲みがないスペースのエラー処理（`VALUE=hello world`） ([pkg/decoders/env_to_json.go:67-80](pkg/decoders/env_to_json.go#L67-L80), [pkg/decoders/dotenv_to_json_test.go:339-403](pkg/decoders/dotenv_to_json_test.go#L339-L403))
 - [x] キー名の検証（POSIX 準拠: `[a-zA-Z_][a-zA-Z0-9_]*`）
   - [x] 数字で始まるキー（`1KEY=value`）のエラー処理 ([pkg/decoders/env_to_json.go:32-34](pkg/decoders/env_to_json.go#L32-L34))
   - [x] 空のキー（`=value`）のエラー処理 ([pkg/decoders/env_to_json.go:29-31](pkg/decoders/env_to_json.go#L29-L31))
   - [x] テスト追加 ([pkg/decoders/dotenv_to_json_test.go:90-161](pkg/decoders/dotenv_to_json_test.go#L90-L161))
-- [ ] BOM (Byte Order Mark) の処理
-  - UTF-8 BOM (`EF BB BF`) をスキップする
+- [x] BOM (Byte Order Mark) の処理 ([pkg/decoders/env_to_json.go:11-18](pkg/decoders/env_to_json.go#L11-L18))
+  - [x] UTF-8 BOM (`EF BB BF`) をスキップ
+  - [x] テスト追加 ([pkg/decoders/dotenv_to_json_test.go:179-220](pkg/decoders/dotenv_to_json_test.go#L179-L220))
 
 ※ 非サポート機能の詳細は [docs/dotenv-spec.md](docs/dotenv-spec.md) を参照
 
@@ -58,6 +59,7 @@
 - [x] 改行を含む環境変数のエスケープ処理（`\n` → `\\n`） ([pkg/sources/env.go:54-73](pkg/sources/env.go#L54-L73))
 - [x] キャリッジリターンを含む環境変数のエスケープ処理（`\r` → `\\r`） ([pkg/sources/env.go:59](pkg/sources/env.go#L59))
 - [x] ダブルクォートを含む環境変数のエスケープ処理（`"` → `\"`） ([pkg/sources/source_test.go:127-151](pkg/sources/source_test.go#L127-L151))
+- [x] スペースを含む環境変数のクォート処理 ([pkg/sources/env.go:32-34](pkg/sources/env.go#L32-L34))
 - [x] 空の値を持つ環境変数（`KEY=`） ([pkg/sources/source_test.go:211-230](pkg/sources/source_test.go#L211-L230))
 - [x] 値に `=` を含む環境変数（`KEY=VALUE=VALUE2`） ([pkg/sources/source_test.go:232-251](pkg/sources/source_test.go#L232-L251))
 - [x] 非常に長い値を持つ環境変数（10KB以上） ([pkg/sources/source_test.go:253-268](pkg/sources/source_test.go#L253-L268))
@@ -75,13 +77,22 @@
   - 改行を含む値が別の KEY=VALUE として解釈されないことの確認（実装済みだがテスト追加）
 
 #### 追加の検証観点
-- [ ] シングルクォートを含む値（`it's`）- エスケープ不要
-- [ ] NULL 文字（`\x00`）を含む値の処理方針決定
+- [x] シングルクォートを含む値（`it's`）- エスケープ不要 ([pkg/sources/source_test.go:294-321](pkg/sources/source_test.go#L294-L321), [pkg/decoders/dotenv_to_json_test.go:180-230](pkg/decoders/dotenv_to_json_test.go#L180-L230))
+- [x] NULL 文字（`\x00`）を含む値の処理 - エラーにする ([pkg/decoders/env_to_json.go:75-78](pkg/decoders/env_to_json.go#L75-L78), [pkg/decoders/dotenv_to_json_test.go:284-336](pkg/decoders/dotenv_to_json_test.go#L284-L336))
 
 ### Vault
 - [x] Vault から構成を読んで JSON にする ([p../pkg/filesystems/vault.go:85-118](p../pkg/filesystems/vault.go#L85-L118))
 - [x] Vault ファイルシステムのテスト ([p../pkg/filesystems/vault_test.go](p../pkg/filesystems/vault_test.go))
 - [x] Vault からの読み込みの統合テスト ([Makefile:40-58](Makefile#L40-L58))
+
+### UUID7
+- [x] UUID7 ファイルシステムの実装 ([pkg/filesystems/uuid7.go](pkg/filesystems/uuid7.go))
+  - [x] アクセスするたびに新しい UUID7 を生成
+  - [x] パスは無視（仮想ファイルシステム）
+  - [x] `seed` オプション: 決定論的な UUID 生成（テスト用）
+  - [x] `fixed` オプション: 固定 UUID を返す（モック用、seed より優先）
+  - [x] テスト追加 ([pkg/filesystems/uuid7_test.go](pkg/filesystems/uuid7_test.go))
+  - [x] Factory への登録 ([pkg/filesystems/factory.go](pkg/filesystems/factory.go))
 
 ### HCL (HashiCorp Configuration Language)
 - [ ] HCL ファイルを読んで JSON にする

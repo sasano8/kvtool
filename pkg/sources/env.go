@@ -29,9 +29,10 @@ func (s *SourceEnv) Load() (io.Reader, error) {
 			key := kv[:idx]
 			val := kv[idx+1:]
 
-			// エスケープが必要かチェック（\n, \r, " のみ）
+			// エスケープが必要かチェック（\n, \r, ", スペース）
 			// Node.js dotenv 互換: \t, \\ はエスケープしない
-			needsQuote := strings.ContainsAny(val, "\n\r\"")
+			// スペースを含む値もクォートが必要（クォートなしスペースはパースエラー）
+			needsQuote := strings.ContainsAny(val, "\n\r\" ")
 			if needsQuote {
 				// ダブルクォートで囲んでエスケープ
 				escapedVal := escapeEnvValue(val)

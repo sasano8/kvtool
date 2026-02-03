@@ -8,8 +8,48 @@ import (
 	"strings"
 )
 
+// EnvToJsonOption は EnvToJson の動作を制御するオプション
+type EnvToJsonOption func(*envToJsonConfig)
+
+type envToJsonConfig struct {
+	trusted bool // true の場合、検証をスキップ（OS環境変数など信頼できるソース用）
+}
+
+// WithTrusted は信頼モードを有効にする
+// 信頼モードでは以下の検証をスキップ:
+// - POSIX キー名検証
+// - NULL 文字チェック
+// - クォートなしスペースチェック
+// os.Environ() など、OS が保証するソースからの入力に使用
+func WithTrusted() EnvToJsonOption {
+	return func(c *envToJsonConfig) {
+		c.trusted = true
+	}
+}
+
+// skipUTF8BOM は入力ストリームの先頭に UTF-8 BOM (EF BB BF) があればスキップする
+// BOM がない場合はそのまま返す
+func skipUTF8BOM(r io.Reader) io.Reader {
+	br := bufio.NewReader(r)
+	bom, err := br.Peek(3)
+	if err == nil && len(bom) >= 3 && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF {
+		br.Discard(3) // BOM をスキップ
+	}
+	return br
+}
+
 // EnvToJson converts .env-style lines into a JSON object.
-func EnvToJson(r io.Reader) (map[string]any, error) {
+// UTF-8 BOM (EF BB BF) がある場合は自動的にスキップする
+// opts に WithTrusted() を渡すと、信頼モードで検証をスキップする
+func EnvToJson(r io.Reader, opts ...EnvToJsonOption) (map[string]any, error) {
+	// オプションを適用
+	cfg := &envToJsonConfig{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	// UTF-8 BOM をスキップ
+	r = skipUTF8BOM(r)
 	scanner := bufio.NewScanner(r) // １行ずつ返す
 	result := make(map[string]any)
 
@@ -29,7 +69,8 @@ func EnvToJson(r io.Reader) (map[string]any, error) {
 		if key == "" {
 			return nil, errors.New("empty key")
 		}
-		if !isValidPOSIXKeyName(key) {
+		// 信頼モードでない場合のみ POSIX キー名を検証
+		if !cfg.trusted && !isValidPOSIXKeyName(key) {
 			return nil, fmt.Errorf("invalid key name (must match POSIX [a-zA-Z_][a-zA-Z0-9_]*): %q", key)
 		}
 
@@ -52,10 +93,24 @@ func EnvToJson(r io.Reader) (map[string]any, error) {
 			} else {
 				// クォートなし: 行末コメントを処理
 				val = stripInlineComment(val)
+				// 信頼モードでない場合のみ、クォートなしスペースを検証
+				if !cfg.trusted && strings.Contains(val, " ") {
+					return nil, fmt.Errorf("unquoted value contains space for key %q (use quotes: %s=\"%s\")", key, key, val)
+				}
 			}
 		} else {
 			// 短い値: 行末コメントを処理
 			val = stripInlineComment(val)
+			// 信頼モードでない場合のみ、クォートなしスペースを検証
+			if !cfg.trusted && strings.Contains(val, " ") {
+				return nil, fmt.Errorf("unquoted value contains space for key %q (use quotes: %s=\"%s\")", key, key, val)
+			}
+		}
+
+		// 信頼モードでない場合のみ NULL 文字チェック
+		// （セキュリティ: NULL 文字は通常バグか攻撃の兆候）
+		if !cfg.trusted && strings.ContainsRune(val, '\x00') {
+			return nil, fmt.Errorf("value contains NULL character (\\x00) for key %q", key)
 		}
 
 		result[key] = val

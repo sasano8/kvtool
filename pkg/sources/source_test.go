@@ -290,3 +290,64 @@ func TestSourceEnvUnicodeValue(t *testing.T) {
 
 	require.True(found, "UNICODE_KEY should preserve Unicode characters including emoji and Japanese")
 }
+
+func TestSourceEnvSingleQuoteInValue(t *testing.T) {
+	require := require.New(t)
+
+	// シングルクォートを含む値（it's のような文字列）
+	// Node.js dotenv 互換: シングルクォートはエスケープ不要
+	// ただし、スペースを含む場合はクォートされる
+	os.Setenv("SINGLE_QUOTE_KEY", "it's a test")
+	defer os.Unsetenv("SINGLE_QUOTE_KEY")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	lines := strings.Split(content, "\n")
+
+	found := false
+	for _, line := range lines {
+		// スペースを含むので、ダブルクォートで囲まれて出力される
+		// シングルクォート自体はエスケープ不要
+		if line == `SINGLE_QUOTE_KEY="it's a test"` {
+			found = true
+			break
+		}
+	}
+
+	require.True(found, "SINGLE_QUOTE_KEY should be quoted due to space (single quotes preserved)")
+}
+
+func TestSourceEnvSingleQuoteNoSpace(t *testing.T) {
+	require := require.New(t)
+
+	// スペースを含まないシングルクォートの値はクォート不要
+	os.Setenv("SINGLE_QUOTE_NOSPACE", "it's")
+	defer os.Unsetenv("SINGLE_QUOTE_NOSPACE")
+
+	source := &SourceEnv{}
+	reader, err := source.Load()
+	require.NoError(err)
+
+	data, err := io.ReadAll(reader)
+	require.NoError(err)
+
+	content := string(data)
+	lines := strings.Split(content, "\n")
+
+	found := false
+	for _, line := range lines {
+		// スペースがないので、クォートなしでそのまま出力される
+		if line == "SINGLE_QUOTE_NOSPACE=it's" {
+			found = true
+			break
+		}
+	}
+
+	require.True(found, "SINGLE_QUOTE_NOSPACE should not be quoted (no space, no newline, no double quote)")
+}

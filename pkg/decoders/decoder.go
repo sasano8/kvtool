@@ -21,11 +21,17 @@ type Decoder interface {
 // 出力:
 //   - map[string]any 形式の JSON オブジェクト
 //   - すべての値は文字列として扱われる
-type EnvDecoder struct{}
+type EnvDecoder struct {
+	// Trusted が true の場合、検証をスキップ（OS環境変数など信頼できるソース用）
+	Trusted bool
+}
 
 // Decode は KEY=VALUE 形式のデータを JSON オブジェクトにデコードする
 // Decoder インターフェースを実装
 func (d *EnvDecoder) Decode(r io.Reader) (any, error) {
+	if d.Trusted {
+		return EnvToJson(r, WithTrusted())
+	}
 	return EnvToJson(r)
 }
 

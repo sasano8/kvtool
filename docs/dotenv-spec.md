@@ -41,13 +41,16 @@ kvtool convert env:// --to hcl > terraform.tfvars
 | エスケープ `\t` | ❌ | Node.js 互換で非対応 |
 | エスケープ `\\` | ❌ | Node.js 互換で非対応 |
 | 行末コメント | ✅ | `KEY=value # comment` |
-| キー名検証 (POSIX) | ✅ | `[a-zA-Z_][a-zA-Z0-9_]*` |
 | 空のキー `=value` | ❌ | エラー（POSIX 準拠） |
 | 数字で始まるキー | ❌ | エラー（POSIX 準拠） |
+| キー名検証 | ✅ | `[a-zA-Z_][a-zA-Z0-9_]*` （POSIX 準拠） |
+
 | `export` プレフィックス | ❌ | サポートしない |
 | 変数展開 `${VAR}` | ❌ | リテラル扱い |
 | コマンド置換 `$(cmd)` | ❌ | リテラル扱い |
 | 複数行 (heredoc) | ❌ | サポートしない |
+| UTF-8 BOM | ✅ | 自動スキップ |
+| NULL 文字 `\x00` | ❌ | エラー（セキュリティ） |
 
 ## 基本構文
 
@@ -218,5 +221,5 @@ kvtool file load env:// --format raw
 
 ## エンコーディング
 
-- **UTF-8 のみ**: BOM なし
+- **UTF-8 のみ**: BOM 付きファイルも自動的に処理（BOM をスキップ）
 - **改行コード**: LF (`\n`) を推奨、CRLF (`\r\n`) も許容

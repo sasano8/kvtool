@@ -43,7 +43,8 @@ func (f *FsEnvFile) LoadAsJson() (any, error) {
 	}
 
 	// Decoder インターフェースを通じてデータを変換
-	var decoder decoders.Decoder = &decoders.EnvDecoder{}
+	// os.Environ() からのデータは OS が保証するため、信頼モードで処理
+	var decoder decoders.Decoder = &decoders.EnvDecoder{Trusted: true}
 	result, err := decoder.Decode(stream)
 	if err != nil {
 		return nil, err

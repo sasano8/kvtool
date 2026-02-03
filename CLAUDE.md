@@ -56,6 +56,73 @@ type File interface {
 
 `FilesystemFactory` ([p../pkg/filesystems/factory.go](p../pkg/filesystems/factory.go)) が設定から適切なドライバーを生成。
 
+### 設定ファイル形式
+
+#### YAML 形式 (.kvtool.yml)
+
+```yaml
+version: 0.1
+namespaces:
+  default:
+    vault:
+      driver: "vault"
+      args:
+        endpoint: "http://localhost:8200"
+        token: "root"
+      mount:
+        dir: "app"
+        file: "prod"
+```
+
+#### HCL 形式 (.kvtool.hcl)
+
+HCL 標準 + 環境変数展開（kvtool 拡張）をサポート ([pkg/config/hcl_loader.go](pkg/config/hcl_loader.go))
+
+```hcl
+# 変数定義（辞書形式）
+locals {
+  config = {
+    environment = "development"
+    port        = 8080
+  }
+}
+
+# namespace 定義（YAML 形式と同じ構造）
+namespaces {
+  namespace "default" {
+    vault {
+      driver = "vault"
+      args {
+        endpoint = env.VAULT_ADDR           # 環境変数展開
+        path     = "secret/${local.config.environment}/app"  # 変数参照
+      }
+      mount {
+        dir  = "app"
+        file = "prod"
+      }
+    }
+  }
+
+  namespace "production" {
+    vault {
+      driver = "vault"
+      args {
+        endpoint = "https://vault.prod.example.com"
+      }
+    }
+  }
+}
+```
+
+| 機能 | 構文 | 備考 |
+|------|------|------|
+| 変数定義 | `locals { ... }` | HCL 標準、辞書形式 |
+| 変数参照 | `local.config.port` | HCL 標準、属性アクセス |
+| 環境変数 | `env.VAR` | kvtool 拡張 |
+| namespace 定義 | `namespaces { namespace "name" { ... } }` | YAML と同じ構造 |
+| args ブロック | `args { ... }` | YAML の args と同等 |
+| mount ブロック | `mount { ... }` | YAML の mount と同等 |
+
 ## コード規約
 
 ### パッケージコメント
@@ -238,3 +305,5 @@ make gen-docs  # docs/api-reference.md を生成
 - [do../pkg/filesystems/s3.md](do../pkg/filesystems/s3.md): S3 仕様
 - [p../pkg/filesystems/core.go](p../pkg/filesystems/core.go): 統一インターフェース
 - [p../pkg/filesystems/integration_test.go](p../pkg/filesystems/integration_test.go): 統合テスト
+- [pkg/config/hcl_loader.go](pkg/config/hcl_loader.go): HCL 構成ファイルローダー
+- [test_data/configs/.kvtool.hcl.example](test_data/configs/.kvtool.hcl.example): HCL 設定例

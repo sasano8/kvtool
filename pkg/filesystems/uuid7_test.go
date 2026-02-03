@@ -211,9 +211,9 @@ func TestUUID7FsInvalidFixedFormat(t *testing.T) {
 	// 不正な形式の UUID はエラーになる
 	invalidUUIDs := []string{
 		"not-a-uuid",
-		"0190a5e4-1234-7abc-8def",            // 短すぎる
-		"0190a5e4-1234-7abc-8def-0123456789", // 短すぎる
-		"0190a5e4123470bc8def0123456789ab",   // ハイフンなし
+		"0190a5e4-1234-7abc-8def",              // 短すぎる
+		"0190a5e4-1234-7abc-8def-0123456789",   // 短すぎる
+		"0190a5e4123470bc8def0123456789ab",     // ハイフンなし
 		"ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ", // 不正な文字
 	}
 

@@ -73,8 +73,8 @@
   - [x] テストの更新 ([pkg/sources/source_test.go:102-154](pkg/sources/source_test.go#L102-L154))
 
 #### 未実装
-- [ ] 環境変数インジェクション耐性の確認
-  - 改行を含む値が別の KEY=VALUE として解釈されないことの確認（実装済みだがテスト追加）
+- [x] 環境変数インジェクション耐性の確認 ([pkg/sources/integration_test.go:137-184](pkg/sources/integration_test.go#L137-L184))
+  - [x] 改行を含む値が別の KEY=VALUE として解釈されないことの確認
 
 #### 追加の検証観点
 - [x] シングルクォートを含む値（`it's`）- エスケープ不要 ([pkg/sources/source_test.go:294-321](pkg/sources/source_test.go#L294-L321), [pkg/decoders/dotenv_to_json_test.go:180-230](pkg/decoders/dotenv_to_json_test.go#L180-L230))
@@ -94,12 +94,60 @@
   - [x] テスト追加 ([pkg/filesystems/uuid7_test.go](pkg/filesystems/uuid7_test.go))
   - [x] Factory への登録 ([pkg/filesystems/factory.go](pkg/filesystems/factory.go))
 
-### HCL (HashiCorp Configuration Language)
-- [ ] HCL ファイルを読んで JSON にする
-  - [ ] HCL パーサーの実装（github.com/hashicorp/hcl/v2 使用）
-  - [ ] HCL から JSON への変換
-  - [ ] ネストされた構造のサポート
-  - [ ] 変数展開のサポート
+### HCL 構成ファイル (.kvtool.hcl)
+
+**仕様**: kvtool 用の構成ファイル形式。HCL 標準 + 環境変数展開（kvtool 拡張）
+
+```hcl
+# .kvtool.hcl
+
+# 変数定義（HCL 標準の locals）
+locals {
+  config = {
+    environment = "development"
+    port        = 8080
+  }
+}
+
+# 環境変数展開（kvtool 拡張）
+# env.VAR または "${env.VAR}" で展開可能
+stores {
+  vault {
+    driver = "vault"
+    args {
+      endpoint = env.VAULT_ADDR
+      token    = env.VAULT_TOKEN
+      path     = "secret/${local.config.environment}/app"
+    }
+    mount {
+      dir  = "app"
+      file = "prod"
+    }
+  }
+}
+```
+
+| 機能 | 構文 | 備考 |
+|------|------|------|
+| 変数定義 | `locals { ... }` | HCL 標準、辞書形式で複数定義可能 |
+| 変数参照 | `local.config.port` | HCL 標準、属性アクセス可能 |
+| 環境変数 | `env.VAR` | kvtool 拡張（HCL 式内で使用） |
+| args ブロック | `args { ... }` | YAML の args と同等 |
+| mount ブロック | `mount { ... }` | YAML の mount と同等 |
+
+#### 実装済み
+- [x] HCL パーサーの実装（github.com/hashicorp/hcl/v2 使用） ([pkg/config/hcl_loader.go](pkg/config/hcl_loader.go))
+- [x] locals ブロックのパース ([pkg/config/hcl_loader.go:93-132](pkg/config/hcl_loader.go#L93-L132))
+- [x] 環境変数展開 `env.VAR` の実装 ([pkg/config/hcl_loader.go:77-91](pkg/config/hcl_loader.go#L77-L91))
+- [x] local 変数参照の解決 ([pkg/config/hcl_loader.go:65-66](pkg/config/hcl_loader.go#L65-L66))
+- [x] stores ブロックから KvtoolConfig への変換 ([pkg/config/hcl_loader.go:134-184](pkg/config/hcl_loader.go#L134-L184))
+- [x] args/mount ブロックのサポート（YAML 形式との整合性） ([pkg/config/hcl_loader.go:186-282](pkg/config/hcl_loader.go#L186-L282))
+- [x] .kvtool.hcl ファイルのロード機能 ([pkg/config/hcl_loader.go:42-75](pkg/config/hcl_loader.go#L42-L75))
+- [x] テストの実装 ([pkg/config/hcl_loader_test.go](pkg/config/hcl_loader_test.go))
+- [x] サンプル設定ファイル ([test_data/configs/.kvtool.hcl.example](test_data/configs/.kvtool.hcl.example))
+
+#### HCL Transform（別機能）
+- [ ] HCL ファイルを読んで JSON にする Transform
   - [ ] Transform 設定での利用
     ```yaml
     namespaces:
@@ -111,7 +159,6 @@
             transform:
               read: hcl
     ```
-  - [ ] テストの実装
   - ユースケース:
     - Terraform 設定ファイルの読み込み
     - Nomad/Consul 設定との統合

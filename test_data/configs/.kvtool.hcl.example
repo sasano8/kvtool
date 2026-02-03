@@ -1,0 +1,80 @@
+# .kvtool.hcl - kvtool 設定ファイル（HCL 形式）
+#
+# 構文:
+# - locals { ... }              : 変数定義（HCL 標準）
+# - local.var                   : 変数参照（HCL 標準）
+# - env.VAR                     : 環境変数展開（kvtool 拡張）
+# - namespaces { namespace "name" { ... } } : namespace 定義
+#
+# ストア定義形式（YAML と同等）:
+# - driver : ドライバー名
+# - args   : ドライバー固有の引数
+# - mount  : マウント設定（dir, file）
+
+# 変数定義（辞書形式で複数定義可能）
+locals {
+  config = {
+    environment = "development"
+    port        = 8080
+    debug       = true
+  }
+
+  database = {
+    host = "localhost"
+    port = 5432
+    name = "myapp"
+  }
+}
+
+# ストア定義
+namespaces {
+  namespace "default" {
+    # Vault ストア
+    vault {
+      driver = "vault"
+      args {
+        endpoint = env.VAULT_ADDR     # 環境変数から取得
+        token    = env.VAULT_TOKEN
+        path     = "secret/${local.config.environment}/app"  # 変数を使用
+      }
+      mount {
+        dir  = "app"
+        file = "prod"
+      }
+    }
+
+    # S3 ストア
+    s3 {
+      driver = "s3"
+      args {
+        endpoint = env.S3_ENDPOINT
+        bucket   = "config-bucket"
+        root     = local.config.environment
+      }
+    }
+
+    # ローカルファイルシステム（dotenv transform 付き）
+    local {
+      driver = "local"
+      args {
+        root = "./configs/${local.config.environment}"
+        transform = {
+          read  = "dotenv"
+          write = "dotenv"
+        }
+      }
+      mount {
+        file = ""
+      }
+    }
+
+    # 環境変数
+    env {
+      driver = "env"
+      args {}
+      mount {
+        file = ""
+      }
+    }
+  }
+}

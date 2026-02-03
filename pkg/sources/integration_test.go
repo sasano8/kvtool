@@ -132,3 +132,65 @@ func TestSourceEnvWithDecoderLongValue(t *testing.T) {
 	require.Equal(longValue, actualValue, "long value should be preserved correctly")
 	require.Len(actualValue, 10*1024, "value length should be 10KB")
 }
+
+// TestSourceEnvInjectionResistance は環境変数インジェクション耐性のテスト
+// 改行を含む値が別の KEY=VALUE として解釈されないことを確認
+func TestSourceEnvInjectionResistance(t *testing.T) {
+	tests := []struct {
+		name        string
+		envKey      string
+		envValue    string
+		injectedKey string // インジェクションされないことを確認するキー
+	}{
+		{
+			name:        "改行で KEY=VALUE インジェクション試行",
+			envKey:      "SAFE_KEY",
+			envValue:    "safe_value\nINJECTED_KEY=malicious_value",
+			injectedKey: "INJECTED_KEY",
+		},
+		{
+			name:        "CR+LF で KEY=VALUE インジェクション試行",
+			envKey:      "SAFE_KEY2",
+			envValue:    "safe_value\r\nINJECTED_KEY2=malicious_value",
+			injectedKey: "INJECTED_KEY2",
+		},
+		{
+			name:        "複数改行でのインジェクション試行",
+			envKey:      "SAFE_KEY3",
+			envValue:    "line1\nINJECT1=bad\nINJECT2=worse\nline4",
+			injectedKey: "INJECT1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require := require.New(t)
+
+			// 環境変数を設定（改行を含む悪意のある値）
+			os.Setenv(tt.envKey, tt.envValue)
+			defer os.Unsetenv(tt.envKey)
+
+			// SourceEnv でデータを取得
+			var source Source = &SourceEnv{}
+			reader, err := source.Load()
+			require.NoError(err)
+
+			// EnvDecoder でデコード（信頼モード）
+			var decoder decoders.Decoder = &decoders.EnvDecoder{Trusted: true}
+			result, err := decoder.Decode(reader)
+			require.NoError(err)
+
+			dataMap, ok := result.(map[string]any)
+			require.True(ok, "result should be map[string]any")
+
+			// 元のキーが存在し、改行を含む値全体が保持されていることを確認
+			actualValue, exists := dataMap[tt.envKey]
+			require.True(exists, "original key should exist")
+			require.Equal(tt.envValue, actualValue, "original value should be preserved including newlines")
+
+			// インジェクションされたキーが存在しないことを確認
+			_, injected := dataMap[tt.injectedKey]
+			require.False(injected, "injected key should NOT exist - injection attempt failed (good!)")
+		})
+	}
+}

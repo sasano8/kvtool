@@ -5,7 +5,6 @@
 - [クイックスタート](./quickstart.md)
 - [ストア構成ファイル](./configuration.md)
 - [ドライバー](./api-reference.md)
-  - [S3](./filesystems/s3.md)
 - [.env ファイル仕様](./dotenv-spec.md)
 - [アーキテクチャ](./architecture.md)
 - [開発ガイド](./development.md)

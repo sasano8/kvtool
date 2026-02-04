@@ -4,6 +4,33 @@
 
 生成コマンド: `go run scripts/gen-docs.go`
 
+## DbFsConfig
+
+ファイル: [db.go](pkg/filesystems/db.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| connection_string | string | ✓ | - | データベース接続文字列 |
+| driver | string |  | - | データベースドライバー（postgres, mysql, sqlite）。省略時は接続文字列から自動判定 |
+| query | string | ✓ | - | SQL クエリ。{key} と {namespace} がプレースホルダーとして使用可能 |
+| timeout | time.Duration |  | 10s | クエリタイムアウト |
+| namespace | string |  | default | デフォルトの namespace 値 |
+
+**設定例:**
+
+```yaml
+dbfs:
+  driver: db
+  args:
+    connection_string: postgres://user:pass@localhost/db
+    driver: postgres
+    query: SELECT value FROM config WHERE key = {key}
+    timeout: 30s
+    namespace: production
+```
+
+---
+
 ## LocalFsConfig
 
 ファイル: [local.go](pkg/filesystems/local.go)
@@ -60,6 +87,26 @@ s3fs:
     use_path_style: true
     transform: dotenv
     timeout: 60s
+```
+
+---
+
+## UUID7FsConfig
+
+ファイル: [uuid7.go](pkg/filesystems/uuid7.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| seed | *int64 |  | - | シード値（指定すると決定論的な UUID を生成） |
+| fixed | string |  | - | 固定 UUID 文字列（常にこの値を返す） |
+
+**設定例:**
+
+```yaml
+uuid7fs:
+  driver: uuid7
+  args:
+    fixed: 0190a5e4-1234-7abc-8def-0123456789ab
 ```
 
 ---

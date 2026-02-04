@@ -36,6 +36,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createS3Fs(storeInfo)
 	case "uuid7":
 		return f.createUUID7Fs(storeInfo)
+	case "db":
+		return f.createDbFs(storeInfo)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
 	}
@@ -183,6 +185,30 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 	}
 
 	return NewS3Fs(f.ctx, config)
+}
+
+func (f *FilesystemFactory) createDbFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	connectionString, _ := args["connection_string"].(string)
+	driver, _ := args["driver"].(string)
+	query, _ := args["query"].(string)
+	namespace, _ := args["namespace"].(string)
+
+	timeout := 10 * time.Second
+	if timeoutVal, ok := args["timeout"].(int); ok {
+		timeout = time.Duration(timeoutVal) * time.Second
+	}
+
+	config := DbFsConfig{
+		ConnectionString: connectionString,
+		Driver:           driver,
+		Query:            query,
+		Namespace:        namespace,
+		Timeout:          timeout,
+	}
+
+	return NewDbFs(f.ctx, &config)
 }
 
 // GetFilesystem is a convenience function that creates a filesystem without storing the factory

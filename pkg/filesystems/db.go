@@ -46,7 +46,7 @@ type DbFsConfig struct {
 
 	// Driver はデータベースドライバー名（postgres, mysql, sqlite）
 	// 省略時は接続文字列から自動判定
-	Driver string `yaml:"driver" doc:"データベースドライバー（postgres, mysql, sqlite）。省略時は接続文字列から自動判定" required:"false" example:"postgres"`
+	Driver string `yaml:"driver" doc:"データベースドライバー（postgres, mysql, sqlite）。省略時は接続文字列から自動判定" required:"false"`
 
 	// Query は値を取得する SQL クエリ
 	// {key} と {namespace} はプレースホルダーとして展開される

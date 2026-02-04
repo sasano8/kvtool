@@ -23,7 +23,6 @@ dbfs:
   driver: db
   args:
     connection_string: postgres://user:pass@localhost/db
-    driver: postgres
     query: SELECT value FROM config WHERE key = {key}
     timeout: 30s
     namespace: production

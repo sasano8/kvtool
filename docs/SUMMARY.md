@@ -4,6 +4,7 @@
 - [インストール](./installation.md)
 - [クイックスタート](./quickstart.md)
 - [ストア構成ファイル](./configuration.md)
+- [HTTP サーバー](./http-server.md)
 - [ドライバー](./api-reference.md)
 - [.env ファイル仕様](./dotenv-spec.md)
 - [アーキテクチャ](./architecture.md)

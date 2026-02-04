@@ -18,7 +18,7 @@ type VaultConfig struct {
 	Addr string `yaml:"addr" doc:"Vault サーバーのアドレス" required:"true" example:"http://localhost:8200"`
 
 	// Token は Vault 認証トークン
-	Token string `yaml:"token" doc:"Vault 認証トークン（省略時は VAULT_TOKEN 環境変数から取得）" required:"false" example:"root"`
+	Token string `yaml:"token" doc:"Vault 認証トークン" required:"true" example:"root"`
 
 	// Namespace は Vault 名前空間（Enterprise 機能）
 	Namespace string `yaml:"namespace" doc:"Vault 名前空間（Enterprise 機能）" required:"false" default:"" example:"admin"`
@@ -57,8 +57,7 @@ type VaultFsFile struct {
 
 func GetVaultFs(parent context.Context, fs *VaultConfig) (*VaultFs, error) {
 	cfg := vaultapi.DefaultConfig()
-	// VAULT_ADDR や TLS 系環境変数（VAULT_CACERT等）を反映
-	_ = cfg.ReadEnvironment()
+	// 環境変数からは読み込まない（明示的な設定のみ使用）
 
 	cfg.Address = fs.Addr
 	client, err := vaultapi.NewClient(cfg)

@@ -36,8 +36,8 @@ localfs:
 | bucket | string | ✓ | - | S3 バケット名 |
 | region | string | ✓ | - | AWS リージョン |
 | root | string |  | - | バケット内のルートパス。このパスより上位には遡れない |
-| access_key_id | string |  | - | AWS アクセスキー ID（省略時は環境変数または IAM ロールから取得） |
-| secret_access_key | string |  | - | AWS シークレットアクセスキー（省略時は環境変数または IAM ロールから取得） |
+| access_key_id | string | ✓ | - | AWS アクセスキー ID |
+| secret_access_key | string | ✓ | - | AWS シークレットアクセスキー |
 | session_token | string |  | - | AWS セッショントークン（一時的な認証情報使用時） |
 | endpoint | string |  | - | カスタムエンドポイント（MinIO など S3 互換ストレージ用） |
 | use_path_style | bool |  | false | パススタイルアクセスを使用（S3 互換ストレージで必要な場合あり） |
@@ -71,7 +71,7 @@ s3fs:
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
 |-----------|-----|:----:|----------|------|
 | addr | string | ✓ | - | Vault サーバーのアドレス |
-| token | string |  | - | Vault 認証トークン（省略時は VAULT_TOKEN 環境変数から取得） |
+| token | string | ✓ | - | Vault 認証トークン |
 | namespace | string |  | - | Vault 名前空間（Enterprise 機能） |
 | mount | string | ✓ | secret | KV シークレットエンジンのマウントパス |
 | kv_ver | int |  | 2 | KV シークレットエンジンのバージョン（現在は 2 のみサポート） |

@@ -61,11 +61,11 @@ type S3FsConfig struct {
 	// Root はバケット内のルートパス（オプション）
 	Root string `yaml:"root" doc:"バケット内のルートパス。このパスより上位には遡れない" required:"false" default:"" example:"config/production"`
 
-	// AccessKeyID は AWS アクセスキー ID（オプション、環境変数または IAM ロールから取得可能）
-	AccessKeyID string `yaml:"access_key_id" doc:"AWS アクセスキー ID（省略時は環境変数または IAM ロールから取得）" required:"false" default:"" example:"AKIAIOSFODNN7EXAMPLE"`
+	// AccessKeyID は AWS アクセスキー ID（必須）
+	AccessKeyID string `yaml:"access_key_id" doc:"AWS アクセスキー ID" required:"true" example:"AKIAIOSFODNN7EXAMPLE"`
 
-	// SecretAccessKey は AWS シークレットアクセスキー（オプション）
-	SecretAccessKey string `yaml:"secret_access_key" doc:"AWS シークレットアクセスキー（省略時は環境変数または IAM ロールから取得）" required:"false" default:"" example:"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"`
+	// SecretAccessKey は AWS シークレットアクセスキー（必須）
+	SecretAccessKey string `yaml:"secret_access_key" doc:"AWS シークレットアクセスキー" required:"true" example:"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"`
 
 	// SessionToken は AWS セッショントークン（オプション、一時認証情報使用時）
 	SessionToken string `yaml:"session_token" doc:"AWS セッショントークン（一時的な認証情報使用時）" required:"false" default:"" example:"FwoGZXIvYXdzE..."`
@@ -93,15 +93,11 @@ type S3Fs struct {
 
 // NewS3Fs は S3 ファイルシステムを作成します。
 //
-// 認証情報は以下の優先順位で取得されます：
-//  1. 設定ファイルでの明示的な指定
-//  2. 環境変数（AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY）
-//  3. 共有認証情報ファイル（~/.aws/credentials）
-//  4. IAM ロール（EC2, ECS などで実行時）
+// 認証情報は設定ファイルで明示的に指定する必要があります。
+// 環境変数からの自動読み込みは行いません。
 //
 // エラーが発生する場合：
-//   - 設定が不正な場合（バケット名または region が空）
-//   - AWS 認証情報が見つからない場合
+//   - 設定が不正な場合（バケット名、region、認証情報が空）
 //   - S3 への接続に失敗した場合
 func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 	// バケット名と region は必須
@@ -131,22 +127,19 @@ func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 	var awsCfg aws.Config
 	var err error
 
-	// 認証情報が明示的に指定されている場合
-	if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
-		awsCfg, err = config.LoadDefaultConfig(ctx,
-			config.WithRegion(cfg.Region),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-				cfg.AccessKeyID,
-				cfg.SecretAccessKey,
-				cfg.SessionToken,
-			)),
-		)
-	} else {
-		// デフォルトの認証情報チェーン（環境変数、共有認証情報ファイル、IAM ロール）
-		awsCfg, err = config.LoadDefaultConfig(ctx,
-			config.WithRegion(cfg.Region),
-		)
+	// 認証情報は明示的に指定が必須（環境変数からは読み込まない）
+	if cfg.AccessKeyID == "" || cfg.SecretAccessKey == "" {
+		return nil, fmt.Errorf("access_key_id and secret_access_key are required")
 	}
+
+	awsCfg, err = config.LoadDefaultConfig(ctx,
+		config.WithRegion(cfg.Region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			cfg.AccessKeyID,
+			cfg.SecretAccessKey,
+			cfg.SessionToken,
+		)),
+	)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS config: %w", err)

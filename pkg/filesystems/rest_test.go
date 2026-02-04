@@ -30,13 +30,13 @@ func TestRestFs_GetFile(t *testing.T) {
 	defer server.Close()
 
 	tests := []struct {
-		name           string
-		root           string
-		path           string
-		expectedKey    string
-		expectedValue  any
-		expectError    bool
-		errorContains  string
+		name          string
+		root          string
+		path          string
+		expectedKey   string
+		expectedValue any
+		expectError   bool
+		errorContains string
 	}{
 		{
 			name:          "正常系: ルートからファイル取得",

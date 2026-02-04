@@ -39,7 +39,6 @@ var configOrder = []string{
 	"S3FsConfig",
 	"VaultConfig",
 	"DbFsConfig",
-	"UUID7FsConfig",
 	"EnvFsConfig",
 }
 

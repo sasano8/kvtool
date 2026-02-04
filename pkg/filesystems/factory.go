@@ -34,8 +34,6 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createEnvFs(storeInfo)
 	case "s3":
 		return f.createS3Fs(storeInfo)
-	case "uuid7":
-		return f.createUUID7Fs(storeInfo)
 	case "db":
 		return f.createDbFs(storeInfo)
 	default:
@@ -111,32 +109,6 @@ func (f *FilesystemFactory) createEnvFs(storeInfo *StoreInfo) (Filesystem, error
 	return &FsEnvFilesystem{
 		Ctx: f.ctx,
 	}, nil
-}
-
-func (f *FilesystemFactory) createUUID7Fs(storeInfo *StoreInfo) (Filesystem, error) {
-	args := storeInfo.Args
-	config := &UUID7FsConfig{}
-
-	// seed オプション（int64）
-	if seedVal, ok := args["seed"]; ok {
-		var seed int64
-		switch v := seedVal.(type) {
-		case int:
-			seed = int64(v)
-		case int64:
-			seed = v
-		case float64:
-			seed = int64(v)
-		}
-		config.Seed = &seed
-	}
-
-	// fixed オプション（string）
-	if fixed, ok := args["fixed"].(string); ok {
-		config.Fixed = fixed
-	}
-
-	return NewUUID7Fs(f.ctx, config)
 }
 
 func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error) {

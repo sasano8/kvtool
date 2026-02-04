@@ -9,6 +9,7 @@ import (
 	"github.com/sasano8/kvtool/cmd/cmd_file_convert"
 	"github.com/sasano8/kvtool/cmd/cmd_file_load"
 	"github.com/sasano8/kvtool/cmd/cmd_store"
+	"github.com/sasano8/kvtool/cmd/cmd_tool"
 	"github.com/spf13/cobra"
 )
 
@@ -81,6 +82,7 @@ func init() {
 	CmdFile.AddCommand(belongsTo(CmdFileConvert, fileConverts))
 	CmdRoot.AddCommand(CmdFile)
 	CmdRoot.AddCommand(belongsTo(CmdStore, stores))
+	CmdRoot.AddCommand(cmd_tool.CmdTool)
 }
 
 // CmdRoot represents the base command when called without any subcommands

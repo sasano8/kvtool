@@ -121,23 +121,3 @@ dbfs:
 
 ---
 
-## UUID7FsConfig
-
-ファイル: [uuid7.go](pkg/filesystems/uuid7.go)
-
-| パラメータ | 型 | 必須 | デフォルト | 説明 |
-|-----------|-----|:----:|----------|------|
-| seed | *int64 |  | - | シード値（指定すると決定論的な UUID を生成） |
-| fixed | string |  | - | 固定 UUID 文字列（常にこの値を返す） |
-
-**設定例:**
-
-```yaml
-uuid7fs:
-  driver: uuid7
-  args:
-    fixed: 0190a5e4-1234-7abc-8def-0123456789ab
-```
-
----
-

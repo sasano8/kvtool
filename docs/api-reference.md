@@ -95,6 +95,37 @@ vault:
 
 ---
 
+## RestFsConfig
+
+ファイル: [rest.go](pkg/filesystems/rest.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| base_url | string | ✓ | - | ベース URL |
+| root | string |  | - | ルートパス |
+| auth_type | string |  | - | 認証タイプ（bearer, basic） |
+| token | string |  | - | Bearer トークン |
+| token_file | string |  | - | Bearer トークンファイルパス |
+| username | string |  | - | Basic 認証ユーザー名 |
+| password | string |  | - | Basic 認証パスワード |
+| ca_file | string |  | - | CA 証明書ファイルパス |
+| insecure | bool |  | false | TLS 証明書検証をスキップ |
+| timeout | time.Duration |  | 30s | リクエストタイムアウト |
+
+**設定例:**
+
+```yaml
+restfs:
+  driver: rest
+  args:
+    base_url: https://api.example.com
+    root: /api/v1/data
+    auth_type: bearer
+    token_file: /var/run/secrets/token
+```
+
+---
+
 ## DbFsConfig
 
 ファイル: [db.go](pkg/filesystems/db.go)

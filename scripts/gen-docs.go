@@ -38,6 +38,7 @@ var configOrder = []string{
 	"LocalFsConfig",
 	"S3FsConfig",
 	"VaultConfig",
+	"RestFsConfig",
 	"DbFsConfig",
 	"EnvFsConfig",
 }

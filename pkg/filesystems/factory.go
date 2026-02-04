@@ -36,6 +36,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createS3Fs(storeInfo)
 	case "db":
 		return f.createDbFs(storeInfo)
+	case "rest":
+		return f.createRestFs(storeInfo)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
 	}
@@ -181,6 +183,44 @@ func (f *FilesystemFactory) createDbFs(storeInfo *StoreInfo) (Filesystem, error)
 	}
 
 	return NewDbFs(f.ctx, &config)
+}
+
+func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	baseURL, _ := args["base_url"].(string)
+	root, _ := args["root"].(string)
+	authType, _ := args["auth_type"].(string)
+	token, _ := args["token"].(string)
+	tokenFile, _ := args["token_file"].(string)
+	username, _ := args["username"].(string)
+	password, _ := args["password"].(string)
+	caFile, _ := args["ca_file"].(string)
+
+	insecure := false
+	if val, ok := args["insecure"].(bool); ok {
+		insecure = val
+	}
+
+	timeout := 30 * time.Second
+	if timeoutVal, ok := args["timeout"].(int); ok {
+		timeout = time.Duration(timeoutVal) * time.Second
+	}
+
+	config := &RestFsConfig{
+		BaseURL:   baseURL,
+		Root:      root,
+		AuthType:  authType,
+		Token:     token,
+		TokenFile: tokenFile,
+		Username:  username,
+		Password:  password,
+		CAFile:    caFile,
+		Insecure:  insecure,
+		Timeout:   timeout,
+	}
+
+	return NewRestFs(f.ctx, config)
 }
 
 // GetFilesystem is a convenience function that creates a filesystem without storing the factory

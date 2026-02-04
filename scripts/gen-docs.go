@@ -33,6 +33,16 @@ type ConfigStructInfo struct {
 	FileName    string
 }
 
+// configOrder は出力順を定義します
+var configOrder = []string{
+	"LocalFsConfig",
+	"S3FsConfig",
+	"VaultConfig",
+	"DbFsConfig",
+	"UUID7FsConfig",
+	"EnvFsConfig",
+}
+
 func main() {
 	driver := flag.String("driver", "", "特定のドライバーのみ生成（例: s3, local, vault）")
 	flag.Parse()
@@ -60,6 +70,9 @@ func main() {
 		return
 	}
 
+	// 出力順にソート
+	configs = sortConfigs(configs)
+
 	// ドライバーリファレンスを生成
 	if err := generateAPIReference(configs); err != nil {
 		fmt.Fprintf(os.Stderr, "Error generating driver reference: %v\n", err)
@@ -68,6 +81,38 @@ func main() {
 
 	fmt.Printf("✅ Generated documentation for %d configuration structures\n", len(configs))
 	fmt.Println("📄 Output: docs/api-reference.md")
+}
+
+// sortConfigs は configOrder に従って設定をソートします
+func sortConfigs(configs []ConfigStructInfo) []ConfigStructInfo {
+	orderMap := make(map[string]int)
+	for i, name := range configOrder {
+		orderMap[name] = i
+	}
+
+	sorted := make([]ConfigStructInfo, 0, len(configs))
+	remaining := make([]ConfigStructInfo, 0)
+
+	// まず順序が定義されているものを抽出
+	for _, cfg := range configs {
+		if _, ok := orderMap[cfg.Name]; ok {
+			sorted = append(sorted, cfg)
+		} else {
+			remaining = append(remaining, cfg)
+		}
+	}
+
+	// 順序でソート
+	for i := 0; i < len(sorted)-1; i++ {
+		for j := i + 1; j < len(sorted); j++ {
+			if orderMap[sorted[i].Name] > orderMap[sorted[j].Name] {
+				sorted[i], sorted[j] = sorted[j], sorted[i]
+			}
+		}
+	}
+
+	// 残りを末尾に追加
+	return append(sorted, remaining...)
 }
 
 // parseFilesystems は filesystems ディレクトリ内の Go ファイルを解析します

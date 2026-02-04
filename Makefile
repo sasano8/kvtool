@@ -125,8 +125,8 @@ lint:
 # コード内のコメントと構造体タグから API リファレンスを自動生成します
 # 出力: docs/api-reference.md
 # 詳細: CLAUDE.md の「コード規約」セクション参照
-.PHONY: gen-docs
-gen-docs:
+.PHONY: doc-gen
+doc-gen:
 	@echo "=== Generating documentation from code ==="
 	@go run scripts/gen-docs.go
 	@echo "✅ Documentation generated successfully"

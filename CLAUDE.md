@@ -165,7 +165,7 @@ type S3FsConfig struct {
 これらのタグから API リファレンスを自動生成:
 
 ```bash
-make gen-docs  # docs/api-reference.md を生成
+make doc-gen  # docs/api-reference.md を生成
 ```
 
 ### セキュリティ規約
@@ -224,7 +224,7 @@ func TestSomething(t *testing.T) {
 コード内のコメントと構造体タグから自動生成:
 
 ```bash
-make gen-docs  # docs/api-reference.md を生成
+make doc-gen  # docs/api-reference.md を生成
 ```
 
 実装: [scripts/gen-docs.go](scripts/gen-docs.go)
@@ -248,7 +248,7 @@ make gen-docs  # docs/api-reference.md を生成
 3. **インターフェース実装**: `Filesystem` と `File` を実装
 4. **Factory 登録**: `filesystems/factory.go` に追加
 5. **テスト**: `filesystems/integration_test.go` にテストケース追加
-6. **ドキュメント生成**: `make gen-docs` を実行
+6. **ドキュメント生成**: `make doc-gen` を実行
 
 ### 新 Transform 追加
 

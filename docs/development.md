@@ -53,7 +53,7 @@ make services-logs
 
 ```bash
 # APIリファレンスを自動生成
-make gen-docs
+make doc-gen
 ```
 
 コード内のコメントと構造体タグから `docs/api-reference.md` が自動生成されます。
@@ -80,6 +80,6 @@ make setup-tools
 2. **構造体定義**: 設定構造体を定義（`doc`, `required`, `default`, `example` タグを含む）
 3. **インターフェース実装**: `Filesystem` と `File` インターフェースを実装
 4. **テスト**: `filesystems/integration_test.go` にテストケースを追加
-5. **ドキュメント生成**: `make gen-docs` を実行
+5. **ドキュメント生成**: `make doc-gen` を実行
 
 詳細は [CLAUDE.md](../CLAUDE.md) の「開発ワークフロー」セクションを参照してください。

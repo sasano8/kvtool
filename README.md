@@ -114,7 +114,7 @@ make vault-up                     # http://localhost:8200
 make vault-down
 
 # ドキュメント生成
-make gen-docs                     # docs/api-reference.md を生成
+make doc-gen                      # docs/api-reference.md を生成
 make book-build                   # mdBook をビルド
 make book-serve                   # mdBook サーバー起動
 

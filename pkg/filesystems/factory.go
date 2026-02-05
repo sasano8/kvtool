@@ -38,6 +38,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createDbFs(storeInfo)
 	case "rest":
 		return f.createRestFs(storeInfo)
+	case "tool":
+		return f.createToolFs(storeInfo)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
 	}
@@ -221,6 +223,10 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 	}
 
 	return NewRestFs(f.ctx, config)
+}
+
+func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {
+	return NewToolFs(f.ctx, &ToolFsConfig{})
 }
 
 // GetFilesystem is a convenience function that creates a filesystem without storing the factory

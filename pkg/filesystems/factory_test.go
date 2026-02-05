@@ -89,6 +89,34 @@ func TestFactoryCreateLocalFsWithDefaults(t *testing.T) {
 	require.Equal(".", localFs.Root)
 }
 
+func TestFactoryCreateToolFs(t *testing.T) {
+	require := require.New(t)
+
+	ctx := context.Background()
+	factory := NewFilesystemFactory(ctx)
+
+	storeInfo := &StoreInfo{
+		Driver: "tool",
+		Args:   map[string]interface{}{},
+	}
+
+	fs, err := factory.Create(storeInfo)
+	require.NoError(err)
+	require.NotNil(fs)
+
+	// uuid7 を取得
+	file, err := fs.GetFile("uuid7")
+	require.NoError(err)
+
+	data, err := file.LoadAsJson()
+	require.NoError(err)
+
+	// 値がそのまま返される
+	value, ok := data.(string)
+	require.True(ok)
+	require.Len(value, 36) // UUID format
+}
+
 func TestGetFilesystemConvenienceFunction(t *testing.T) {
 	require := require.New(t)
 

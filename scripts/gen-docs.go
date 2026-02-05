@@ -41,6 +41,7 @@ var configOrder = []string{
 	"RestFsConfig",
 	"DbFsConfig",
 	"EnvFsConfig",
+	"ToolFsConfig",
 }
 
 func main() {

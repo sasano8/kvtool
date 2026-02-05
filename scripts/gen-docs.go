@@ -151,76 +151,92 @@ func parseGoFile(filename string) ([]ConfigStructInfo, error) {
 	var configs []ConfigStructInfo
 
 	// 構造体定義を探す
-	ast.Inspect(node, func(n ast.Node) bool {
-		typeSpec, ok := n.(*ast.TypeSpec)
-		if !ok {
-			return true
+	for _, decl := range node.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.TYPE {
+			continue
 		}
 
-		structType, ok := typeSpec.Type.(*ast.StructType)
-		if !ok {
-			return true
-		}
-
-		// Config で終わる構造体のみ処理
-		if !strings.HasSuffix(typeSpec.Name.Name, "Config") {
-			return true
-		}
-
-		config := ConfigStructInfo{
-			Name:        typeSpec.Name.Name,
-			PackageName: node.Name.Name,
-			FileName:    filename,
-		}
-
-		// 構造体のコメントを取得
-		if typeSpec.Doc != nil {
-			config.Comment = typeSpec.Doc.Text()
-		}
-
-		// フィールドを解析
-		for _, field := range structType.Fields.List {
-			if len(field.Names) == 0 {
-				continue // 埋め込みフィールドはスキップ
-			}
-
-			fieldName := field.Names[0].Name
-
-			// 非公開フィールドはスキップ
-			if !ast.IsExported(fieldName) {
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok {
 				continue
 			}
 
-			fieldInfo := FieldInfo{
-				Name: fieldName,
-				Type: getTypeName(field.Type),
+			structType, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				continue
 			}
 
-			// コメントを取得
-			if field.Doc != nil {
-				fieldInfo.Comment = strings.TrimSpace(field.Doc.Text())
+			// Config で終わる構造体のみ処理
+			if !strings.HasSuffix(typeSpec.Name.Name, "Config") {
+				continue
 			}
 
-			// タグを解析
-			if field.Tag != nil {
-				tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
-
-				fieldInfo.YAMLName = tag.Get("yaml")
-				fieldInfo.Doc = tag.Get("doc")
-				fieldInfo.Required = tag.Get("required") == "true"
-				fieldInfo.DefaultValue = tag.Get("default")
-				fieldInfo.Example = tag.Get("example")
+			config := ConfigStructInfo{
+				Name:        typeSpec.Name.Name,
+				PackageName: node.Name.Name,
+				FileName:    filename,
 			}
 
-			config.Fields = append(config.Fields, fieldInfo)
+			// 構造体のコメントを取得（GenDecl.Doc を優先）
+			if genDecl.Doc != nil {
+				config.Comment = genDecl.Doc.Text()
+			} else if typeSpec.Doc != nil {
+				config.Comment = typeSpec.Doc.Text()
+			}
+
+			// フィールドを解析
+			for _, field := range structType.Fields.List {
+				if len(field.Names) == 0 {
+					continue // 埋め込みフィールドはスキップ
+				}
+
+				fieldName := field.Names[0].Name
+
+				// 非公開フィールドはスキップ
+				if !ast.IsExported(fieldName) {
+					continue
+				}
+
+				fieldInfo := FieldInfo{
+					Name: fieldName,
+					Type: getTypeName(field.Type),
+				}
+
+				// コメントを取得
+				if field.Doc != nil {
+					fieldInfo.Comment = strings.TrimSpace(field.Doc.Text())
+				}
+
+				// タグを解析
+				if field.Tag != nil {
+					tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
+
+					fieldInfo.YAMLName = tag.Get("yaml")
+					fieldInfo.Doc = tag.Get("doc")
+					fieldInfo.Required = tag.Get("required") == "true"
+					fieldInfo.DefaultValue = tag.Get("default")
+					fieldInfo.Example = tag.Get("example")
+				}
+
+				config.Fields = append(config.Fields, fieldInfo)
+			}
+
+			// configOrder に含まれる構造体、またはフィールドがある構造体を追加
+			_, inOrder := func() (int, bool) {
+				for i, name := range configOrder {
+					if name == config.Name {
+						return i, true
+					}
+				}
+				return -1, false
+			}()
+			if len(config.Fields) > 0 || inOrder {
+				configs = append(configs, config)
+			}
 		}
-
-		if len(config.Fields) > 0 {
-			configs = append(configs, config)
-		}
-
-		return true
-	})
+	}
 
 	return configs, nil
 }

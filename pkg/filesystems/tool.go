@@ -42,6 +42,8 @@ import (
 )
 
 // ToolFsConfig は Tool ファイルシステムの設定
+// 設定パラメータは不要です。
+// 利用可能なパス: uuid7, uuid4, now, timestamp, random/hex/{bytes}, random/base64/{bytes}, password
 type ToolFsConfig struct {
 	// 設定項目なし（将来の拡張用）
 }

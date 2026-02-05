@@ -6,6 +6,8 @@
 
 ## LocalFsConfig
 
+LocalFsConfig はローカルファイルシステムの設定
+
 ファイル: [local.go](pkg/filesystems/local.go)
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
@@ -28,6 +30,8 @@ localfs:
 ---
 
 ## S3FsConfig
+
+S3FsConfig は S3 ファイルシステムの設定
 
 ファイル: [s3.go](pkg/filesystems/s3.go)
 
@@ -66,6 +70,8 @@ s3fs:
 
 ## VaultConfig
 
+VaultConfig は HashiCorp Vault ファイルシステムの設定
+
 ファイル: [vault.go](pkg/filesystems/vault.go)
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
@@ -96,6 +102,8 @@ vault:
 ---
 
 ## RestFsConfig
+
+RestFsConfig は REST ファイルシステムの設定
 
 ファイル: [rest.go](pkg/filesystems/rest.go)
 
@@ -128,6 +136,8 @@ restfs:
 
 ## DbFsConfig
 
+DbFsConfig はデータベースファイルシステムの設定
+
 ファイル: [db.go](pkg/filesystems/db.go)
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
@@ -149,6 +159,16 @@ dbfs:
     timeout: 30s
     namespace: production
 ```
+
+---
+
+## ToolFsConfig
+
+ToolFsConfig は Tool ファイルシステムの設定
+設定パラメータは不要です。
+利用可能なパス: uuid7, uuid4, now, timestamp, random/hex/{bytes}, random/base64/{bytes}, password
+
+ファイル: [tool.go](pkg/filesystems/tool.go)
 
 ---
 

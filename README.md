@@ -9,6 +9,54 @@
 - **フォーマット変換**: dotenv ↔ JSON ↔ YAML
 - **接続確認**: ストアの接続テスト機能
 
+## Before / After
+
+### Before: 複数ツールを個別に呼び出し
+
+```bash
+# Vault からシークレット取得
+export VAULT_ADDR=http://localhost:8200
+export VAULT_TOKEN=s.xxxxx
+DB_PASS=$(vault kv get -field=password secret/prod/db)
+
+# S3 から設定ファイル取得
+aws s3 cp s3://my-bucket/config/app.json /tmp/app.json
+APP_CONFIG=$(cat /tmp/app.json)
+
+# ローカル .env 読み込み
+export $(cat .env | xargs)
+
+# 環境変数から取得
+API_KEY=$API_KEY
+```
+
+### After: kvtool で統一アクセス
+
+```bash
+# 全て同じインターフェースで取得
+kvtool store load vault/prod/db/password      # Vault
+kvtool store load s3config/app.json           # S3
+kvtool store load local/.env                  # ローカル .env
+kvtool store load env/API_KEY                 # 環境変数
+```
+
+```yaml
+# .kvtool.yml - 一度設定すれば、どこからでも同じ方法でアクセス
+namespaces:
+  default:
+    vault:
+      driver: vault
+      args: { addr: "http://localhost:8200", token: "${VAULT_TOKEN}", mount: "secret" }
+    s3config:
+      driver: s3
+      args: { bucket: "my-bucket", region: "us-east-1", root: "config" }
+    local:
+      driver: local
+      args: { root: ".", transform: { read: "dotenv" } }
+    env:
+      driver: env
+```
+
 ## インストール
 
 ```bash

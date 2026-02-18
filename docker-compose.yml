@@ -83,5 +83,36 @@ services:
         echo "[minio-init] done."
     restart: "no"
 
+  # NATS (JetStream KV Store)
+  nats:
+    image: nats:latest
+    container_name: nats-dev
+    ports:
+      - "4222:4222"   # Client
+      - "8222:8222"   # Monitoring
+    command: ["-js", "-m", "8222"]
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -q --spider http://localhost:8222/healthz || exit 1"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  # NATS 初期化: テスト用 KV バケットとデータを作成
+  nats-init:
+    image: natsio/nats-box:latest
+    depends_on:
+      nats:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        echo "[nats-init] creating test KV bucket and data..."
+        nats -s nats://nats:4222 kv add kvtool-test 2>/dev/null || true
+        nats -s nats://nats:4222 kv put kvtool-test "app/settings" '{"debug":true,"port":8080}'
+        nats -s nats://nats:4222 kv put kvtool-test simple 'hello world'
+        echo "[nats-init] done."
+    restart: "no"
+
 volumes:
   minio-data:

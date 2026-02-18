@@ -28,3 +28,12 @@ func getTestVaultToken() string {
 	}
 	return "root" // ローカル開発用デフォルト（dev mode）
 }
+
+// getTestNatsURL returns NATS URL for testing
+// Makefile の test-ci ターゲットで NATS_URL を設定する
+func getTestNatsURL() string {
+	if url := os.Getenv("NATS_URL"); url != "" {
+		return url
+	}
+	return "nats://127.0.0.1:4222" // ローカル開発用デフォルト
+}

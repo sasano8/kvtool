@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -113,6 +114,24 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 			testPath:       "../../../etc/passwd",
 			expectError:    true,
 			errorSubstring: "escapes root",
+		},
+		{
+			name: "NatsFs - 有効なキー",
+			setupFs: func(t *testing.T) Filesystem {
+				if testing.Short() || os.Getenv("SKIP_NATS_TESTS") == "true" {
+					t.Skip("NATS tests skipped (-short flag or SKIP_NATS_TESTS=true)")
+				}
+
+				fs, err := NewNatsFs(context.Background(), &NatsFsConfig{
+					URL:     getTestNatsURL(),
+					Bucket:  "kvtool-test",
+					Timeout: 5 * time.Second,
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath:    "app/settings",
+			expectError: false,
 		},
 	}
 
@@ -297,6 +316,28 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				"APP_NAME":     "kvtool",
 				"APP_ENV":      "production",
 				"DATABASE_URL": "postgres://localhost/mydb",
+			},
+			expectError: false,
+		},
+		{
+			name: "NatsFs - JSON 値を読み込む",
+			setupFs: func(t *testing.T) Filesystem {
+				if testing.Short() || os.Getenv("SKIP_NATS_TESTS") == "true" {
+					t.Skip("NATS tests skipped (-short flag or SKIP_NATS_TESTS=true)")
+				}
+
+				fs, err := NewNatsFs(context.Background(), &NatsFsConfig{
+					URL:     getTestNatsURL(),
+					Bucket:  "kvtool-test",
+					Timeout: 5 * time.Second,
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath: "app/settings",
+			expectedData: map[string]any{
+				"debug": true,
+				"port":  float64(8080),
 			},
 			expectError: false,
 		},

@@ -21,6 +21,7 @@ fi
 export VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
 export VAULT_TOKEN="${VAULT_TOKEN:-root}"
 export MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://127.0.0.1:9000}"
+export NATS_URL="${NATS_URL:-nats://127.0.0.1:4222}"
 
 log() {
     echo "=== $1 ==="
@@ -36,8 +37,8 @@ trap cleanup EXIT
 
 cd "$PROJECT_DIR"
 
-log "Starting services (Vault + MinIO)"
-docker compose up -d vault minio
+log "Starting services (Vault + MinIO + NATS)"
+docker compose up -d vault minio nats
 
 log "Waiting for Vault"
 "$SCRIPT_DIR/wait-for-vault.sh" "$VAULT_ADDR"
@@ -50,6 +51,12 @@ log "Waiting for MinIO"
 
 log "Initializing MinIO"
 docker compose up minio-init
+
+log "Waiting for NATS"
+"$SCRIPT_DIR/wait-for-nats.sh" "http://127.0.0.1:8222"
+
+log "Initializing NATS"
+docker compose up nats-init
 
 log "Running tests"
 if [ "$CI_MODE" = true ]; then

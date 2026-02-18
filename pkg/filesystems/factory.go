@@ -38,6 +38,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createDbFs(storeInfo)
 	case "rest":
 		return f.createRestFs(storeInfo)
+	case "nats":
+		return f.createNatsFs(storeInfo)
 	case "tool":
 		return f.createToolFs(storeInfo)
 	default:
@@ -223,6 +225,34 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 	}
 
 	return NewRestFs(f.ctx, config)
+}
+
+func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	url, _ := args["url"].(string)
+	bucket, _ := args["bucket"].(string)
+	token, _ := args["token"].(string)
+	user, _ := args["user"].(string)
+	password, _ := args["password"].(string)
+	credsFile, _ := args["creds_file"].(string)
+
+	timeout := 10 * time.Second
+	if timeoutVal, ok := args["timeout"].(int); ok {
+		timeout = time.Duration(timeoutVal) * time.Second
+	}
+
+	config := &NatsFsConfig{
+		URL:       url,
+		Bucket:    bucket,
+		Token:     token,
+		User:      user,
+		Password:  password,
+		CredsFile: credsFile,
+		Timeout:   timeout,
+	}
+
+	return NewNatsFs(f.ctx, config)
 }
 
 func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {

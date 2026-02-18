@@ -149,6 +149,10 @@ func testConnection(ctx context.Context, name string, storeInfo *config.StoreInf
 		addr, _ := storeInfo.Args["addr"].(string)
 		mount, _ := storeInfo.Args["mount"].(string)
 		details = fmt.Sprintf("addr: %s, mount: %s", addr, mount)
+	case "nats":
+		url, _ := storeInfo.Args["url"].(string)
+		bucket, _ := storeInfo.Args["bucket"].(string)
+		details = fmt.Sprintf("url: %s, bucket: %s", url, bucket)
 	default:
 		details = "connected"
 	}

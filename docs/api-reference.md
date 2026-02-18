@@ -162,6 +162,35 @@ dbfs:
 
 ---
 
+## NatsFsConfig
+
+NatsFsConfig は NATS JetStream KV ファイルシステムの設定
+
+ファイル: [nats.go](pkg/filesystems/nats.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| url | string | ✓ | - | NATS サーバーの接続 URL |
+| bucket | string | ✓ | - | JetStream KV バケット名 |
+| token | string |  | - | NATS 認証トークン |
+| user | string |  | - | NATS ユーザー名 |
+| password | string |  | - | NATS パスワード |
+| creds_file | string |  | - | NATS 認証情報ファイルパス |
+| timeout | time.Duration |  | 10s | 接続およびリクエストタイムアウト |
+
+**設定例:**
+
+```yaml
+natsfs:
+  driver: nats
+  args:
+    url: nats://localhost:4222
+    bucket: config
+    timeout: 30s
+```
+
+---
+
 ## ToolFsConfig
 
 ToolFsConfig は Tool ファイルシステムの設定

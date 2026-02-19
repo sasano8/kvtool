@@ -40,6 +40,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createRestFs(storeInfo)
 	case "nats":
 		return f.createNatsFs(storeInfo)
+	case "redis":
+		return f.createRedisFs(storeInfo)
 	case "tool":
 		return f.createToolFs(storeInfo)
 	default:
@@ -253,6 +255,34 @@ func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, erro
 	}
 
 	return NewNatsFs(f.ctx, config)
+}
+
+func (f *FilesystemFactory) createRedisFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	addr, _ := args["addr"].(string)
+	password, _ := args["password"].(string)
+	prefix, _ := args["prefix"].(string)
+
+	db := 0
+	if dbVal, ok := args["db"].(int); ok {
+		db = dbVal
+	}
+
+	timeout := 10 * time.Second
+	if timeoutVal, ok := args["timeout"].(int); ok {
+		timeout = time.Duration(timeoutVal) * time.Second
+	}
+
+	config := &RedisFsConfig{
+		Addr:     addr,
+		Password: password,
+		DB:       db,
+		Prefix:   prefix,
+		Timeout:  timeout,
+	}
+
+	return NewRedisFs(f.ctx, config)
 }
 
 func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {

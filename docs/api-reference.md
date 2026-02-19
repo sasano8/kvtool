@@ -191,6 +191,34 @@ natsfs:
 
 ---
 
+## RedisFsConfig
+
+RedisFsConfig は Redis ファイルシステムの設定
+
+ファイル: [redis.go](pkg/filesystems/redis.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| addr | string | ✓ | - | Redis サーバーのアドレス |
+| password | string |  | - | Redis 認証パスワード |
+| db | int |  | 0 | Redis データベース番号 |
+| prefix | string |  | - | キーのプレフィックス |
+| timeout | time.Duration |  | 10s | 接続およびリクエストタイムアウト |
+
+**設定例:**
+
+```yaml
+redisfs:
+  driver: redis
+  args:
+    addr: localhost:6379
+    db: 0
+    prefix: config:
+    timeout: 30s
+```
+
+---
+
 ## ToolFsConfig
 
 ToolFsConfig は Tool ファイルシステムの設定

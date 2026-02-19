@@ -37,3 +37,12 @@ func getTestNatsURL() string {
 	}
 	return "nats://127.0.0.1:4222" // ローカル開発用デフォルト
 }
+
+// getTestRedisAddr returns Redis address for testing
+// Makefile の test-ci ターゲットで REDIS_ADDR を設定する
+func getTestRedisAddr() string {
+	if addr := os.Getenv("REDIS_ADDR"); addr != "" {
+		return addr
+	}
+	return "127.0.0.1:6379" // ローカル開発用デフォルト
+}

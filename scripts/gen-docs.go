@@ -41,6 +41,7 @@ var configOrder = []string{
 	"RestFsConfig",
 	"DbFsConfig",
 	"NatsFsConfig",
+	"RedisFsConfig",
 	"EnvFsConfig",
 	"ToolFsConfig",
 }

@@ -38,6 +38,7 @@ test-ci:
 	VAULT_ADDR=http://127.0.0.1:8200 \
 	VAULT_TOKEN=root \
 	NATS_URL=nats://127.0.0.1:4222 \
+	REDIS_ADDR=127.0.0.1:6379 \
 	go test -v ./...
 
 # テストを詳細表示で実行します（主要な出力のみ）
@@ -77,22 +78,25 @@ test-quality:
 test-full: lint
 	@./scripts/test-with-services.sh
 
-# 開発用サービス（Vault + MinIO + NATS）を起動します
+# 開発用サービス（Vault + MinIO + NATS + Redis）を起動します
 # Vault: http://localhost:8200 (token: root)
 # MinIO: http://localhost:9000 (user: minioadmin)
 # NATS:  nats://localhost:4222 (monitoring: http://localhost:8222)
+# Redis: localhost:6379
 .PHONY: services-up
 services-up:
-	@docker compose up -d vault minio nats
+	@docker compose up -d vault minio nats redis
 	@./scripts/wait-for-vault.sh
 	@./scripts/wait-for-minio.sh
 	@./scripts/wait-for-nats.sh
-	@docker compose up vault-init minio-init nats-init
+	@./scripts/wait-for-redis.sh
+	@docker compose up vault-init minio-init nats-init redis-init
 	@echo ""
 	@echo "Services ready:"
 	@echo "  Vault: http://localhost:8200 (token: root)"
 	@echo "  MinIO: http://localhost:9000 (user: minioadmin)"
 	@echo "  NATS:  nats://localhost:4222 (monitoring: http://localhost:8222)"
+	@echo "  Redis: localhost:6379"
 
 # 全サービスを停止します
 .PHONY: services-down

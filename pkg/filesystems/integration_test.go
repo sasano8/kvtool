@@ -133,6 +133,24 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 			testPath:    "app/settings",
 			expectError: false,
 		},
+		{
+			name: "RedisFs - 有効なキー",
+			setupFs: func(t *testing.T) Filesystem {
+				if testing.Short() || os.Getenv("SKIP_REDIS_TESTS") == "true" {
+					t.Skip("Redis tests skipped (-short flag or SKIP_REDIS_TESTS=true)")
+				}
+
+				fs, err := NewRedisFs(context.Background(), &RedisFsConfig{
+					Addr:    getTestRedisAddr(),
+					Prefix:  "kvtool-test:",
+					Timeout: 5 * time.Second,
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath:    "app/settings",
+			expectError: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -329,6 +347,28 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				fs, err := NewNatsFs(context.Background(), &NatsFsConfig{
 					URL:     getTestNatsURL(),
 					Bucket:  "kvtool-test",
+					Timeout: 5 * time.Second,
+				})
+				require.NoError(t, err)
+				return fs
+			},
+			testPath: "app/settings",
+			expectedData: map[string]any{
+				"debug": true,
+				"port":  float64(8080),
+			},
+			expectError: false,
+		},
+		{
+			name: "RedisFs - JSON 値を読み込む",
+			setupFs: func(t *testing.T) Filesystem {
+				if testing.Short() || os.Getenv("SKIP_REDIS_TESTS") == "true" {
+					t.Skip("Redis tests skipped (-short flag or SKIP_REDIS_TESTS=true)")
+				}
+
+				fs, err := NewRedisFs(context.Background(), &RedisFsConfig{
+					Addr:    getTestRedisAddr(),
+					Prefix:  "kvtool-test:",
 					Timeout: 5 * time.Second,
 				})
 				require.NoError(t, err)

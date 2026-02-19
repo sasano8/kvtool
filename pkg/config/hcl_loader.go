@@ -53,6 +53,10 @@ func LoadHCLConfig(path string) (*KvtoolConfig, error) {
 		return nil, fmt.Errorf("failed to parse namespaces: %w", err)
 	}
 
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }
 

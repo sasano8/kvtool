@@ -12,7 +12,6 @@ LocalFsConfig はローカルファイルシステムの設定
 
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
 |-----------|-----|:----:|----------|------|
-| timeout | time.Duration |  | 30s | リクエストタイムアウト |
 | root | string |  | . | ルートディレクトリ。このパスより上位には遡れない |
 | transform | string |  | json | 読み込み時の変換方法（dotenv, json など） |
 
@@ -22,7 +21,6 @@ LocalFsConfig はローカルファイルシステムの設定
 localfs:
   driver: local
   args:
-    timeout: 60s
     root: ./config
     transform: dotenv
 ```
@@ -45,7 +43,6 @@ S3FsConfig は S3 ファイルシステムの設定
 | endpoint | string |  | - | カスタムエンドポイント（MinIO など S3 互換ストレージ用） |
 | use_path_style | bool |  | false | パススタイルアクセスを使用（S3 互換ストレージで必要な場合あり） |
 | transform | string |  | - | 読み込み時の変換方法（dotenv, json など） |
-| timeout | time.Duration |  | 30s | リクエストタイムアウト |
 
 **設定例:**
 
@@ -61,7 +58,6 @@ s3fs:
     endpoint: http://localhost:9000
     use_path_style: true
     transform: dotenv
-    timeout: 60s
 ```
 
 ---
@@ -82,7 +78,6 @@ VaultConfig は HashiCorp Vault ファイルシステムの設定
 | version | int |  | 0 | 取得するシークレットのバージョン（0 = 最新） |
 | field | string |  | - | 取得する特定のフィールド名（省略時は全フィールド） |
 | pretty | bool |  | false | JSON 出力を整形するか |
-| timeout | time.Duration |  | 30s | リクエストタイムアウト |
 
 **設定例:**
 
@@ -94,7 +89,6 @@ vault:
     token: root
     namespace: admin
     mount: secret
-    timeout: 60s
 ```
 
 ---
@@ -115,7 +109,6 @@ RestFsConfig は REST ファイルシステムの設定
 | password | string |  | - | Basic 認証パスワード |
 | ca_file | string |  | - | CA 証明書ファイルパス |
 | insecure | bool |  | false | TLS 証明書検証をスキップ |
-| timeout | time.Duration |  | 30s | リクエストタイムアウト |
 
 **設定例:**
 
@@ -141,7 +134,6 @@ DbFsConfig はデータベースファイルシステムの設定
 | connection_string | string | ✓ | - | データベース接続文字列 |
 | driver | string |  | - | データベースドライバー（postgres, mysql, sqlite）。省略時は接続文字列から自動判定 |
 | query | string | ✓ | - | SQL クエリ。{key} と {namespace} がプレースホルダーとして使用可能 |
-| timeout | time.Duration |  | 10s | クエリタイムアウト |
 | namespace | string |  | default | デフォルトの namespace 値 |
 
 **設定例:**
@@ -152,7 +144,6 @@ dbfs:
   args:
     connection_string: postgres://user:pass@localhost/db
     query: SELECT value FROM config WHERE key = {key}
-    timeout: 30s
     namespace: production
 ```
 
@@ -172,7 +163,6 @@ NatsFsConfig は NATS JetStream KV ファイルシステムの設定
 | user | string |  | - | NATS ユーザー名 |
 | password | string |  | - | NATS パスワード |
 | creds_file | string |  | - | NATS 認証情報ファイルパス |
-| timeout | time.Duration |  | 10s | 接続およびリクエストタイムアウト |
 
 **設定例:**
 
@@ -182,7 +172,6 @@ natsfs:
   args:
     url: nats://localhost:4222
     bucket: config
-    timeout: 30s
 ```
 
 ---
@@ -199,7 +188,6 @@ RedisFsConfig は Redis ファイルシステムの設定
 | password | string |  | - | Redis 認証パスワード |
 | db | int |  | 0 | Redis データベース番号 |
 | prefix | string |  | - | キーのプレフィックス |
-| timeout | time.Duration |  | 10s | 接続およびリクエストタイムアウト |
 
 **設定例:**
 
@@ -210,7 +198,6 @@ redisfs:
     addr: localhost:6379
     db: 0
     prefix: config:
-    timeout: 30s
 ```
 
 ---
@@ -225,7 +212,6 @@ GitFsConfig は Git ファイルシステムの設定
 |-----------|-----|:----:|----------|------|
 | url | string | ✓ | - | Git リポジトリ URL |
 | ref | string |  | main | ブランチまたはタグ名 |
-| timeout | time.Duration |  | 60s | git コマンドのタイムアウト |
 
 **設定例:**
 
@@ -235,7 +221,6 @@ gitfs:
   args:
     url: https://github.com/example/config.git
     ref: main
-    timeout: 120s
 ```
 
 ---

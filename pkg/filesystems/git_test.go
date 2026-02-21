@@ -3,6 +3,7 @@ package filesystems
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +26,9 @@ func TestGitFs_ConfigValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			_, err := NewGitFs(context.Background(), tt.config)
+			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			defer cancel()
+			_, err := NewGitFs(ctx, tt.config)
 			if tt.expectError {
 				require.Error(err)
 				require.Contains(err.Error(), tt.errorMsg)
@@ -88,7 +91,9 @@ func TestGitFs_Integration(t *testing.T) {
 			Ref: "main",
 		}
 
-		fs, err := NewGitFs(context.Background(), config)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		fs, err := NewGitFs(ctx, config)
 		require.NoError(err)
 
 		// Sync
@@ -120,7 +125,9 @@ func TestGitFs_Integration(t *testing.T) {
 			Ref: "main",
 		}
 
-		fs, err := NewGitFs(context.Background(), config)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		fs, err := NewGitFs(ctx, config)
 		require.NoError(err)
 
 		// Sync を呼ばずに GetFile → 自動 Sync される

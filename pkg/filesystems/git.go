@@ -38,9 +38,6 @@ type GitFsConfig struct {
 
 	// Ref はブランチ・タグ名（オプション、デフォルト: main）
 	Ref string `yaml:"ref" doc:"ブランチまたはタグ名" required:"false" default:"main" example:"main"`
-
-	// Timeout はコマンドタイムアウト（オプション）
-	Timeout time.Duration `yaml:"timeout" doc:"git コマンドのタイムアウト" required:"false" default:"60s" example:"120s"`
 }
 
 // GitFs は Git リポジトリベースのファイルシステム
@@ -55,6 +52,8 @@ type GitFs struct {
 
 // NewGitFs は新しい Git ファイルシステムを作成
 func NewGitFs(ctx context.Context, config *GitFsConfig) (*GitFs, error) {
+	timeout := extractTimeout(ctx, 60*time.Second)
+
 	if config.URL == "" {
 		return nil, fmt.Errorf("url is required")
 	}
@@ -64,15 +63,10 @@ func NewGitFs(ctx context.Context, config *GitFsConfig) (*GitFs, error) {
 		ref = "main"
 	}
 
-	timeout := config.Timeout
-	if timeout == 0 {
-		timeout = 60 * time.Second
-	}
-
 	cacheDir := gitCacheDir(config.URL, ref)
 
 	fs := &GitFs{
-		ctx:      ctx,
+		ctx:      context.Background(),
 		cacheDir: cacheDir,
 		url:      config.URL,
 		ref:      ref,
@@ -137,9 +131,10 @@ func (fs *GitFs) Sync() error {
 	}
 
 	// inner LocalFs を設定
-	localFs, err := GetLocalFs(fs.ctx, &LocalFsConfig{
-		Root:    fs.cacheDir,
-		Timeout: fs.timeout,
+	localCtx, localCancel := context.WithTimeout(context.Background(), fs.timeout)
+	defer localCancel()
+	localFs, err := GetLocalFs(localCtx, &LocalFsConfig{
+		Root: fs.cacheDir,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create local fs for cache: %w", err)

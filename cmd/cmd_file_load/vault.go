@@ -61,6 +61,8 @@ var CmdLoadFromVault = &cobra.Command{
 		}
 		defer w.Close()
 
+		timeout := must(cmd.Flags().GetDuration("timeout"))
+
 		config, err := catchPanic(func() (filesystems.VaultConfig, error) {
 			config := filesystems.VaultConfig{
 				Addr:      must(cmd.Flags().GetString("addr")),
@@ -70,7 +72,6 @@ var CmdLoadFromVault = &cobra.Command{
 				Version:   must(cmd.Flags().GetInt("version")),
 				Field:     must(cmd.Flags().GetString("field")),
 				Pretty:    must(cmd.Flags().GetBool("pretty")),
-				Timeout:   must(cmd.Flags().GetDuration("timeout")),
 				Token:     must(cmd.Flags().GetString("token")),
 			}
 			return config, nil
@@ -80,8 +81,9 @@ var CmdLoadFromVault = &cobra.Command{
 		}
 
 		loadAsBytes := func(ctx context.Context, config filesystems.VaultConfig, path string) ([]byte, error) {
-			parent := context.Background()
-			fs, err := filesystems.GetVaultFs(parent, &config)
+			vaultCtx, vaultCancel := context.WithTimeout(context.Background(), timeout)
+			defer vaultCancel()
+			fs, err := filesystems.GetVaultFs(vaultCtx, &config)
 			if err != nil {
 				return nil, err
 			}

@@ -24,10 +24,10 @@ func TestVaultFs(t *testing.T) {
 		Mount:     "secret",
 		KvVer:     2,
 		Version:   0,
-		Timeout:   10 * time.Second,
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	vaultFs, err := GetVaultFs(ctx, config)
 	require.NoError(err)
 	require.NotNil(vaultFs)
@@ -62,10 +62,10 @@ func TestVaultFsNonExistentPath(t *testing.T) {
 		Mount:     "secret",
 		KvVer:     2,
 		Version:   0,
-		Timeout:   10 * time.Second,
 	}
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	vaultFs, err := GetVaultFs(ctx, config)
 	require.NoError(err)
 

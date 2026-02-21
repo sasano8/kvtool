@@ -46,9 +46,6 @@ type RedisFsConfig struct {
 
 	// Prefix はキーのプレフィックス
 	Prefix string `yaml:"prefix" doc:"キーのプレフィックス" required:"false" default:"" example:"config:"`
-
-	// Timeout は接続およびリクエストタイムアウト
-	Timeout time.Duration `yaml:"timeout" doc:"接続およびリクエストタイムアウト" required:"false" default:"10s" example:"30s"`
 }
 
 // RedisFs は Redis ファイルシステム
@@ -67,13 +64,10 @@ type RedisFile struct {
 
 // NewRedisFs は新しい Redis ファイルシステムを作成する
 func NewRedisFs(ctx context.Context, config *RedisFsConfig) (*RedisFs, error) {
+	timeout := extractTimeout(ctx, 10*time.Second)
+
 	if config.Addr == "" {
 		return nil, fmt.Errorf("addr is required")
-	}
-
-	timeout := config.Timeout
-	if timeout == 0 {
-		timeout = 10 * time.Second
 	}
 
 	client := redis.NewClient(&redis.Options{
@@ -94,7 +88,7 @@ func NewRedisFs(ctx context.Context, config *RedisFsConfig) (*RedisFs, error) {
 	}
 
 	return &RedisFs{
-		ctx:     ctx,
+		ctx:     context.Background(),
 		client:  client,
 		prefix:  config.Prefix,
 		timeout: timeout,

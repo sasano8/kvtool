@@ -76,9 +76,6 @@ type S3FsConfig struct {
 
 	// Transform は読み込み時の変換方法（オプション）
 	Transform string `yaml:"transform" doc:"読み込み時の変換方法（dotenv, json など）" required:"false" default:"" example:"dotenv"`
-
-	// Timeout はリクエストタイムアウト（オプション）
-	Timeout time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s" example:"60s"`
 }
 
 // S3Fs は S3 ファイルシステムの実装
@@ -97,6 +94,7 @@ type S3Fs struct {
 //   - 設定が不正な場合（バケット名、region、認証情報が空）
 //   - S3 への接続に失敗した場合
 func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
+	timeout := extractTimeout(ctx, 30*time.Second)
 	// バケット名と region は必須
 	if cfg.Bucket == "" {
 		return nil, fmt.Errorf("bucket is required")
@@ -159,11 +157,6 @@ func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 
 	client := s3.NewFromConfig(awsCfg, s3Options...)
 
-	// タイムアウトのデフォルト値
-	if cfg.Timeout == 0 {
-		cfg.Timeout = 30 * time.Second
-	}
-
 	fs := &S3Fs{
 		client:    client,
 		bucket:    cfg.Bucket,
@@ -171,7 +164,7 @@ func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 	}
 
 	// バケットの存在を検証（endpoint + bucket が正しいバケットを示しているか確認）
-	headCtx, headCancel := context.WithTimeout(ctx, cfg.Timeout)
+	headCtx, headCancel := context.WithTimeout(ctx, timeout)
 	defer headCancel()
 
 	_, err = client.HeadBucket(headCtx, &s3.HeadBucketInput{

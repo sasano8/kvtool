@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -83,7 +84,9 @@ func TestRestFs_GetFile(t *testing.T) {
 				BaseURL: tt.baseURL,
 			}
 
-			fs, err := NewRestFs(context.Background(), config)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			fs, err := NewRestFs(ctx, config)
 			require.NoError(err)
 
 			file, err := fs.GetFile(tt.path)
@@ -137,7 +140,9 @@ func TestRestFs_Auth(t *testing.T) {
 			Token:    "test-token",
 		}
 
-		fs, err := NewRestFs(context.Background(), config)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		fs, err := NewRestFs(ctx, config)
 		require.NoError(err)
 
 		file, err := fs.GetFile("data")
@@ -160,7 +165,9 @@ func TestRestFs_Auth(t *testing.T) {
 			Password: "testpass",
 		}
 
-		fs, err := NewRestFs(context.Background(), config)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		fs, err := NewRestFs(ctx, config)
 		require.NoError(err)
 
 		file, err := fs.GetFile("basic")
@@ -179,7 +186,9 @@ func TestRestFs_Validation(t *testing.T) {
 		require := require.New(t)
 
 		config := &RestFsConfig{}
-		_, err := NewRestFs(context.Background(), config)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		_, err := NewRestFs(ctx, config)
 		require.Error(err)
 		require.Contains(err.Error(), "base_url is required")
 	})

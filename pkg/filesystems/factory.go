@@ -14,7 +14,7 @@ type StoreInfo struct {
 	Context *ContextInfo
 }
 
-// ContextInfo represents common operational parameters
+// ContextInfo represents common operational parameters (from config file)
 type ContextInfo struct {
 	Timeout *int // seconds
 }
@@ -67,9 +67,12 @@ func (f *FilesystemFactory) createLocalFs(storeInfo *StoreInfo) (Filesystem, err
 	// Transform 設定を取得
 	transform := getTransformFromArgs(args, "read")
 
-	return GetLocalFs(f.ctx, &LocalFsConfig{
+	timeout := resolveTimeout(storeInfo, 10*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return GetLocalFs(ctx, &LocalFsConfig{
 		Root:      root,
-		Timeout:   getTimeout(storeInfo, 10*time.Second),
 		Transform: transform,
 	})
 }
@@ -103,10 +106,13 @@ func (f *FilesystemFactory) createVaultFs(storeInfo *StoreInfo) (Filesystem, err
 		Mount:     mount,
 		KvVer:     2,
 		Version:   0,
-		Timeout:   getTimeout(storeInfo, 10*time.Second),
 	}
 
-	return GetVaultFs(f.ctx, &config)
+	timeout := resolveTimeout(storeInfo, 10*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return GetVaultFs(ctx, &config)
 }
 
 func (f *FilesystemFactory) createEnvFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -151,10 +157,13 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 		SessionToken:    sessionToken,
 		UsePathStyle:    usePathStyle,
 		Transform:       transform,
-		Timeout:         getTimeout(storeInfo, 30*time.Second),
 	}
 
-	return NewS3Fs(f.ctx, config)
+	timeout := resolveTimeout(storeInfo, 30*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewS3Fs(ctx, config)
 }
 
 func (f *FilesystemFactory) createDbFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -170,10 +179,13 @@ func (f *FilesystemFactory) createDbFs(storeInfo *StoreInfo) (Filesystem, error)
 		Driver:           driver,
 		Query:            query,
 		Namespace:        namespace,
-		Timeout:          getTimeout(storeInfo, 10*time.Second),
 	}
 
-	return NewDbFs(f.ctx, &config)
+	timeout := resolveTimeout(storeInfo, 10*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewDbFs(ctx, &config)
 }
 
 func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -201,10 +213,13 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 		Password:  password,
 		CAFile:    caFile,
 		Insecure:  insecure,
-		Timeout:   getTimeout(storeInfo, 30*time.Second),
 	}
 
-	return NewRestFs(f.ctx, config)
+	timeout := resolveTimeout(storeInfo, 30*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewRestFs(ctx, config)
 }
 
 func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -224,10 +239,13 @@ func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, erro
 		User:      user,
 		Password:  password,
 		CredsFile: credsFile,
-		Timeout:   getTimeout(storeInfo, 10*time.Second),
 	}
 
-	return NewNatsFs(f.ctx, config)
+	timeout := resolveTimeout(storeInfo, 10*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewNatsFs(ctx, config)
 }
 
 func (f *FilesystemFactory) createRedisFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -247,10 +265,13 @@ func (f *FilesystemFactory) createRedisFs(storeInfo *StoreInfo) (Filesystem, err
 		Password: password,
 		DB:       db,
 		Prefix:   prefix,
-		Timeout:  getTimeout(storeInfo, 10*time.Second),
 	}
 
-	return NewRedisFs(f.ctx, config)
+	timeout := resolveTimeout(storeInfo, 10*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewRedisFs(ctx, config)
 }
 
 func (f *FilesystemFactory) createGitFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -260,12 +281,15 @@ func (f *FilesystemFactory) createGitFs(storeInfo *StoreInfo) (Filesystem, error
 	ref, _ := args["ref"].(string)
 
 	config := &GitFsConfig{
-		URL:     url,
-		Ref:     ref,
-		Timeout: getTimeout(storeInfo, 60*time.Second),
+		URL: url,
+		Ref: ref,
 	}
 
-	return NewGitFs(f.ctx, config)
+	timeout := resolveTimeout(storeInfo, 60*time.Second)
+	ctx, cancel := context.WithTimeout(f.ctx, timeout)
+	defer cancel()
+
+	return NewGitFs(ctx, config)
 }
 
 func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -278,9 +302,9 @@ func GetFilesystem(ctx context.Context, storeInfo *StoreInfo) (Filesystem, error
 	return factory.Create(storeInfo)
 }
 
-// getTimeout は StoreInfo から timeout を取得する
+// resolveTimeout は StoreInfo から timeout を解決する
 // context.timeout が指定されていればその値、なければ defaultTimeout
-func getTimeout(storeInfo *StoreInfo, defaultTimeout time.Duration) time.Duration {
+func resolveTimeout(storeInfo *StoreInfo, defaultTimeout time.Duration) time.Duration {
 	if storeInfo.Context != nil && storeInfo.Context.Timeout != nil {
 		return time.Duration(*storeInfo.Context.Timeout) * time.Second
 	}

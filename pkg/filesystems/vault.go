@@ -37,9 +37,6 @@ type VaultConfig struct {
 
 	// Pretty は JSON 出力を整形するか
 	Pretty bool `yaml:"pretty" doc:"JSON 出力を整形するか" required:"false" default:"false"`
-
-	// Timeout はリクエストタイムアウト
-	Timeout time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s" example:"60s"`
 }
 
 type VaultFs struct {
@@ -54,7 +51,8 @@ type VaultFsFile struct {
 	Path string
 }
 
-func GetVaultFs(parent context.Context, fs *VaultConfig) (*VaultFs, error) {
+func GetVaultFs(ctx context.Context, fs *VaultConfig) (*VaultFs, error) {
+	timeout := extractTimeout(ctx, 10*time.Second)
 	cfg := vaultapi.DefaultConfig()
 	// 環境変数からは読み込まない（明示的な設定のみ使用）
 
@@ -75,9 +73,9 @@ func GetVaultFs(parent context.Context, fs *VaultConfig) (*VaultFs, error) {
 
 	vault_client := client.KVv2(mount)
 	fs2 := VaultFs{
-		Ctx:     parent,
+		Ctx:     context.Background(),
 		Client:  vault_client,
-		Timeout: fs.Timeout,
+		Timeout: timeout,
 		Version: fs.Version,
 	}
 	return &fs2, nil

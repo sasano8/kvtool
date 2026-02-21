@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/sasano8/kvtool/pkg/decoders"
 )
@@ -24,9 +23,6 @@ type Path string
 
 // LocalFsConfig はローカルファイルシステムの設定
 type LocalFsConfig struct {
-	// Timeout はリクエストタイムアウト
-	Timeout time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s" example:"60s"`
-
 	// Root はルートディレクトリ
 	Root string `yaml:"root" doc:"ルートディレクトリ。このパスより上位には遡れない" required:"false" default:"." example:"./config"`
 
@@ -40,8 +36,6 @@ type FsLocalFile struct {
 }
 
 type LocalFs struct {
-	Ctx       context.Context
-	Timeout   time.Duration
 	Root      string
 	Transform string // ファイル読み込み時の変換形式
 }
@@ -51,11 +45,9 @@ type LocalFile struct {
 	path string
 }
 
-func GetLocalFs(parent context.Context, config *LocalFsConfig) (*LocalFs, error) {
+func GetLocalFs(_ context.Context, config *LocalFsConfig) (*LocalFs, error) {
 	root := strings.TrimSpace(config.Root)
 	fs := LocalFs{
-		Ctx:       parent,
-		Timeout:   config.Timeout,
 		Root:      root,
 		Transform: config.Transform,
 	}

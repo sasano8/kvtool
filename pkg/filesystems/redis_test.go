@@ -60,12 +60,13 @@ func TestRedisFs(t *testing.T) {
 			require := require.New(t)
 
 			config := &RedisFsConfig{
-				Addr:    redisAddr,
-				Prefix:  "kvtool-test:",
-				Timeout: 5 * time.Second,
+				Addr:   redisAddr,
+				Prefix: "kvtool-test:",
 			}
 
-			fs, err := NewRedisFs(ctx, config)
+			redisCtx, redisCancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer redisCancel()
+			fs, err := NewRedisFs(redisCtx, config)
 			require.NoError(err)
 			defer fs.Close()
 
@@ -100,7 +101,9 @@ func TestRedisFs_ConfigValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewRedisFs(ctx, tt.config)
+			redisCtx, redisCancel := context.WithTimeout(ctx, 5*time.Second)
+			defer redisCancel()
+			_, err := NewRedisFs(redisCtx, tt.config)
 			require.Error(t, err)
 			require.Contains(t, err.Error(), tt.expectError)
 		})

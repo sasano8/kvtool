@@ -171,11 +171,10 @@ func parseGoFile(filename string) ([]ConfigStructInfo, error) {
 				continue
 			}
 
-			// Config で終わる構造体のみ処理
+			// Config で終わる構造体のみ処理（共通型は除外）
 			if !strings.HasSuffix(typeSpec.Name.Name, "Config") {
 				continue
 			}
-
 			config := ConfigStructInfo{
 				Name:        typeSpec.Name.Name,
 				PackageName: node.Name.Name,
@@ -221,6 +220,11 @@ func parseGoFile(filename string) ([]ConfigStructInfo, error) {
 					fieldInfo.Required = tag.Get("required") == "true"
 					fieldInfo.DefaultValue = tag.Get("default")
 					fieldInfo.Example = tag.Get("example")
+				}
+
+				// doc:"-" はドキュメント生成から除外
+				if fieldInfo.Doc == "-" {
+					continue
 				}
 
 				config.Fields = append(config.Fields, fieldInfo)

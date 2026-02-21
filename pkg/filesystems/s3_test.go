@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -120,7 +121,9 @@ func TestNewS3Fs_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
-			fs, err := NewS3Fs(context.Background(), tt.config)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			fs, err := NewS3Fs(ctx, tt.config)
 
 			if tt.expectError {
 				require.Error(err)

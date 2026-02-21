@@ -69,12 +69,13 @@ func TestNatsFs(t *testing.T) {
 			require := require.New(t)
 
 			config := &NatsFsConfig{
-				URL:     natsURL,
-				Bucket:  "kvtool-nats-test",
-				Timeout: 5 * time.Second,
+				URL:    natsURL,
+				Bucket: "kvtool-nats-test",
 			}
 
-			fs, err := NewNatsFs(ctx, config)
+			natsCtx, natsCancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer natsCancel()
+			fs, err := NewNatsFs(natsCtx, config)
 			require.NoError(err)
 			defer fs.Close()
 
@@ -114,7 +115,9 @@ func TestNatsFs_ConfigValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewNatsFs(ctx, tt.config)
+			natsCtx, natsCancel := context.WithTimeout(ctx, 5*time.Second)
+			defer natsCancel()
+			_, err := NewNatsFs(natsCtx, tt.config)
 			require.Error(t, err)
 			require.Contains(t, err.Error(), tt.expectError)
 		})

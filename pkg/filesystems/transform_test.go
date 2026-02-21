@@ -3,11 +3,10 @@ package filesystems
 import (
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestLocalFsTransformDotenv(t *testing.T) {

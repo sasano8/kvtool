@@ -52,21 +52,19 @@ type DbFsConfig struct {
 	// {key} と {namespace} はプレースホルダーとして展開される
 	Query string `yaml:"query" doc:"SQL クエリ。{key} と {namespace} がプレースホルダーとして使用可能" required:"true" example:"SELECT value FROM config WHERE key = {key}"`
 
-	// Timeout はクエリタイムアウト
-	Timeout time.Duration `yaml:"timeout" doc:"クエリタイムアウト" required:"false" default:"10s" example:"30s"`
-
 	// Namespace はデフォルトの namespace 値
 	Namespace string `yaml:"namespace" doc:"デフォルトの namespace 値" required:"false" default:"default" example:"production"`
 }
 
 // DbFs はデータベースファイルシステム
 type DbFs struct {
-	ctx    context.Context
-	db     *sql.DB
-	config *DbFsConfig
-	query  string // プレースホルダー変換後のクエリ
-	hasKey bool   // クエリに {key} が含まれるか
-	hasNs  bool   // クエリに {namespace} が含まれるか
+	ctx     context.Context
+	db      *sql.DB
+	config  *DbFsConfig
+	query   string // プレースホルダー変換後のクエリ
+	hasKey  bool   // クエリに {key} が含まれるか
+	hasNs   bool   // クエリに {namespace} が含まれるか
+	timeout time.Duration
 }
 
 // DbFile はデータベースから取得したファイル
@@ -83,6 +81,8 @@ type DbFile struct {
 
 // NewDbFs は新しいデータベースファイルシステムを作成する
 func NewDbFs(ctx context.Context, config *DbFsConfig) (*DbFs, error) {
+	timeout := extractTimeout(ctx, 10*time.Second)
+
 	if config.ConnectionString == "" {
 		return nil, fmt.Errorf("connection_string is required")
 	}
@@ -97,12 +97,6 @@ func NewDbFs(ctx context.Context, config *DbFsConfig) (*DbFs, error) {
 		if driver == "" {
 			return nil, fmt.Errorf("could not detect database driver from connection string, please specify 'driver' explicitly")
 		}
-	}
-
-	// タイムアウトのデフォルト値
-	timeout := config.Timeout
-	if timeout == 0 {
-		timeout = 10 * time.Second
 	}
 
 	// データベース接続
@@ -127,12 +121,13 @@ func NewDbFs(ctx context.Context, config *DbFsConfig) (*DbFs, error) {
 	query := convertPlaceholders(config.Query, driver, hasKey, hasNs)
 
 	return &DbFs{
-		ctx:    ctx,
-		db:     db,
-		config: config,
-		query:  query,
-		hasKey: hasKey,
-		hasNs:  hasNs,
+		ctx:     context.Background(),
+		db:      db,
+		config:  config,
+		query:   query,
+		hasKey:  hasKey,
+		hasNs:   hasNs,
+		timeout: timeout,
 	}, nil
 }
 
@@ -143,11 +138,6 @@ func (fs *DbFs) GetFile(path string) (File, error) {
 		ns = "default"
 	}
 
-	timeout := fs.config.Timeout
-	if timeout == 0 {
-		timeout = 10 * time.Second
-	}
-
 	return &DbFile{
 		ctx:     fs.ctx,
 		db:      fs.db,
@@ -156,7 +146,7 @@ func (fs *DbFs) GetFile(path string) (File, error) {
 		ns:      ns,
 		hasKey:  fs.hasKey,
 		hasNs:   fs.hasNs,
-		timeout: timeout,
+		timeout: fs.timeout,
 	}, nil
 }
 

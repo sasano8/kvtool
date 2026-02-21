@@ -1,7 +1,6 @@
 package filesystems
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"os"
@@ -18,7 +17,6 @@ func TestLocalFsGetFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -55,7 +53,6 @@ func TestLocalFsLoadAsJson(t *testing.T) {
 	require.NoError(err)
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -87,7 +84,6 @@ func TestLocalFsOpenReader(t *testing.T) {
 	require.NoError(err)
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -112,7 +108,6 @@ func TestLocalFsFileNotFound(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -137,7 +132,6 @@ func TestLocalFsEmptyPath(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -156,7 +150,6 @@ func TestLocalFsAbsolutePath(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -175,7 +168,6 @@ func TestLocalFsPathWithTilde(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -200,7 +192,6 @@ func TestLocalFsPathTraversal(t *testing.T) {
 	defer os.Remove(outsideFile)
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -232,7 +223,6 @@ func TestLocalFsRootAsPath(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -274,7 +264,6 @@ func TestLocalFsSubdirectory(t *testing.T) {
 	require.NoError(err)
 
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: tmpDir,
 	}
 
@@ -306,7 +295,6 @@ func TestLocalFsDefaultRoot(t *testing.T) {
 
 	// Empty root should default to current working directory
 	fs := &LocalFs{
-		Ctx:  context.Background(),
 		Root: "",
 	}
 

@@ -35,15 +35,14 @@ import (
 
 // RestFsConfig は REST ファイルシステムの設定
 type RestFsConfig struct {
-	BaseURL  string `yaml:"base_url" doc:"ベース URL" required:"true" example:"https://api.example.com"`
-	AuthType string `yaml:"auth_type" doc:"認証タイプ（bearer, basic）" required:"false" example:"bearer"`
-	Token     string        `yaml:"token" doc:"Bearer トークン" required:"false"`
-	TokenFile string        `yaml:"token_file" doc:"Bearer トークンファイルパス" required:"false" example:"/var/run/secrets/token"`
-	Username  string        `yaml:"username" doc:"Basic 認証ユーザー名" required:"false"`
-	Password  string        `yaml:"password" doc:"Basic 認証パスワード" required:"false"`
-	CAFile    string        `yaml:"ca_file" doc:"CA 証明書ファイルパス" required:"false"`
-	Insecure  bool          `yaml:"insecure" doc:"TLS 証明書検証をスキップ" required:"false" default:"false"`
-	Timeout   time.Duration `yaml:"timeout" doc:"リクエストタイムアウト" required:"false" default:"30s"`
+	BaseURL   string `yaml:"base_url" doc:"ベース URL" required:"true" example:"https://api.example.com"`
+	AuthType  string `yaml:"auth_type" doc:"認証タイプ（bearer, basic）" required:"false" example:"bearer"`
+	Token     string `yaml:"token" doc:"Bearer トークン" required:"false"`
+	TokenFile string `yaml:"token_file" doc:"Bearer トークンファイルパス" required:"false" example:"/var/run/secrets/token"`
+	Username  string `yaml:"username" doc:"Basic 認証ユーザー名" required:"false"`
+	Password  string `yaml:"password" doc:"Basic 認証パスワード" required:"false"`
+	CAFile    string `yaml:"ca_file" doc:"CA 証明書ファイルパス" required:"false"`
+	Insecure  bool   `yaml:"insecure" doc:"TLS 証明書検証をスキップ" required:"false" default:"false"`
 }
 
 // RestFs は REST API ファイルシステム
@@ -55,29 +54,26 @@ type RestFs struct {
 
 // NewRestFs は新しい REST ファイルシステムを作成
 func NewRestFs(ctx context.Context, config *RestFsConfig) (*RestFs, error) {
+	timeout := extractTimeout(ctx, 30*time.Second)
+
 	if config.BaseURL == "" {
 		return nil, fmt.Errorf("base_url is required")
 	}
 
-	// デフォルト値
-	if config.Timeout == 0 {
-		config.Timeout = 30 * time.Second
-	}
-
 	// HTTP クライアントの作成
-	client, err := createHTTPClient(config)
+	client, err := createHTTPClient(config, timeout)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RestFs{
-		ctx:    ctx,
+		ctx:    context.Background(),
 		config: config,
 		client: client,
 	}, nil
 }
 
-func createHTTPClient(config *RestFsConfig) (*http.Client, error) {
+func createHTTPClient(config *RestFsConfig, timeout time.Duration) (*http.Client, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.Insecure,
 	}
@@ -101,7 +97,7 @@ func createHTTPClient(config *RestFsConfig) (*http.Client, error) {
 
 	return &http.Client{
 		Transport: transport,
-		Timeout:   config.Timeout,
+		Timeout:   timeout,
 	}, nil
 }
 

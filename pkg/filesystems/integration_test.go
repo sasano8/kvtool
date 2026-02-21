@@ -31,7 +31,6 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -52,7 +51,6 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -77,7 +75,9 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
-				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+				fs, err := NewS3Fs(ctx, S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Endpoint:        getTestMinIOEndpoint(),
@@ -98,7 +98,9 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
-				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+				fs, err := NewS3Fs(ctx, S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Endpoint:        getTestMinIOEndpoint(),
@@ -120,10 +122,11 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					t.Skip("NATS tests skipped (-short flag or SKIP_NATS_TESTS=true)")
 				}
 
-				fs, err := NewNatsFs(context.Background(), &NatsFsConfig{
-					URL:     getTestNatsURL(),
-					Bucket:  "kvtool-test",
-					Timeout: 5 * time.Second,
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				fs, err := NewNatsFs(ctx, &NatsFsConfig{
+					URL:    getTestNatsURL(),
+					Bucket: "kvtool-test",
 				})
 				require.NoError(t, err)
 				return fs
@@ -138,10 +141,11 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 					t.Skip("Redis tests skipped (-short flag or SKIP_REDIS_TESTS=true)")
 				}
 
-				fs, err := NewRedisFs(context.Background(), &RedisFsConfig{
-					Addr:    getTestRedisAddr(),
-					Prefix:  "kvtool-test:",
-					Timeout: 5 * time.Second,
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				fs, err := NewRedisFs(ctx, &RedisFsConfig{
+					Addr:   getTestRedisAddr(),
+					Prefix: "kvtool-test:",
 				})
 				require.NoError(t, err)
 				return fs
@@ -191,7 +195,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -218,7 +221,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -240,7 +242,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:       context.Background(),
 					Root:      tmpDir,
 					Transform: "dotenv",
 				}
@@ -257,7 +258,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -288,7 +288,9 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
-				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+				fs, err := NewS3Fs(ctx, S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Endpoint:        getTestMinIOEndpoint(),
@@ -313,7 +315,9 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					t.Skip("MinIO tests skipped (-short flag or SKIP_S3_TESTS=true)")
 				}
 
-				fs, err := NewS3Fs(context.Background(), S3FsConfig{
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+				fs, err := NewS3Fs(ctx, S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
 					Endpoint:        getTestMinIOEndpoint(),
@@ -340,10 +344,11 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					t.Skip("NATS tests skipped (-short flag or SKIP_NATS_TESTS=true)")
 				}
 
-				fs, err := NewNatsFs(context.Background(), &NatsFsConfig{
-					URL:     getTestNatsURL(),
-					Bucket:  "kvtool-test",
-					Timeout: 5 * time.Second,
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				fs, err := NewNatsFs(ctx, &NatsFsConfig{
+					URL:    getTestNatsURL(),
+					Bucket: "kvtool-test",
 				})
 				require.NoError(t, err)
 				return fs
@@ -362,10 +367,11 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 					t.Skip("Redis tests skipped (-short flag or SKIP_REDIS_TESTS=true)")
 				}
 
-				fs, err := NewRedisFs(context.Background(), &RedisFsConfig{
-					Addr:    getTestRedisAddr(),
-					Prefix:  "kvtool-test:",
-					Timeout: 5 * time.Second,
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				fs, err := NewRedisFs(ctx, &RedisFsConfig{
+					Addr:   getTestRedisAddr(),
+					Prefix: "kvtool-test:",
 				})
 				require.NoError(t, err)
 				return fs
@@ -433,7 +439,6 @@ func TestFilesystemInterface_OpenReader(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -451,7 +456,6 @@ func TestFilesystemInterface_OpenReader(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -529,7 +533,6 @@ func TestFilesystemInterface_Consistency(t *testing.T) {
 				require.NoError(t, err)
 
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -600,7 +603,6 @@ func TestFilesystemInterface_ErrorHandling(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -614,7 +616,6 @@ func TestFilesystemInterface_ErrorHandling(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -628,7 +629,6 @@ func TestFilesystemInterface_ErrorHandling(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},
@@ -642,7 +642,6 @@ func TestFilesystemInterface_ErrorHandling(t *testing.T) {
 			setupFs: func(t *testing.T) Filesystem {
 				tmpDir := t.TempDir()
 				return &LocalFs{
-					Ctx:  context.Background(),
 					Root: tmpDir,
 				}
 			},

@@ -106,14 +106,14 @@ func TestDbFs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			ctx := context.Background()
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
 
 			config := &DbFsConfig{
 				ConnectionString: tmpFile.Name(),
 				Driver:           "sqlite",
 				Query:            tt.query,
 				Namespace:        tt.namespace,
-				Timeout:          5 * time.Second,
 			}
 
 			fs, err := NewDbFs(ctx, config)
@@ -232,6 +232,8 @@ func TestDbFs_ConfigValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			defer cancel()
 			_, err := NewDbFs(ctx, tt.config)
 			require.Error(t, err)
 			require.Contains(t, err.Error(), tt.expectError)

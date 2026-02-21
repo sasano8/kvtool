@@ -53,9 +53,6 @@ type NatsFsConfig struct {
 
 	// CredsFile は NATS 認証情報ファイルパス
 	CredsFile string `yaml:"creds_file" doc:"NATS 認証情報ファイルパス" required:"false" default:""`
-
-	// Timeout は接続およびリクエストタイムアウト
-	Timeout time.Duration `yaml:"timeout" doc:"接続およびリクエストタイムアウト" required:"false" default:"10s" example:"30s"`
 }
 
 // NatsFs は NATS JetStream KV ファイルシステム
@@ -75,16 +72,13 @@ type NatsFile struct {
 
 // NewNatsFs は新しい NATS JetStream KV ファイルシステムを作成する
 func NewNatsFs(ctx context.Context, config *NatsFsConfig) (*NatsFs, error) {
+	timeout := extractTimeout(ctx, 10*time.Second)
+
 	if config.URL == "" {
 		return nil, fmt.Errorf("url is required")
 	}
 	if config.Bucket == "" {
 		return nil, fmt.Errorf("bucket is required")
-	}
-
-	timeout := config.Timeout
-	if timeout == 0 {
-		timeout = 10 * time.Second
 	}
 
 	// NATS 接続オプション
@@ -125,7 +119,7 @@ func NewNatsFs(ctx context.Context, config *NatsFsConfig) (*NatsFs, error) {
 	}
 
 	return &NatsFs{
-		ctx:     ctx,
+		ctx:     context.Background(),
 		conn:    conn,
 		kv:      kv,
 		bucket:  config.Bucket,

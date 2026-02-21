@@ -85,7 +85,7 @@ services:
 
   # NATS (JetStream KV Store)
   nats:
-    image: nats:latest
+    image: nats:alpine
     container_name: nats-dev
     ports:
       - "4222:4222"   # Client

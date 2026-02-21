@@ -125,7 +125,6 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 	// Parse S3 configuration
 	bucket, _ := args["bucket"].(string)
 	region, _ := args["region"].(string)
-	root, _ := args["root"].(string)
 	endpoint, _ := args["endpoint"].(string)
 	accessKeyID, _ := args["access_key_id"].(string)
 	secretAccessKey, _ := args["secret_access_key"].(string)
@@ -154,7 +153,6 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 	config := S3FsConfig{
 		Bucket:          bucket,
 		Region:          region,
-		Root:            root,
 		Endpoint:        endpoint,
 		AccessKeyID:     accessKeyID,
 		SecretAccessKey: secretAccessKey,
@@ -195,7 +193,6 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 	args := storeInfo.Args
 
 	baseURL, _ := args["base_url"].(string)
-	root, _ := args["root"].(string)
 	authType, _ := args["auth_type"].(string)
 	token, _ := args["token"].(string)
 	tokenFile, _ := args["token_file"].(string)
@@ -214,9 +211,8 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 	}
 
 	config := &RestFsConfig{
-		BaseURL:   baseURL,
-		Root:      root,
-		AuthType:  authType,
+		BaseURL:  baseURL,
+		AuthType: authType,
 		Token:     token,
 		TokenFile: tokenFile,
 		Username:  username,

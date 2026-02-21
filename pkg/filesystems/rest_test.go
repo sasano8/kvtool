@@ -31,7 +31,7 @@ func TestRestFs_GetFile(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		root          string
+		baseURL       string
 		path          string
 		expectedKey   string
 		expectedValue any
@@ -40,35 +40,35 @@ func TestRestFs_GetFile(t *testing.T) {
 	}{
 		{
 			name:          "正常系: ルートからファイル取得",
-			root:          "/api/v1/data",
+			baseURL:       server.URL + "/api/v1/data",
 			path:          "config",
 			expectedKey:   "key",
 			expectedValue: "value",
 		},
 		{
 			name:          "正常系: ネストしたパス",
-			root:          "/api/v1/data",
+			baseURL:       server.URL + "/api/v1/data",
 			path:          "nested/deep/file",
 			expectedKey:   "nested",
 			expectedValue: true,
 		},
 		{
 			name:          "エラー系: 存在しないパス",
-			root:          "/api/v1/data",
+			baseURL:       server.URL + "/api/v1/data",
 			path:          "notfound",
 			expectError:   true,
 			errorContains: "not found",
 		},
 		{
 			name:          "エラー系: 絶対パス",
-			root:          "/api/v1/data",
+			baseURL:       server.URL + "/api/v1/data",
 			path:          "/etc/passwd",
 			expectError:   true,
 			errorContains: "must be relative",
 		},
 		{
 			name:          "エラー系: パストラバーサル",
-			root:          "/api/v1/data",
+			baseURL:       server.URL + "/api/v1/data",
 			path:          "../../../etc/passwd",
 			expectError:   true,
 			errorContains: "must be relative",
@@ -80,8 +80,7 @@ func TestRestFs_GetFile(t *testing.T) {
 			require := require.New(t)
 
 			config := &RestFsConfig{
-				BaseURL: server.URL,
-				Root:    tt.root,
+				BaseURL: tt.baseURL,
 			}
 
 			fs, err := NewRestFs(context.Background(), config)

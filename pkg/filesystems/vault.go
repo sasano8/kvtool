@@ -47,7 +47,6 @@ type VaultFs struct {
 	Client  *vaultapi.KVv2
 	Version int
 	Timeout time.Duration
-	Root    string
 }
 
 type VaultFsFile struct {

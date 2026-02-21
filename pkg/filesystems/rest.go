@@ -29,16 +29,14 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"time"
 )
 
 // RestFsConfig は REST ファイルシステムの設定
 type RestFsConfig struct {
-	BaseURL   string        `yaml:"base_url" doc:"ベース URL" required:"true" example:"https://api.example.com"`
-	Root      string        `yaml:"root" doc:"ルートパス" required:"false" default:"" example:"/api/v1/data"`
-	AuthType  string        `yaml:"auth_type" doc:"認証タイプ（bearer, basic）" required:"false" example:"bearer"`
+	BaseURL  string `yaml:"base_url" doc:"ベース URL" required:"true" example:"https://api.example.com"`
+	AuthType string `yaml:"auth_type" doc:"認証タイプ（bearer, basic）" required:"false" example:"bearer"`
 	Token     string        `yaml:"token" doc:"Bearer トークン" required:"false"`
 	TokenFile string        `yaml:"token_file" doc:"Bearer トークンファイルパス" required:"false" example:"/var/run/secrets/token"`
 	Username  string        `yaml:"username" doc:"Basic 認証ユーザー名" required:"false"`
@@ -121,15 +119,8 @@ func (fs *RestFs) GetFile(filePath string) (File, error) {
 }
 
 func (fs *RestFs) buildURL(filePath string) string {
-	// base_url + root + path
+	// base_url + path
 	url := strings.TrimSuffix(fs.config.BaseURL, "/")
-	if fs.config.Root != "" {
-		root := fs.config.Root
-		if !strings.HasPrefix(root, "/") {
-			root = "/" + root
-		}
-		url += strings.TrimSuffix(root, "/")
-	}
 	if filePath != "" {
 		url += "/" + filePath
 	}
@@ -224,7 +215,7 @@ func (f *RestFile) OpenReader() (io.ReadCloser, error) {
 
 // Path はファイルパスを返す
 func (f *RestFile) Path() string {
-	return path.Join(f.fs.config.Root, f.path)
+	return f.path
 }
 
 // LoadAsBytes はバイト列として読み込む

@@ -24,7 +24,8 @@
 //	      args:
 //	        bucket: my-config-bucket
 //	        region: ap-northeast-1
-//	        root: config
+//	      mount:
+//	        dir: config
 //
 // ## Security
 //
@@ -58,9 +59,6 @@ type S3FsConfig struct {
 	// Region は AWS リージョン（必須）
 	Region string `yaml:"region" doc:"AWS リージョン" required:"true" example:"ap-northeast-1"`
 
-	// Root はバケット内のルートパス（オプション）
-	Root string `yaml:"root" doc:"バケット内のルートパス。このパスより上位には遡れない" required:"false" default:"" example:"config/production"`
-
 	// AccessKeyID は AWS アクセスキー ID（必須）
 	AccessKeyID string `yaml:"access_key_id" doc:"AWS アクセスキー ID" required:"true" example:"AKIAIOSFODNN7EXAMPLE"`
 
@@ -87,7 +85,6 @@ type S3FsConfig struct {
 type S3Fs struct {
 	client    *s3.Client
 	bucket    string
-	root      string
 	transform string
 }
 
@@ -170,7 +167,6 @@ func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 	fs := &S3Fs{
 		client:    client,
 		bucket:    cfg.Bucket,
-		root:      filepath.Clean(cfg.Root),
 		transform: cfg.Transform,
 	}
 
@@ -196,14 +192,9 @@ func (fs *S3Fs) GetFile(path string) (File, error) {
 	}
 
 	// パストラバーサルチェック
-	fullPath := filepath.Join(fs.root, path)
-	cleanPath := filepath.Clean(fullPath)
-
-	// root が空文字の場合は、パス全体をチェック
-	if fs.root != "" && fs.root != "." {
-		if !strings.HasPrefix(cleanPath, fs.root) {
-			return nil, fmt.Errorf("path escapes root: %s", path)
-		}
+	cleanPath := filepath.Clean(path)
+	if strings.HasPrefix(cleanPath, "..") {
+		return nil, fmt.Errorf("path escapes root: %s", path)
 	}
 
 	// S3 のパスはフォワードスラッシュを使用

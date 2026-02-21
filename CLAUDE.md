@@ -258,15 +258,46 @@ make doc-gen  # docs/api-reference.md を生成
 
 ## 暗黙知・設計判断
 
-### ファイルシステムの設定階層
+### args と mount の分離
 
-#### S3 の場合
+ストア設定は `args`（接続情報）と `mount`（参照スコープ）に分離する。
+
+- **args**: ドライバー固有の接続パラメータ（URL, 認証情報, バケット名など）
+- **mount.dir**: ストア内の参照ルートディレクトリ（全ドライバー共通）
+- **mount.file**: 参照する単一ファイル（全ドライバー共通）
+
+```yaml
+s3-store:
+  driver: "s3"
+  args:
+    bucket: "my-bucket"       # 接続情報（ドライバー固有）
+    region: "ap-northeast-1"
+  mount:
+    dir: "config/production"  # バケット内のどこを見るか（共通）
+```
+
+#### 設計判断: args.root を廃止し mount.dir に統一
+
+以前は S3 と REST で `args.root` を使っていたが、以下の理由で `mount.dir` に移行した:
+
+| 項目 | args（ドライバー固有） | mount（共通） |
+|------|----------------------|--------------|
+| 目的 | 接続先を特定する | 参照範囲を絞る |
+| 例 | bucket, endpoint, url | dir, file |
+| ドライバー依存 | あり | なし |
+
+- **local**: `args.root` はローカル物理パス → 接続先そのものなので args に残す
+- **s3**: 旧 `args.root` はバケット内パス → 参照範囲なので `mount.dir` に移行
+- **rest**: 旧 `args.root` は URL パス接頭辞 → 参照範囲なので `mount.dir` に移行
+- **git**（将来）: キャッシュ先は kvtool 自動管理、リポジトリ内パスは `mount.dir`
+
+#### S3 の設定
+
 - **endpoint**: S3 エンドポイント（パス含む可、マルチテナント対応）
 - **bucket**: バケット名（スラッシュ禁止）
-- **root**: バケット内のルートキー（オプション）
 
 検証:
-- `bucket` にスラッシュが含まれる場合エラー（`root` の使用を提案）
+- `bucket` にスラッシュが含まれる場合エラー
 - `endpoint + bucket` が実際のバケットを示すか HeadBucket API で確認
 
 ### コマンド名の統一

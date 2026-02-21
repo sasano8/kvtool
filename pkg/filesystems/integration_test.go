@@ -80,7 +80,6 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
-					Root:            "config",
 					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
@@ -89,7 +88,7 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				require.NoError(t, err)
 				return fs
 			},
-			testPath:    "app.json",
+			testPath:    "config/app.json",
 			expectError: false,
 		},
 		{
@@ -102,7 +101,6 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
-					Root:            "config",
 					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
@@ -293,7 +291,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
-					Root:            "config",
 					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
@@ -302,7 +299,7 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				require.NoError(t, err)
 				return fs
 			},
-			testPath: "app.json",
+			testPath: "config/app.json",
 			expectedData: map[string]any{
 				"app_name": "kvtool",
 				"version":  "1.0.0",
@@ -319,7 +316,6 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				fs, err := NewS3Fs(context.Background(), S3FsConfig{
 					Bucket:          "kvtool-test",
 					Region:          "us-east-1",
-					Root:            "config",
 					Endpoint:        getTestMinIOEndpoint(),
 					UsePathStyle:    true,
 					AccessKeyID:     "minioadmin",
@@ -329,7 +325,7 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				require.NoError(t, err)
 				return fs
 			},
-			testPath: "production.env",
+			testPath: "config/production.env",
 			expectedData: map[string]any{
 				"APP_NAME":     "kvtool",
 				"APP_ENV":      "production",

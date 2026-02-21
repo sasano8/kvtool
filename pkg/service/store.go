@@ -82,14 +82,9 @@ func (s *storeService) Get(ctx context.Context, opts GetOptions) (any, error) {
 
 // getFileContent retrieves file content from a filesystem
 func getFileContent(fs filesystems.Filesystem, storeInfo *config.StoreInfo, filePath string) (interface{}, error) {
-	args := storeInfo.Args
-
-	// Apply root path if configured (for vault)
-	if storeInfo.Driver == "vault" {
-		root, _ := args["root"].(string)
-		if root != "" {
-			filePath = root + "/" + filePath
-		}
+	// mount.dir が設定されている場合、パスにプレフィックスを付与
+	if storeInfo.Mount != nil && storeInfo.Mount.Dir != nil && *storeInfo.Mount.Dir != "" {
+		filePath = *storeInfo.Mount.Dir + "/" + filePath
 	}
 
 	// ファイルを取得して JSON として読み込む

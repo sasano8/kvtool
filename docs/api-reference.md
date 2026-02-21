@@ -39,7 +39,6 @@ S3FsConfig は S3 ファイルシステムの設定
 |-----------|-----|:----:|----------|------|
 | bucket | string | ✓ | - | S3 バケット名 |
 | region | string | ✓ | - | AWS リージョン |
-| root | string |  | - | バケット内のルートパス。このパスより上位には遡れない |
 | access_key_id | string | ✓ | - | AWS アクセスキー ID |
 | secret_access_key | string | ✓ | - | AWS シークレットアクセスキー |
 | session_token | string |  | - | AWS セッショントークン（一時的な認証情報使用時） |
@@ -56,7 +55,6 @@ s3fs:
   args:
     bucket: my-config-bucket
     region: ap-northeast-1
-    root: config/production
     access_key_id: AKIAIOSFODNN7EXAMPLE
     secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     session_token: FwoGZXIvYXdzE...
@@ -110,7 +108,6 @@ RestFsConfig は REST ファイルシステムの設定
 | パラメータ | 型 | 必須 | デフォルト | 説明 |
 |-----------|-----|:----:|----------|------|
 | base_url | string | ✓ | - | ベース URL |
-| root | string |  | - | ルートパス |
 | auth_type | string |  | - | 認証タイプ（bearer, basic） |
 | token | string |  | - | Bearer トークン |
 | token_file | string |  | - | Bearer トークンファイルパス |
@@ -127,7 +124,6 @@ restfs:
   driver: rest
   args:
     base_url: https://api.example.com
-    root: /api/v1/data
     auth_type: bearer
     token_file: /var/run/secrets/token
 ```

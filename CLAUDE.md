@@ -21,6 +21,7 @@ kvtool
     ├── init
     ├── connect
     ├── load
+    ├── sync
     └── serve (未実装)
 ```
 
@@ -258,13 +259,15 @@ make doc-gen  # docs/api-reference.md を生成
 
 ## 暗黙知・設計判断
 
-### args と mount の分離
+### ストア設定の3層分離（args / context / mount）
 
-ストア設定は `args`（接続情報）と `mount`（参照スコープ）に分離する。
+ストア設定は3つのブロックに分離する:
 
-- **args**: ドライバー固有の接続パラメータ（URL, 認証情報, バケット名など）
-- **mount.dir**: ストア内の参照ルートディレクトリ（全ドライバー共通）
-- **mount.file**: 参照する単一ファイル（全ドライバー共通）
+| ブロック | 役割 | 例 |
+|---------|------|-----|
+| `args` | ドライバー固有の接続情報 | bucket, url, addr, token |
+| `context` | 共通の運用パラメータ | timeout（将来: retry 等） |
+| `mount` | 共通の参照スコープ | dir, file |
 
 ```yaml
 s3-store:
@@ -272,9 +275,13 @@ s3-store:
   args:
     bucket: "my-bucket"       # 接続情報（ドライバー固有）
     region: "ap-northeast-1"
+  context:
+    timeout: 30               # 運用パラメータ（共通、秒単位）
   mount:
     dir: "config/production"  # バケット内のどこを見るか（共通）
 ```
+
+`context.timeout` は `args.timeout` より優先される（後方互換のため `args.timeout` も動作する）。
 
 #### 設計判断: args.root を廃止し mount.dir に統一
 

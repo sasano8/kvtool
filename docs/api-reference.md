@@ -215,6 +215,31 @@ redisfs:
 
 ---
 
+## GitFsConfig
+
+GitFsConfig は Git ファイルシステムの設定
+
+ファイル: [git.go](pkg/filesystems/git.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| url | string | ✓ | - | Git リポジトリ URL |
+| ref | string |  | main | ブランチまたはタグ名 |
+| timeout | time.Duration |  | 60s | git コマンドのタイムアウト |
+
+**設定例:**
+
+```yaml
+gitfs:
+  driver: git
+  args:
+    url: https://github.com/example/config.git
+    ref: main
+    timeout: 120s
+```
+
+---
+
 ## ToolFsConfig
 
 ToolFsConfig は Tool ファイルシステムの設定

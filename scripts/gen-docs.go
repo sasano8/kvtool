@@ -42,6 +42,7 @@ var configOrder = []string{
 	"DbFsConfig",
 	"NatsFsConfig",
 	"RedisFsConfig",
+	"GitFsConfig",
 	"EnvFsConfig",
 	"ToolFsConfig",
 }

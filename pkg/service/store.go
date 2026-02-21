@@ -116,5 +116,12 @@ func (f *defaultFilesystemFactory) Create(ctx context.Context, storeInfo *config
 		Args:   storeInfo.Args,
 	}
 
+	// Propagate context info
+	if storeInfo.Context != nil {
+		fsStoreInfo.Context = &filesystems.ContextInfo{
+			Timeout: storeInfo.Context.Timeout,
+		}
+	}
+
 	return factory.Create(fsStoreInfo)
 }

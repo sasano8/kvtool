@@ -154,6 +154,11 @@ func testConnection(ctx context.Context, name string, storeInfo *config.StoreInf
 		Driver: storeInfo.Driver,
 		Args:   storeInfo.Args,
 	}
+	if storeInfo.Context != nil {
+		fsStoreInfo.Context = &filesystems.ContextInfo{
+			Timeout: storeInfo.Context.Timeout,
+		}
+	}
 
 	_, err := factory.Create(fsStoreInfo)
 	if err != nil {
@@ -192,6 +197,13 @@ func testConnection(ctx context.Context, name string, storeInfo *config.StoreInf
 		addr, _ := storeInfo.Args["addr"].(string)
 		db, _ := storeInfo.Args["db"].(int)
 		details = fmt.Sprintf("addr: %s, db: %d", addr, db)
+	case "git":
+		url, _ := storeInfo.Args["url"].(string)
+		ref, _ := storeInfo.Args["ref"].(string)
+		if ref == "" {
+			ref = "main"
+		}
+		details = fmt.Sprintf("url: %s, ref: %s", url, ref)
 	default:
 		details = "connected"
 	}

@@ -9,8 +9,14 @@ import (
 // StoreInfo represents store configuration
 // This is a simplified version to avoid circular dependency with internal/config
 type StoreInfo struct {
-	Driver string
-	Args   map[string]interface{}
+	Driver  string
+	Args    map[string]interface{}
+	Context *ContextInfo
+}
+
+// ContextInfo represents common operational parameters
+type ContextInfo struct {
+	Timeout *int // seconds
 }
 
 // FilesystemFactory creates Filesystem instances from configuration
@@ -42,6 +48,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createNatsFs(storeInfo)
 	case "redis":
 		return f.createRedisFs(storeInfo)
+	case "git":
+		return f.createGitFs(storeInfo)
 	case "tool":
 		return f.createToolFs(storeInfo)
 	default:
@@ -56,17 +64,12 @@ func (f *FilesystemFactory) createLocalFs(storeInfo *StoreInfo) (Filesystem, err
 		root = "."
 	}
 
-	timeout := 10 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	// Transform 設定を取得
 	transform := getTransformFromArgs(args, "read")
 
 	return GetLocalFs(f.ctx, &LocalFsConfig{
 		Root:      root,
-		Timeout:   timeout,
+		Timeout:   getTimeout(storeInfo, 10*time.Second),
 		Transform: transform,
 	})
 }
@@ -93,11 +96,6 @@ func (f *FilesystemFactory) createVaultFs(storeInfo *StoreInfo) (Filesystem, err
 		namespace = "admin"
 	}
 
-	timeout := 10 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	config := VaultConfig{
 		Addr:      addr,
 		Token:     token,
@@ -105,7 +103,7 @@ func (f *FilesystemFactory) createVaultFs(storeInfo *StoreInfo) (Filesystem, err
 		Mount:     mount,
 		KvVer:     2,
 		Version:   0,
-		Timeout:   timeout,
+		Timeout:   getTimeout(storeInfo, 10*time.Second),
 	}
 
 	return GetVaultFs(f.ctx, &config)
@@ -136,12 +134,6 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 		usePathStyle = val
 	}
 
-	// Parse timeout
-	timeout := 30 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	// Transform 設定を取得
 	transform := getTransformFromArgs(args, "read")
 	if transform == "" {
@@ -159,7 +151,7 @@ func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error)
 		SessionToken:    sessionToken,
 		UsePathStyle:    usePathStyle,
 		Transform:       transform,
-		Timeout:         timeout,
+		Timeout:         getTimeout(storeInfo, 30*time.Second),
 	}
 
 	return NewS3Fs(f.ctx, config)
@@ -173,17 +165,12 @@ func (f *FilesystemFactory) createDbFs(storeInfo *StoreInfo) (Filesystem, error)
 	query, _ := args["query"].(string)
 	namespace, _ := args["namespace"].(string)
 
-	timeout := 10 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	config := DbFsConfig{
 		ConnectionString: connectionString,
 		Driver:           driver,
 		Query:            query,
 		Namespace:        namespace,
-		Timeout:          timeout,
+		Timeout:          getTimeout(storeInfo, 10*time.Second),
 	}
 
 	return NewDbFs(f.ctx, &config)
@@ -205,21 +192,16 @@ func (f *FilesystemFactory) createRestFs(storeInfo *StoreInfo) (Filesystem, erro
 		insecure = val
 	}
 
-	timeout := 30 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	config := &RestFsConfig{
-		BaseURL:  baseURL,
-		AuthType: authType,
+		BaseURL:   baseURL,
+		AuthType:  authType,
 		Token:     token,
 		TokenFile: tokenFile,
 		Username:  username,
 		Password:  password,
 		CAFile:    caFile,
 		Insecure:  insecure,
-		Timeout:   timeout,
+		Timeout:   getTimeout(storeInfo, 30*time.Second),
 	}
 
 	return NewRestFs(f.ctx, config)
@@ -235,11 +217,6 @@ func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, erro
 	password, _ := args["password"].(string)
 	credsFile, _ := args["creds_file"].(string)
 
-	timeout := 10 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	config := &NatsFsConfig{
 		URL:       url,
 		Bucket:    bucket,
@@ -247,7 +224,7 @@ func (f *FilesystemFactory) createNatsFs(storeInfo *StoreInfo) (Filesystem, erro
 		User:      user,
 		Password:  password,
 		CredsFile: credsFile,
-		Timeout:   timeout,
+		Timeout:   getTimeout(storeInfo, 10*time.Second),
 	}
 
 	return NewNatsFs(f.ctx, config)
@@ -265,20 +242,30 @@ func (f *FilesystemFactory) createRedisFs(storeInfo *StoreInfo) (Filesystem, err
 		db = dbVal
 	}
 
-	timeout := 10 * time.Second
-	if timeoutVal, ok := args["timeout"].(int); ok {
-		timeout = time.Duration(timeoutVal) * time.Second
-	}
-
 	config := &RedisFsConfig{
 		Addr:     addr,
 		Password: password,
 		DB:       db,
 		Prefix:   prefix,
-		Timeout:  timeout,
+		Timeout:  getTimeout(storeInfo, 10*time.Second),
 	}
 
 	return NewRedisFs(f.ctx, config)
+}
+
+func (f *FilesystemFactory) createGitFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	url, _ := args["url"].(string)
+	ref, _ := args["ref"].(string)
+
+	config := &GitFsConfig{
+		URL:     url,
+		Ref:     ref,
+		Timeout: getTimeout(storeInfo, 60*time.Second),
+	}
+
+	return NewGitFs(f.ctx, config)
 }
 
 func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {
@@ -289,6 +276,15 @@ func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, erro
 func GetFilesystem(ctx context.Context, storeInfo *StoreInfo) (Filesystem, error) {
 	factory := NewFilesystemFactory(ctx)
 	return factory.Create(storeInfo)
+}
+
+// getTimeout は StoreInfo から timeout を取得する
+// context.timeout が指定されていればその値、なければ defaultTimeout
+func getTimeout(storeInfo *StoreInfo, defaultTimeout time.Duration) time.Duration {
+	if storeInfo.Context != nil && storeInfo.Context.Timeout != nil {
+		return time.Duration(*storeInfo.Context.Timeout) * time.Second
+	}
+	return defaultTimeout
 }
 
 // getTransformFromArgs は args から transform.{direction} の値を取得する

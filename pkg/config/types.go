@@ -30,13 +30,19 @@ func (c *KvtoolConfig) Validate() error {
 
 // StoreInfo represents a single store configuration
 type StoreInfo struct {
-	Driver string                 `yaml:"driver"`
-	Args   map[string]interface{} `yaml:"args"`
-	Mount  *MountInfo             `yaml:"mount,omitempty"`
+	Driver  string                 `yaml:"driver"`
+	Args    map[string]interface{} `yaml:"args"`
+	Mount   *MountInfo             `yaml:"mount,omitempty"`
+	Context *ContextInfo           `yaml:"context,omitempty"`
 }
 
 // MountInfo represents mount configuration
 type MountInfo struct {
 	Dir  *string `yaml:"dir,omitempty"`
 	File *string `yaml:"file,omitempty"`
+}
+
+// ContextInfo represents common operational parameters
+type ContextInfo struct {
+	Timeout *int `yaml:"timeout,omitempty"` // seconds
 }

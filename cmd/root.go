@@ -57,6 +57,7 @@ func init() {
 		cmd_store.CmdConnect: {"implemented": true},
 		cmd_store.CmdServe:   {"implemented": false},
 		cmd_store.CmdLoad:    {"implemented": true},
+		cmd_store.CmdSync:    {"implemented": true},
 	}
 
 	// Build command hierarchy

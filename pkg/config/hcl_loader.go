@@ -230,6 +230,7 @@ func parseStoreBlock(block *hcl.Block, evalCtx *hcl.EvalContext) (StoreInfo, err
 		Blocks: []hcl.BlockHeaderSchema{
 			{Type: "args"},
 			{Type: "mount"},
+			{Type: "context"},
 		},
 	})
 	if diags.HasErrors() {
@@ -267,6 +268,17 @@ func parseStoreBlock(block *hcl.Block, evalCtx *hcl.EvalContext) (StoreInfo, err
 				return StoreInfo{}, fmt.Errorf("failed to parse mount block: %w", err)
 			}
 			storeInfo.Mount = mount
+		}
+	}
+
+	// context ブロックを処理
+	for _, ctxBlock := range content.Blocks {
+		if ctxBlock.Type == "context" {
+			ctx, err := parseContextBlock(ctxBlock, evalCtx)
+			if err != nil {
+				return StoreInfo{}, fmt.Errorf("failed to parse context block: %w", err)
+			}
+			storeInfo.Context = ctx
 		}
 	}
 
@@ -336,6 +348,36 @@ func parseMountBlock(block *hcl.Block, evalCtx *hcl.EvalContext) (*MountInfo, er
 	}
 
 	return mount, nil
+}
+
+// parseContextBlock は context ブロックを解析する
+func parseContextBlock(block *hcl.Block, evalCtx *hcl.EvalContext) (*ContextInfo, error) {
+	attrs, diags := block.Body.JustAttributes()
+	if diags.HasErrors() {
+		return nil, fmt.Errorf("failed to get context attributes: %s", diags.Error())
+	}
+
+	ctx := &ContextInfo{}
+
+	if attr, exists := attrs["timeout"]; exists {
+		val, diags := attr.Expr.Value(evalCtx)
+		if diags.HasErrors() {
+			return nil, fmt.Errorf("failed to evaluate timeout: %s", diags.Error())
+		}
+		v := ctyToGo(val)
+		switch t := v.(type) {
+		case int64:
+			i := int(t)
+			ctx.Timeout = &i
+		case float64:
+			i := int(t)
+			ctx.Timeout = &i
+		default:
+			return nil, fmt.Errorf("timeout must be a number (seconds), got %T", v)
+		}
+	}
+
+	return ctx, nil
 }
 
 // ctyToGo は cty.Value を Go の値に変換する

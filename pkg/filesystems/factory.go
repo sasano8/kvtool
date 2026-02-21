@@ -112,11 +112,34 @@ func (f *FilesystemFactory) createVaultFs(storeInfo *StoreInfo) (Filesystem, err
 }
 
 func (f *FilesystemFactory) createEnvFs(storeInfo *StoreInfo) (Filesystem, error) {
-	// Environment filesystem doesn't need any configuration
-	// Just return a new instance with context
-	return &FsEnvFilesystem{
-		Ctx: f.ctx,
-	}, nil
+	args := storeInfo.Args
+	config := &EnvFsConfig{}
+	if args != nil {
+		config.Include = toStringSlice(args["include"])
+		config.Exclude = toStringSlice(args["exclude"])
+	}
+	return NewEnvFs(f.ctx, config)
+}
+
+// toStringSlice は []interface{} を []string に変換する
+func toStringSlice(v interface{}) []string {
+	if v == nil {
+		return nil
+	}
+	arr, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]string, 0, len(arr))
+	for _, item := range arr {
+		if s, ok := item.(string); ok {
+			result = append(result, s)
+		}
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
 }
 
 func (f *FilesystemFactory) createS3Fs(storeInfo *StoreInfo) (Filesystem, error) {

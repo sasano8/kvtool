@@ -117,6 +117,40 @@ func TestFactoryCreateToolFs(t *testing.T) {
 	require.Len(value, 36) // UUID format
 }
 
+func TestFactoryCreateEnvFsWithIncludeExclude(t *testing.T) {
+	require := require.New(t)
+
+	t.Setenv("ALLOWED_VAR", "allowed")
+	t.Setenv("BLOCKED_VAR", "blocked")
+	t.Setenv("OTHER_VAR", "other")
+
+	ctx := context.Background()
+	factory := NewFilesystemFactory(ctx)
+
+	storeInfo := &StoreInfo{
+		Driver: "env",
+		Args: map[string]interface{}{
+			"include": []interface{}{"ALLOWED_VAR", "BLOCKED_VAR"},
+			"exclude": []interface{}{"BLOCKED_VAR"},
+		},
+	}
+
+	fs, err := factory.Create(storeInfo)
+	require.NoError(err)
+	require.NotNil(fs)
+
+	file, err := fs.GetFile("")
+	require.NoError(err)
+
+	data, err := file.LoadAsJson()
+	require.NoError(err)
+
+	dataMap := data.(map[string]any)
+	require.Equal("allowed", dataMap["ALLOWED_VAR"])
+	require.NotContains(dataMap, "BLOCKED_VAR", "exclude が優先")
+	require.NotContains(dataMap, "OTHER_VAR", "include に含まれない")
+}
+
 func TestGetFilesystemConvenienceFunction(t *testing.T) {
 	require := require.New(t)
 

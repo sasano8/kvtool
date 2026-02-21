@@ -225,6 +225,29 @@ gitfs:
 
 ---
 
+## EnvFsConfig
+
+EnvFsConfig は環境変数ファイルシステムの設定
+
+ファイル: [env.go](pkg/filesystems/env.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| include | []string |  | - | 許可する環境変数キーのリスト。未指定で全許可 |
+| exclude | []string |  | - | 除外する環境変数キーのリスト。include より優先 |
+
+**設定例:**
+
+```yaml
+envfs:
+  driver: env
+  args:
+    include: APP_NAME,DATABASE_URL
+    exclude: SECRET_KEY,PASSWORD
+```
+
+---
+
 ## ToolFsConfig
 
 ToolFsConfig は Tool ファイルシステムの設定

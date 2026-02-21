@@ -60,9 +60,9 @@ func TestFilesystemInterface_GetFile(t *testing.T) {
 		{
 			name: "EnvFs - 任意のパスでファイルを返す",
 			setupFs: func(t *testing.T) Filesystem {
-				return &FsEnvFilesystem{
-					Ctx: context.Background(),
-				}
+				fs, err := NewEnvFs(context.Background(), &EnvFsConfig{})
+				require.NoError(t, err)
+				return fs
 			},
 			testPath:    "anypath",
 			expectError: false,
@@ -272,9 +272,9 @@ func TestFilesystemInterface_LoadAsJson(t *testing.T) {
 				t.Setenv("TEST_VAR_1", "value1")
 				t.Setenv("TEST_VAR_2", "value2")
 
-				return &FsEnvFilesystem{
-					Ctx: context.Background(),
-				}
+				fs, err := NewEnvFs(context.Background(), &EnvFsConfig{})
+				require.NoError(t, err)
+				return fs
 			},
 			testPath: "anypath",
 			// 全ての環境変数を予測できないため、一部の存在をチェック
@@ -466,9 +466,9 @@ func TestFilesystemInterface_OpenReader(t *testing.T) {
 			name: "EnvFs - 環境変数を JSON として読み込む",
 			setupFs: func(t *testing.T) Filesystem {
 				t.Setenv("TEST_READ_VAR", "testvalue")
-				return &FsEnvFilesystem{
-					Ctx: context.Background(),
-				}
+				fs, err := NewEnvFs(context.Background(), &EnvFsConfig{})
+				require.NoError(t, err)
+				return fs
 			},
 			testPath: "anypath",
 			validateJSON: func(t *testing.T, data []byte) {
@@ -542,9 +542,9 @@ func TestFilesystemInterface_Consistency(t *testing.T) {
 			name: "EnvFs - 一貫性",
 			setupFs: func(t *testing.T) Filesystem {
 				t.Setenv("CONSISTENCY_TEST", "value")
-				return &FsEnvFilesystem{
-					Ctx: context.Background(),
-				}
+				fs, err := NewEnvFs(context.Background(), &EnvFsConfig{})
+				require.NoError(t, err)
+				return fs
 			},
 			path: "anypath",
 		},

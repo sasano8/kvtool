@@ -67,11 +67,7 @@ func (f *FilesystemFactory) createLocalFs(storeInfo *StoreInfo) (Filesystem, err
 	// Transform 設定を取得
 	transform := getTransformFromArgs(args, "read")
 
-	timeout := resolveTimeout(storeInfo, 10*time.Second)
-	ctx, cancel := context.WithTimeout(f.ctx, timeout)
-	defer cancel()
-
-	return GetLocalFs(ctx, &LocalFsConfig{
+	return GetLocalFs(f.ctx, &LocalFsConfig{
 		Root:      root,
 		Transform: transform,
 	})

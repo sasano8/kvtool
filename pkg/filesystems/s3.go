@@ -94,7 +94,6 @@ type S3Fs struct {
 //   - 設定が不正な場合（バケット名、region、認証情報が空）
 //   - S3 への接続に失敗した場合
 func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
-	timeout := extractTimeout(ctx, 30*time.Second)
 	// バケット名と region は必須
 	if cfg.Bucket == "" {
 		return nil, fmt.Errorf("bucket is required")
@@ -164,10 +163,7 @@ func NewS3Fs(ctx context.Context, cfg S3FsConfig) (*S3Fs, error) {
 	}
 
 	// バケットの存在を検証（endpoint + bucket が正しいバケットを示しているか確認）
-	headCtx, headCancel := context.WithTimeout(ctx, timeout)
-	defer headCancel()
-
-	_, err = client.HeadBucket(headCtx, &s3.HeadBucketInput{
+	_, err = client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(cfg.Bucket),
 	})
 	if err != nil {

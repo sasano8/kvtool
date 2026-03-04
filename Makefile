@@ -108,6 +108,14 @@ services-down:
 services-logs:
 	@docker compose logs -f
 
+# Bitwarden SDK ビルド環境セットアップ
+# Go SDK は Rust FFI (CGO) を使用するため musl-tools が必要
+# インストール後、CGO_ENABLED=1 CC=musl-gcc でビルドする
+.PHONY: bitwarden-setup
+bitwarden-setup:
+	sudo apt install -y musl-tools
+	go env -w CGO_ENABLED=1 CC=musl-gcc
+
 # 開発ツールのインストール（~/go/bin にインストール）
 .PHONY: setup-tools
 setup-tools:

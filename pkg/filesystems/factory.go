@@ -52,6 +52,8 @@ func (f *FilesystemFactory) Create(storeInfo *StoreInfo) (Filesystem, error) {
 		return f.createGitFs(storeInfo)
 	case "tool":
 		return f.createToolFs(storeInfo)
+	case "bitwarden":
+		return f.createBitwardenFs(storeInfo)
 	default:
 		return nil, fmt.Errorf("unsupported driver: %s", storeInfo.Driver)
 	}
@@ -309,6 +311,29 @@ func (f *FilesystemFactory) createGitFs(storeInfo *StoreInfo) (Filesystem, error
 	defer cancel()
 
 	return NewGitFs(ctx, config)
+}
+
+func (f *FilesystemFactory) createBitwardenFs(storeInfo *StoreInfo) (Filesystem, error) {
+	args := storeInfo.Args
+
+	accessToken, _ := args["access_token"].(string)
+	organizationID, _ := args["organization_id"].(string)
+	projectID, _ := args["project_id"].(string)
+
+	if accessToken == "" {
+		return nil, fmt.Errorf("bitwarden store missing required 'access_token'")
+	}
+	if organizationID == "" {
+		return nil, fmt.Errorf("bitwarden store missing required 'organization_id'")
+	}
+
+	config := &BitwardenFsConfig{
+		AccessToken:    accessToken,
+		OrganizationID: organizationID,
+		ProjectID:      projectID,
+	}
+
+	return NewBitwardenFs(config)
 }
 
 func (f *FilesystemFactory) createToolFs(storeInfo *StoreInfo) (Filesystem, error) {

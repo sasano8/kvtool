@@ -248,6 +248,31 @@ envfs:
 
 ---
 
+## BitwardenFsConfig
+
+BitwardenFsConfig は Bitwarden Secrets Manager ファイルシステムの設定
+
+ファイル: [bitwarden.go](pkg/filesystems/bitwarden.go)
+
+| パラメータ | 型 | 必須 | デフォルト | 説明 |
+|-----------|-----|:----:|----------|------|
+| access_token | string | ✓ | - | Bitwarden アクセストークン |
+| organization_id | string | ✓ | - | Bitwarden 組織 ID |
+| project_id | string |  | - | フィルタ対象のプロジェクト ID |
+
+**設定例:**
+
+```yaml
+bitwardenfs:
+  driver: bitwarden
+  args:
+    access_token: 0.48c78342-...
+    organization_id: a1b2c3d4-...
+    project_id: e325ea69-...
+```
+
+---
+
 ## ToolFsConfig
 
 ToolFsConfig は Tool ファイルシステムの設定

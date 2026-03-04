@@ -42,7 +42,8 @@ func init() {
 		cmd_file_load.CmdLoadFromHcl:    {"implemented": false},
 		cmd_file_load.CmdLoadFromVault:  {"implemented": false},
 		cmd_file_load.CmdLoadFromYaml:   {"implemented": false},
-		cmd_file_load.CmdLoadFromToml:   {"implemented": false},
+		cmd_file_load.CmdLoadFromToml:      {"implemented": false},
+		cmd_file_load.CmdLoadFromBitwarden: {"implemented": true},
 	}
 
 	// file convert subcommands
